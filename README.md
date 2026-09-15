@@ -9,6 +9,9 @@ code published in the SpeakLeash Hugging Face Space.
   (160 generated responses per model). The file is about 60 kB.
 - `data/mt_bench/mt-bench.csv` — upstream aggregate scores for reference models.
 - `data/judge_prompts.jsonl` — the standard FastChat MT-Bench judge prompts.
+- `generate_answers.py` — native-template renderer plus OpenAI-compatible
+  `/v1/completions` generation runner.
+- `config.example.toml` — zero-dependency TOML configuration example.
 - `common.py`, `app.py`, `content.py`, and `src/` — copied upstream utilities,
   leaderboard UI, and answer/judgment browser code.
 - `requirements.txt` — the upstream UI requirements.
@@ -55,6 +58,24 @@ that logic. Decide and document whether to preserve this behavior.
 
 The upstream code is retained here as a reference and can be adapted if the
 FastChat dependencies and judge prompt configuration are restored.
+
+## Generation runner
+
+The project runner deliberately uses `/v1/completions`, not
+`/v1/chat/completions`: it renders each model's own chat template locally with
+`transformers`, then sends the resulting string to a vLLM-compatible server.
+Turn 2 is rendered with turn 1 included as an assistant message. Responses are
+cleaned of accidental end-of-turn markers before being inserted into the next
+template, so chat-control tokens do not become conversational content.
+
+```bash
+python generate_answers.py --config config.example.toml
+```
+
+Copy the example to a model-specific TOML file and set the tokenizer path,
+served model name, endpoint, and generation parameters. For a Hugging Face repo
+whose tokenizer lives in a checkpoint subdirectory, set `tokenizer_subfolder`;
+the runner downloads only that subdirectory and loads it locally.
 
 ## Łodyga: project-specific scoring
 
