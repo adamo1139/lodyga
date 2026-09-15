@@ -1,20 +1,19 @@
-# Łodyga — Polish MT-Bench
+# Łodyga — polski MT-Bench
 
-Evaluates Polish chat models on 80 two-turn questions. The protocol — rubric,
-judge prompts, passes, aggregation, language ID — is in
-[`custom_scoring.md`](custom_scoring.md). A new evaluation, not a reproduction of
-the SpeakLeash leaderboard.
+Ocenia polskie modele czatowe na 80 pytaniach w dwóch turach. Protokół — rubryka,
+prompty sędziego, przebiegi, agregacja, detekcja języka — jest w
+[`custom_scoring.md`](custom_scoring.md). To nowa ewaluacja, nie odtworzenie rankingu SpeakLeash.
 
 ```bash
-cp .env.example .env && chmod 600 .env    # add OPENROUTER_API_KEY
+cp .env.example .env && chmod 600 .env    # wpisz OPENROUTER_API_KEY
 ./lodyga.py run --config config.poziomka.toml --judge config.judge.example.toml
 ```
 
-Copy `config.example.toml` per model. `run` generates, judges and scores into a
-timestamped directory under `data/mt_bench/runs/` holding the answers, judgments,
-raw judge archive, report and configs used; nothing is overwritten. `--passes N`
-averages repeated runs. See `./lodyga.py --help`.
+Skopiuj `config.example.toml` dla każdego modelu. `run` generuje, ocenia i zapisuje
+wynik do katalogu ze znacznikiem czasu w `data/mt_bench/runs/`: odpowiedzi, oceny,
+surowe archiwum sędziego, raport i użyte konfiguracje; nic nie jest nadpisywane.
+`--passes N` uśrednia powtórzone przebiegi. Zobacz `./lodyga.py --help`.
 
-Questions: [speakleash/mt-bench-pl](https://huggingface.co/spaces/speakleash/mt-bench-pl),
-MT-Bench translated to Polish, upstream `license: other` — check terms before
-redistributing. `app.py`, `common.py`, `content.py`, `src/` are unused upstream code.
+Pytania: [speakleash/mt-bench-pl](https://huggingface.co/spaces/speakleash/mt-bench-pl),
+MT-Bench po polsku; źródło podaje `license: other` — sprawdź warunki przed redystrybucją.
+`app.py`, `common.py`, `content.py`, `src/` to nieużywany kod z oryginalnego Space.
