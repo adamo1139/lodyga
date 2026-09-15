@@ -1,2 +1,5 @@
 gradio==4.31.4
 plotly==5.18.0
+# Needed by generate_answers.py (the upstream browser requirements are above).
+transformers>=4.55
+huggingface_hub>=0.30

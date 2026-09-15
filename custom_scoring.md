@@ -4,6 +4,17 @@
 questions. It is intentionally not claimed to reproduce the SpeakLeash
 leaderboard.
 
+## Versioning
+
+This document defines **Łodyga 0.1**, frozen on 2026-09-15. The question set,
+the reference policy, the rubric, the judge prompts, and the aggregation rules
+below are fixed for the 0.1 release. The judge model and its sampling are set
+in the judge config file, and each model's generation settings live in that
+model's own config file; both files are archived with every run. Any change to
+the frozen parts requires a version bump (0.2, …) and a full re-run of every
+model; published results must always state the protocol version and the config
+files they were produced with.
+
 ## What is scored
 
 Each model answers all 80 questions, including both turns. Turn 2 is judged with
@@ -28,6 +39,36 @@ category. A reference is evidence about the expected answer, not an instruction
 to copy its wording. If a reference is incomplete, ambiguous, or appears wrong,
 the judge should rely on the question and domain knowledge and mention that in
 the explanation.
+
+## Answer generation
+
+- One answer file per model, covering all 80 questions and both turns
+  (160 answers per model).
+- Turn 2 is generated with the full conversation in context: question 1, the
+  model's own turn-1 answer, and question 2.
+- Each model is run from its own config file that specifies the model, its
+  chat template, and its generation settings (sampling parameters and token
+  limits). There is no protocol-wide token limit and no cross-model sampling
+  requirement; the config file used is recorded in run metadata.
+
+## Judge
+
+- The judge is called through the **OpenRouter** chat-completions API. The
+  judge model and its sampling (temperature, top-p, token limit, seed) are set
+  in the judge config file. Sampling is frozen for the whole run — the same
+  values apply to every judged turn — and the config file is archived with the
+  results.
+- API keys are loaded from `.env` and are never hardcoded or committed.
+- The judge prompt is sent as a single user message built from the templates
+  below. When a question has no non-empty `reference`, the reference block is
+  omitted from the prompt entirely; it is never substituted with an empty
+  string.
+- The judge must return exactly the JSON object described in the rubric, and
+  `total` must equal the sum of the four dimensions. There are no retries: a
+  response with invalid JSON, out-of-range scores, or a mismatched total is
+  recorded as unscored in run metadata and reported separately; scores are
+  never imputed.
+- Raw judge requests and responses are archived for every run.
 
 ## Judge prompt: first turn
 
