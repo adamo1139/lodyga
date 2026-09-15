@@ -10,7 +10,13 @@ enable_thinking = true
 
 [api]
 base_url = "http://192.168.1.26:2300"
-model = ""
+# Served model name, as the endpoint reports it. Leave empty only as a fallback:
+# the runner then queries /models once and uses the first entry.
+model = "poziomka_iter_0001718"
+# Questions in flight at once (default 8, or --concurrency). Turns within a
+# question stay sequential, so this only batches independent questions and does
+# not change what is generated.
+concurrency = 16
 # api_key_env = "OPENAI_API_KEY"
 timeout = 600
 

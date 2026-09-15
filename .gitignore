@@ -10,5 +10,18 @@
 # API keys (see custom_scoring.md; never commit)
 .env
 
+# Generated results. Every run is archived in its own timestamped directory
+# with the configs that produced it, so results are reproducible rather than
+# version-controlled; the raw judge archives are large and would bloat history.
+# Publish a specific run deliberately with `git add -f` if it needs to ship.
+/data/mt_bench/runs/
+# Superseded by runs/ — the flat layout used before run directories existed.
+/data/mt_bench/model_answer/
+/data/mt_bench/model_judgment/
+
+# Local working judge config (copy config.judge.example.toml). Kept out of git
+# so a local judge/model choice cannot silently become the committed default.
+/config.judge.toml
+
 # Python
 __pycache__/

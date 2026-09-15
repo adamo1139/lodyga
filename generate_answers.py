@@ -3,10 +3,16 @@
 
 import argparse
 import json
+import threading
 import time
 import tomllib
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
+import runs
+
+PROTOCOL = "Łodyga 0.1"
 
 
 def load_tokenizer(cfg):
@@ -24,18 +30,24 @@ def load_tokenizer(cfg):
 
 
 def hosted_model_id(cfg):
+    """Served model name from the config; the /models endpoint is a fallback.
+
+    Resolved once per run so generation does not re-query the server.
+    """
     api = cfg["api"]
     if api.get("model"):
         return api["model"]
     req = urllib.request.Request(api["base_url"].rstrip("/") + "/models")
     with urllib.request.urlopen(req, timeout=api.get("timeout", 600)) as response:
-        return json.load(response)["data"][0]["id"]
+        served = json.load(response)["data"][0]["id"]
+    print(f"api.model is empty; using served model {served!r} from /models")
+    return served
 
 
-def complete(cfg, prompt_ids):
+def complete(cfg, model, prompt_ids):
     api = cfg["api"]
     generation = dict(cfg.get("generation", {}))
-    payload = {"model": hosted_model_id(cfg), "prompt": prompt_ids, **generation}
+    payload = {"model": model, "prompt": prompt_ids, **generation}
     payload.pop("base_url", None)
     payload.pop("api_key_env", None)
     body = json.dumps(payload).encode()
@@ -76,48 +88,160 @@ def clean_answer(text):
     return text.strip()
 
 
-def main():
+def split_reasoning(text, prefilled):
+    """Separate one completion into (reasoning, answer).
+
+    With `enable_thinking = true` the chat template ends the prompt with an open
+    `<think>` tag, so the completion starts inside the reasoning block and the
+    model closes it with `</think>` before answering. `prefilled` says whether
+    the template opened that block for us; a model that emits its own `<think>`
+    is handled too.
+
+    Only the answer is ever judged — the reasoning trace is archived, never
+    scored (see custom_scoring.md).
+    """
+    opened = prefilled
+    if text.startswith("<think>"):
+        text = text[len("<think>"):]
+        opened = True
+    reasoning, closed, answer = text.partition("</think>")
+    if closed:
+        return reasoning.strip(), answer.strip()
+    if opened:
+        # The block never closed: the model spent its whole budget reasoning
+        # and delivered no answer. Record that instead of promoting the trace
+        # to an answer, which would put the trace in front of the judge.
+        return text.strip(), ""
+    return "", text.strip()
+
+
+def assistant_message(answer):
+    """Turn-1 message for the turn-2 prompt: the answer only.
+
+    The turn-1 reasoning trace is deliberately dropped from turn-2 context. This
+    template would otherwise preserve it (it renders `reasoning_content` back
+    into a `<think>` block), but the follow-up is supposed to be answered from
+    the visible conversation, exactly as a user would see it. Keeping the trace
+    would also spend the 8192-token window twice over on long reasoning.
+
+    The trace is still archived in the answer file; it is simply not context.
+    """
+    return {"role": "assistant", "content": answer}
+
+
+def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, required=True)
-    parser.add_argument("--questions", type=Path, default=Path("data/mt_bench/question.jsonl"))
-    parser.add_argument("--output", type=Path)
-    parser.add_argument("--no-resume", action="store_true")
-    args = parser.parse_args()
+    parser.add_argument("--questions", type=Path, default=runs.QUESTIONS)
+    parser.add_argument(
+        "--run-dir",
+        type=Path,
+        help="write into this existing run directory instead of creating a new one",
+    )
+    parser.add_argument("--output", type=Path, help="write answers here instead of a run directory")
+    parser.add_argument(
+        "--concurrency",
+        type=int,
+        default=8,
+        help="questions in flight at once; overridden by api.concurrency in the config",
+    )
+    args = parser.parse_args(argv)
     cfg = tomllib.loads(args.config.read_text())
     model_id = cfg["model"]["id"]
-    output = args.output or Path("data/mt_bench/model_answer") / f"{model_id}.jsonl"
-    output.parent.mkdir(parents=True, exist_ok=True)
+    # A new timestamped run directory per invocation; nothing is ever
+    # overwritten. --output remains for one-off files (tests, spot checks).
+    run_dir = None
+    if args.output:
+        output = args.output
+        output.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        run_dir = args.run_dir or runs.new_run_dir(model_id)
+        output = runs.answers_path(run_dir)
+        runs.archive_config(run_dir, "model", args.config)
+        meta = runs.read_meta(run_dir)
+        meta.update(
+            {
+                "protocol": PROTOCOL,
+                "model_id": model_id,
+                "questions_file": str(args.questions),
+                "model_config": cfg,
+            }
+        )
+        runs.write_meta(run_dir, meta)
+        runs.update_stage(run_dir, "generate", "running")
+        print(f"run directory: {run_dir}", flush=True)
     tokenizer = load_tokenizer(cfg)
-    existing = {}
-    if output.exists() and not args.no_resume:
-        for line in output.read_text().splitlines():
-            row = json.loads(line)
-            if len(row.get("choices", [{}])[0].get("turns", [])) == 2:
-                existing[row["question_id"]] = row
+    model = hosted_model_id(cfg)
     questions = [json.loads(line) for line in args.questions.read_text().splitlines() if line]
     think = cfg.get("chat_template", {}).get("enable_thinking")
-    with output.open("a") as fout:
-        for q in questions:
-            if q["question_id"] in existing:
-                continue
-            t1_prompt = render(tokenizer, [{"role": "user", "content": q["turns"][0]}], think)
-            answer1 = clean_answer(complete(cfg, t1_prompt))
-            messages = [
-                {"role": "user", "content": q["turns"][0]},
-                {"role": "assistant", "content": answer1},
-                {"role": "user", "content": q["turns"][1]},
-            ]
-            t2_prompt = render(tokenizer, messages, think)
-            answer2 = clean_answer(complete(cfg, t2_prompt))
-            row = {
-                "question_id": q["question_id"],
-                "model_id": model_id,
-                "choices": [{"index": 0, "turns": [answer1, answer2]}],
-                "tstamp": time.time(),
-            }
+    # `enable_thinking = false` makes the template close the block immediately,
+    # so only an explicit true leaves an open <think> for the model to finish.
+    prefilled = think is True
+    # Questions are independent, so they run concurrently; the two turns of one
+    # question stay sequential because turn 2 needs turn 1 in its prompt.
+    workers = max(1, int(cfg["api"].get("concurrency", args.concurrency)))
+    lock = threading.Lock()
+    done = [0]
+
+    def answer_question(q):
+        t1_prompt = render(tokenizer, [{"role": "user", "content": q["turns"][0]}], think)
+        reasoning1, answer1 = split_reasoning(
+            clean_answer(complete(cfg, model, t1_prompt)), prefilled
+        )
+        messages = [
+            {"role": "user", "content": q["turns"][0]},
+            assistant_message(answer1),
+            {"role": "user", "content": q["turns"][1]},
+        ]
+        t2_prompt = render(tokenizer, messages, think)
+        reasoning2, answer2 = split_reasoning(
+            clean_answer(complete(cfg, model, t2_prompt)), prefilled
+        )
+        with lock:
+            done[0] += 1
+            empty = [t for t, a in ((1, answer1), (2, answer2)) if not a]
+            note = f" (no answer on turn {', '.join(map(str, empty))})" if empty else ""
+            print(f"{model_id}: question {q['question_id']} complete{note} [{done[0]}/{len(questions)}]", flush=True)
+        return {
+            "question_id": q["question_id"],
+            "model_id": model_id,
+            # `turns` holds the judged answers only; the reasoning traces are
+            # archived alongside them and are never scored.
+            "choices": [
+                {
+                    "index": 0,
+                    "turns": [answer1, answer2],
+                    "reasoning": [reasoning1, reasoning2],
+                }
+            ],
+            "tstamp": time.time(),
+        }
+
+    print(f"{model_id}: generating {len(questions)} questions with {workers} workers", flush=True)
+    try:
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            rows = list(pool.map(answer_question, questions))
+    except Exception as error:
+        if run_dir is not None:
+            runs.update_stage(run_dir, "generate", "failed", error=repr(error))
+        raise
+    # Written in question order regardless of completion order, so the answer
+    # file is byte-comparable across runs.
+    with output.open("w") as fout:
+        for row in rows:
             fout.write(json.dumps(row, ensure_ascii=False) + "\n")
-            fout.flush()
-            print(f"{model_id}: question {q['question_id']} complete")
+    empty = sum(1 for r in rows for t in r["choices"][0]["turns"] if not t.strip())
+    if run_dir is not None:
+        runs.update_stage(
+            run_dir,
+            "generate",
+            "complete",
+            questions=len(rows),
+            turns=2 * len(rows),
+            empty_answers=empty,
+        )
+    print(f"{model_id}: wrote {output} ({empty} empty answers of {2 * len(rows)} turns)")
+    return run_dir
 
 
 if __name__ == "__main__":

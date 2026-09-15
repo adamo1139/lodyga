@@ -9,8 +9,12 @@ code published in the SpeakLeash Hugging Face Space.
   (160 generated responses per model). The file is about 60 kB.
 - `data/mt_bench/mt-bench.csv` — upstream aggregate scores for reference models.
 - `data/judge_prompts.jsonl` — the standard FastChat MT-Bench judge prompts.
+- `lodyga.py` — single entry point: `run`, `generate`, `judge`, `aggregate`,
+  `list`.
 - `generate_answers.py` — native-template renderer plus OpenAI-compatible
   `/v1/completions` generation runner.
+- `judge_lodyga.py`, `aggregate_lodyga.py` — judge runner and score aggregation.
+- `runs.py` — timestamped run directories and per-stage run metadata.
 - `config.example.toml` — zero-dependency TOML configuration example.
 - `common.py`, `app.py`, `content.py`, and `src/` — copied upstream utilities,
   leaderboard UI, and answer/judgment browser code.
@@ -59,6 +63,38 @@ that logic. Decide and document whether to preserve this behavior.
 The upstream code is retained here as a reference and can be adapted if the
 FastChat dependencies and judge prompt configuration are restored.
 
+## Running an evaluation
+
+`lodyga.py` runs the whole pipeline — generate, judge, aggregate — into a single
+timestamped run directory, so the three stages can never describe different
+runs:
+
+```bash
+cp .env.example .env && chmod 600 .env   # then fill in OPENROUTER_API_KEY
+./lodyga.py run --config config.poziomka.toml --judge config.judge.toml
+```
+
+It prints the headline score, the empty-answer count, and the unscored count.
+Other subcommands:
+
+```bash
+./lodyga.py run --config … --judge … --passes 5   # average N passes, with spread
+./lodyga.py judge --run-dir latest --judge …      # re-judge without regenerating
+./lodyga.py aggregate --run-dir latest            # re-score existing judgments
+./lodyga.py list                                  # all runs, newest last
+```
+
+Each run lands in `data/mt_bench/runs/<UTC timestamp>__<model_id>/` holding
+`answers.jsonl`, `judgments.jsonl`, `judgments__raw.jsonl`, `aggregate.json`,
+`report.md`, `meta.json`, and verbatim copies of both configs used. Nothing is
+ever overwritten, and `meta.json` records each stage as running, complete, or
+failed, so an interrupted run cannot be mistaken for a finished one. Run
+directories are gitignored: results are reproducible from the archived configs
+rather than version-controlled.
+
+The three stage scripts below remain usable directly; the sections describe
+what each one does.
+
 ## Generation runner
 
 The project runner deliberately uses `/v1/completions`, not
@@ -69,14 +105,25 @@ Turn 2 is rendered with turn 1 included as an assistant message. Responses are
 cleaned of accidental end-of-turn markers before being inserted into the next
 template, so chat-control tokens do not become conversational content.
 
+For thinking models the reasoning trace is split from the answer at `</think>`
+and kept out of both the score and the conversation: `choices[0].turns` holds
+the judged answers, `choices[0].reasoning` archives the traces, and turn 2 sees
+only the turn-1 answer — the trace is dropped from its context even where the
+chat template would preserve it. A model that never closes its reasoning block
+produced no answer, and the empty answer is recorded rather than replaced by
+the trace.
+
 ```bash
 python generate_answers.py --config config.example.toml
 ```
 
 Copy the example to a model-specific TOML file and set the tokenizer path,
-served model name, endpoint, and generation parameters. For a Hugging Face repo
-whose tokenizer lives in a checkpoint subdirectory, set `tokenizer_subfolder`;
-the runner downloads only that subdirectory and loads it locally.
+served model name, endpoint, and generation parameters. Set `api.model` to the
+name the endpoint serves; leaving it empty falls back to one `/models` query at
+startup. For a Hugging Face repo whose tokenizer lives in a checkpoint
+subdirectory, set `tokenizer_subfolder`; the runner downloads only that
+subdirectory and loads it locally. Each run rewrites the answer file in full —
+there is no resume.
 
 ## Łodyga: project-specific scoring
 
@@ -101,18 +148,22 @@ request/response archiving.
 ```bash
 # judge config copies config.judge.example.toml; sampling is frozen per run
 OPENROUTER_API_KEY=... python judge_lodyga.py \
-    --config judge.toml \
-    --answers data/mt_bench/model_answer/poziomka.jsonl
+    --config config.judge.toml \
+    --run-dir latest
 ```
 
-Keys can also go in a `.env` file (never committed). Outputs land in
+Keys can also go in a `.env` file: `cp .env.example .env && chmod 600 .env`,
+then fill in `OPENROUTER_API_KEY`. `.env` is gitignored and never committed;
+`.env.example` is the committed template and holds no key material. `.env` is
+read from the project directory, so the runners find the key from any working
+directory, and a real environment variable always wins over the file. Outputs land in
 `data/mt_bench/model_judgment/<judge>/<model>.jsonl` (one row per judged turn,
 scored or unscored), plus `<model>__raw.jsonl` and `<model>__meta.json`.
-Re-running resumes automatically from the existing judgment file;
-`--no-resume` starts a fresh run. A question is reprocessed when it has no
-answer row. The meta file archives the judge config, protocol version, and a
-scored/unscored summary; aggregation over the judgment rows is handled
-separately.
+Questions with no answer row are skipped. There is no resume: every run judges
+the whole answer file and rewrites all three outputs, so a judgment file always
+describes exactly one complete run and its meta summary always matches it. The
+meta file archives the judge config, protocol version, and the scored/unscored
+summary; aggregation over the judgment rows is handled separately.
 
 ## Aggregation
 
@@ -127,9 +178,7 @@ heuristic (Polish diacritics or distinctive Polish function words) and
 reported only as a descriptor, never as a score multiplier.
 
 ```bash
-python aggregate_lodyga.py \
-    --judgments data/mt_bench/model_judgment/openai_gpt-4o/poziomka.jsonl \
-    --answers data/mt_bench/model_answer/poziomka.jsonl
+python aggregate_lodyga.py --run-dir latest
 ```
 
 Two files are written next to the judgment file: `<model>__aggregate.json`

@@ -3,19 +3,24 @@
 
 Implements the Łodyga 0.1 protocol from custom_scoring.md: four-dimension 0-10
 rubric, per-turn references, single-user-message prompts, strict JSON validation
-without retries (invalid judge output is recorded as unscored), raw
-request/response archiving, and resume support.
+without retries (invalid judge output is recorded as unscored), and raw
+request/response archiving. Each run judges the whole answer file and rewrites
+its outputs, so a judgment file always describes exactly one run.
 """
 
 import argparse
 import json
 import os
 import sys
+import threading
 import time
 import tomllib
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
+import runs
 
 PROTOCOL = "Łodyga 0.1"
 
@@ -139,8 +144,13 @@ def validate(content):
     return judgment, None
 
 
-def load_dotenv(path=Path(".env")):
-    """Minimal .env loader; real environment variables take precedence."""
+def load_dotenv(path=None):
+    """Minimal .env loader; real environment variables take precedence.
+
+    Resolved next to this file rather than in the working directory, so the
+    runner finds the key no matter where it is invoked from.
+    """
+    path = Path(path) if path else runs.PROJECT_DIR / ".env"
     if not path.exists():
         return
     for line in path.read_text().splitlines():
@@ -202,35 +212,53 @@ def load_answers(path):
     return answers, model_id
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, required=True, help="judge config TOML")
     parser.add_argument(
+        "--run-dir",
+        help="run directory to judge, or 'latest'; answers and outputs live there",
+    )
+    parser.add_argument(
         "--answers",
         type=Path,
-        required=True,
-        help="answers JSONL produced by generate_answers.py",
+        help="answers JSONL to judge instead of a run directory's answers.jsonl",
     )
     parser.add_argument(
         "--questions",
         type=Path,
-        default=Path("data/mt_bench/question.jsonl"),
+        default=runs.QUESTIONS,
         help="Łodyga question file",
     )
     parser.add_argument("--output", type=Path, help="judgments JSONL output path")
     parser.add_argument(
-        "--no-resume", action="store_true", help="start a fresh run, overwriting prior output"
+        "--concurrency",
+        type=int,
+        default=8,
+        help="turns judged at once; overridden by api.concurrency in the judge config",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+    if not args.answers and not args.run_dir:
+        parser.error("one of --run-dir or --answers is required")
 
     cfg_text = args.config.read_text()
     cfg = tomllib.loads(cfg_text)
-    judge_name = cfg["api"]["model"].replace("/", "_")
-    default_dir = Path("data/mt_bench/model_judgment") / judge_name
-    output = args.output or default_dir / f"{args.answers.stem}.jsonl"
+    run_dir = None
+    if args.answers and not args.run_dir:
+        answers_file = args.answers
+        output = args.output or answers_file.with_name(answers_file.stem + "__judgments.jsonl")
+        output.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        run_dir = runs.resolve_run_dir(args.run_dir)
+        answers_file = args.answers or runs.answers_path(run_dir)
+        if not answers_file.exists():
+            sys.exit(f"error: no answers in {run_dir}; run generation first")
+        output = args.output or runs.judgments_path(run_dir)
+        runs.archive_config(run_dir, "judge", args.config)
+        runs.update_stage(run_dir, "judge", "running")
+        print(f"run directory: {run_dir}", flush=True)
     raw_path = output.with_name(output.stem + "__raw.jsonl")
     meta_path = output.with_name(output.stem + "__meta.json")
-    output.parent.mkdir(parents=True, exist_ok=True)
 
     load_dotenv()
     key_name = cfg["api"].get("api_key_env", "OPENROUTER_API_KEY")
@@ -239,86 +267,98 @@ def main():
 
     lines = [line for line in args.questions.read_text().splitlines() if line.strip()]
     questions = [json.loads(line) for line in lines]
-    answers, model_id = load_answers(args.answers)
-    model_id = model_id or args.answers.stem
-
-    done = set()
-    if output.exists() and not args.no_resume:
-        for line in output.read_text().splitlines():
-            row = json.loads(line)
-            done.add((row["question_id"], row["turn"]))
+    answers, model_id = load_answers(answers_file)
+    model_id = model_id or answers_file.stem
 
     start = time.time()
     summary = {"scored": 0, "unscored": {}}
-    mode = "w" if args.no_resume else "a"
-    with output.open(mode) as fout, raw_path.open(mode) as fraw:
-        for q in questions:
-            qid = q["question_id"]
-            turns = answers.get(qid)
-            if turns is None:
-                print(f"{model_id}: question {qid} skipped (no answer row)")
-                continue
-            prompts = [
-                (1, prompt_turn1(q["turns"][0], reference_text(q.get("reference"), 0), turns[0])),
-                (
-                    2,
-                    prompt_turn2(
-                        q["turns"][0],
-                        turns[0],
-                        reference_text(q.get("reference"), 0),
-                        q["turns"][1],
-                        reference_text(q.get("reference"), 1),
-                        turns[1],
-                    ),
+
+    # Unlike generation, both turns are judged from the finished answer file, so
+    # every (question, turn) is independent and the whole set can run at once.
+    units = []
+    for q in questions:
+        qid = q["question_id"]
+        turns = answers.get(qid)
+        if turns is None:
+            print(f"{model_id}: question {qid} skipped (no answer row)")
+            continue
+        units.append(
+            (qid, 1, prompt_turn1(q["turns"][0], reference_text(q.get("reference"), 0), turns[0]))
+        )
+        units.append(
+            (
+                qid,
+                2,
+                prompt_turn2(
+                    q["turns"][0],
+                    turns[0],
+                    reference_text(q.get("reference"), 0),
+                    q["turns"][1],
+                    reference_text(q.get("reference"), 1),
+                    turns[1],
                 ),
-            ]
-            for turn, prompt in prompts:
-                if (qid, turn) in done:
-                    continue
-                response, payload = chat(cfg, prompt)
-                content = response.get("choices", [{}])[0].get("message", {}).get("content")
-                fraw.write(
-                    json.dumps(
-                        {
-                            "question_id": qid,
-                            "turn": turn,
-                            "request": payload,
-                            "response": response,
-                            "tstamp": time.time(),
-                        },
-                        ensure_ascii=False,
-                    )
-                    + "\n"
+            )
+        )
+
+    workers = max(1, int(cfg["api"].get("concurrency", args.concurrency)))
+    lock = threading.Lock()
+
+    def judge_unit(unit):
+        qid, turn, prompt = unit
+        response, payload = chat(cfg, prompt)
+        content = response.get("choices", [{}])[0].get("message", {}).get("content")
+        raw = {
+            "question_id": qid,
+            "turn": turn,
+            "request": payload,
+            "response": response,
+            "tstamp": time.time(),
+        }
+        if content is None:
+            judgment, reason = None, "empty_response"
+        else:
+            judgment, reason = validate(content)
+        row = {
+            "question_id": qid,
+            "model_id": model_id,
+            "judge_model": cfg["api"]["model"],
+            "turn": turn,
+            "tstamp": time.time(),
+        }
+        with lock:
+            if judgment is None:
+                row["status"] = "unscored"
+                row["reason"] = reason
+                summary["unscored"][reason] = summary["unscored"].get(reason, 0) + 1
+                print(f"{model_id}: question {qid} turn {turn} unscored ({reason})", flush=True)
+            else:
+                row["status"] = "scored"
+                row["judgment"] = judgment
+                summary["scored"] += 1
+                print(
+                    f"{model_id}: question {qid} turn {turn} total {judgment['total']}", flush=True
                 )
-                fraw.flush()
-                if content is None:
-                    judgment, reason = None, "empty_response"
-                else:
-                    judgment, reason = validate(content)
-                row = {
-                    "question_id": qid,
-                    "model_id": model_id,
-                    "judge_model": cfg["api"]["model"],
-                    "turn": turn,
-                    "tstamp": time.time(),
-                }
-                if judgment is None:
-                    row["status"] = "unscored"
-                    row["reason"] = reason
-                    summary["unscored"][reason] = summary["unscored"].get(reason, 0) + 1
-                    print(f"{model_id}: question {qid} turn {turn} unscored ({reason})")
-                else:
-                    row["status"] = "scored"
-                    row["judgment"] = judgment
-                    summary["scored"] += 1
-                    print(f"{model_id}: question {qid} turn {turn} total {judgment['total']}")
-                fout.write(json.dumps(row, ensure_ascii=False) + "\n")
-                fout.flush()
+        return row, raw
+
+    print(f"{model_id}: judging {len(units)} turns with {workers} workers", flush=True)
+    try:
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            results = list(pool.map(judge_unit, units))
+    except Exception as error:
+        if run_dir is not None:
+            runs.update_stage(run_dir, "judge", "failed", error=repr(error))
+        raise
+    # Written in (question, turn) order regardless of completion order, so the
+    # outputs are comparable across runs. Every run rewrites them in full.
+    with output.open("w") as fout, raw_path.open("w") as fraw:
+        for row, raw in results:
+            fout.write(json.dumps(row, ensure_ascii=False) + "\n")
+            fraw.write(json.dumps(raw, ensure_ascii=False) + "\n")
 
     meta = {
         "protocol": PROTOCOL,
         "judge_model": cfg["api"]["model"],
-        "answers_file": str(args.answers),
+        "answers_file": str(answers_file),
         "questions_file": str(args.questions),
         "judge_config_file": str(args.config),
         "judge_config": cfg,
@@ -328,6 +368,21 @@ def main():
         "summary": summary,
     }
     meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2) + "\n")
+    if run_dir is not None:
+        runs.update_stage(
+            run_dir,
+            "judge",
+            "complete",
+            judge_model=cfg["api"]["model"],
+            sampling=dict(cfg.get("generation", {})),
+            scored=summary["scored"],
+            unscored=summary["unscored"],
+        )
+    print(
+        f"{model_id}: {summary['scored']} scored, "
+        f"{sum(summary['unscored'].values())} unscored -> {output}"
+    )
+    return run_dir
 
 
 if __name__ == "__main__":
