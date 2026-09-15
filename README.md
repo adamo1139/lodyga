@@ -88,3 +88,52 @@ It scores correctness, task completion, usefulness, and Polish presentation on
 a 0–10 scale, reports both turns and all categories, and keeps Polish-language
 rate separate from quality. It is a new evaluation and should not be presented
 as a reproduced MT-Bench leaderboard result.
+
+## Judge runner
+
+`judge_lodyga.py` scores an answer file against the frozen Łodyga 0.1 protocol:
+one judge call per turn through an OpenAI-compatible chat-completions API
+(OpenRouter), the prompts from `custom_scoring.md`, per-turn references, strict
+JSON validation (invalid JSON, out-of-range scores, or a mismatched total are
+recorded as `unscored` with a reason — never retried, never imputed), and raw
+request/response archiving.
+
+```bash
+# judge config copies config.judge.example.toml; sampling is frozen per run
+OPENROUTER_API_KEY=... python judge_lodyga.py \
+    --config judge.toml \
+    --answers data/mt_bench/model_answer/poziomka.jsonl
+```
+
+Keys can also go in a `.env` file (never committed). Outputs land in
+`data/mt_bench/model_judgment/<judge>/<model>.jsonl` (one row per judged turn,
+scored or unscored), plus `<model>__raw.jsonl` and `<model>__meta.json`.
+Re-running resumes automatically from the existing judgment file;
+`--no-resume` starts a fresh run. A question is reprocessed when it has no
+answer row. The meta file archives the judge config, protocol version, and a
+scored/unscored summary; aggregation over the judgment rows is handled
+separately.
+
+## Aggregation
+
+`aggregate_lodyga.py` turns a judgment file into results per the Łodyga 0.1
+aggregation rules: the headline score is the arithmetic mean of all scored
+turn totals; turn-1, turn-2, the eight category means, and
+reference-vs-no-reference means are reported with bootstrap 95% confidence
+intervals (questions resampled, both turns kept together). Unscored turns are
+excluded and reported separately — never imputed. The share of answers
+classified as Polish is computed from the answer text with a documented
+heuristic (Polish diacritics or distinctive Polish function words) and
+reported only as a descriptor, never as a score multiplier.
+
+```bash
+python aggregate_lodyga.py \
+    --judgments data/mt_bench/model_judgment/openai_gpt-4o/poziomka.jsonl \
+    --answers data/mt_bench/model_answer/poziomka.jsonl
+```
+
+Two files are written next to the judgment file: `<model>__aggregate.json`
+(machine-readable: means, CIs, dimension averages, Polish rate, and a
+per-question breakdown) and `<model>__report.md` (human-readable). Bootstrap
+iterations and seed default to 10000 and 12345 and can be overridden with
+`--iterations` and `--seed`; the values used are recorded in the output.

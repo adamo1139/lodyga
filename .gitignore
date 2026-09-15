@@ -4,3 +4,9 @@
 *.db
 .beads-credential-key
 .beads/proxieddb/
+
+# API keys (see custom_scoring.md; never commit)
+.env
+
+# Python
+__pycache__/

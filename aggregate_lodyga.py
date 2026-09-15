@@ -1,0 +1,383 @@
+#!/usr/bin/env python3
+"""Aggregate Łodyga judgments into machine- and human-readable results.
+
+Implements the aggregation rules from custom_scoring.md (Łodyga 0.1): the
+headline score is the arithmetic mean of all scored turn totals; turn-1,
+turn-2, eight category, and reference-vs-no-reference means are also reported;
+bootstrap 95% confidence intervals are computed over questions, resampling
+both turns of a question together. Unscored turns are never imputed — they are
+excluded from means and reported separately. The share of answers classified
+as Polish is reported as a separate descriptive statistic.
+"""
+
+import argparse
+import json
+import random
+import re
+import time
+from collections import defaultdict
+from pathlib import Path
+
+PROTOCOL = "Łodyga 0.1"
+
+CATEGORY_LABELS = {
+    "writing": "Piśmiennictwo",
+    "roleplay": "Odgrywanie ról",
+    "reasoning": "Wnioskowanie",
+    "math": "Matematyka",
+    "coding": "Kodowanie",
+    "extraction": "Ekstrakcja",
+    "stem": "Nauki ścisłe",
+    "humanities": "Humanistyka",
+}
+
+# Distinctive, very frequent Polish function words used by the language
+# heuristic. Not a general detector; documented in the report.
+POLISH_WORDS = frozenset(
+    """
+    się jest że czy nie już tak też ale chyba jednak tylko może można należy
+    trzeba również oraz bardzo dlatego ponieważ przede ponadto właśnie między
+    kiedy gdzie aby który które która których którym bowiem ani albo więc lecz
+    aż
+    """.split()
+)
+POLISH_DIACRITICS = "ąćęłńóśźż"
+
+
+def is_polish(text):
+    """Heuristic: an answer is Polish when it has Polish diacritics or at
+    least two distinctive Polish function words. Descriptive only; this is
+    deliberately separate from the quality scores."""
+    lowered = text.lower()
+    if any(c in POLISH_DIACRITICS for c in lowered):
+        return True
+    tokens = re.findall(r"[a-ząćęłńóśźż]{2,}", lowered)
+    return sum(1 for w in tokens if w in POLISH_WORDS) >= 2
+
+
+def per_turn_reference(question):
+    """Which turns of a question showed a reference in the judge prompt.
+
+    Turn 1 shows a reference when its first list entry is non-empty; turn 2
+    shows one when either entry is non-empty (matching judge_lodyga.py).
+    """
+    ref = question.get("reference")
+    if not isinstance(ref, list):
+        return False, False
+    ref0 = bool(ref and len(ref) > 0 and str(ref[0]).strip())
+    ref1 = bool(len(ref) > 1 and str(ref[1]).strip())
+    return ref0, ref0 or ref1
+
+
+def load_judgments(path):
+    scored = {}
+    unscored = defaultdict(int)
+    meta = {"model_id": None, "judge_model": None}
+    for line in path.read_text().splitlines():
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        if meta["model_id"] is None:
+            meta["model_id"] = row.get("model_id")
+        if meta["judge_model"] is None:
+            meta["judge_model"] = row.get("judge_model")
+        key = (row["question_id"], row["turn"])
+        if row.get("status") == "scored":
+            scored[key] = row["judgment"]
+        else:
+            unscored[row.get("reason", "unscored")] += 1
+    return scored, dict(unscored), meta
+
+
+def load_questions(path):
+    questions = {}
+    for line in path.read_text().splitlines():
+        if not line.strip():
+            continue
+        q = json.loads(line)
+        ref_turn1, ref_turn2 = per_turn_reference(q)
+        questions[q["question_id"]] = {
+            "category": q.get("category"),
+            "reference_turn1": ref_turn1,
+            "reference_turn2": ref_turn2,
+        }
+    return questions
+
+
+def load_answers(path):
+    answers = {}
+    for line in path.read_text().splitlines():
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        turns = row.get("choices", [{}])[0].get("turns", [])
+        if len(turns) == 2:
+            answers[row["question_id"]] = turns
+    return answers
+
+
+def percentile(sorted_values, p):
+    """Nearest-rank percentile of an already sorted list."""
+    if not sorted_values:
+        return None
+    return sorted_values[min(len(sorted_values) - 1, round(p / 100.0 * (len(sorted_values) - 1)))]
+
+
+def metric(pool, rng, iterations):
+    """Bootstrap statistics for a pool of questions -> scored turn totals."""
+    totals_by_q = [(qid, totals) for qid, totals in pool.items()]
+    all_totals = [t for _, totals in totals_by_q for t in totals]
+    if not all_totals:
+        return None
+    samples = []
+    n = len(totals_by_q)
+    for _ in range(iterations):
+        totals = []
+        for _ in range(n):
+            totals.extend(totals_by_q[rng.randrange(n)][1])
+        if totals:
+            samples.append(sum(totals) / len(totals))
+    samples.sort()
+    return {
+        "mean": sum(all_totals) / len(all_totals),
+        "ci95": [percentile(samples, 2.5), percentile(samples, 97.5)],
+        "n_questions": n,
+        "n_turns": len(all_totals),
+    }
+
+
+def build_pool(qids, scored, turn=None, ref_filter=None, ref_shown=None):
+    """Group scored turn totals by question, optionally restricted to one turn
+    or to turns whose reference presence matches `ref_filter`."""
+    pool = {}
+    for qid in qids:
+        totals = []
+        for turn_idx in (1, 2):
+            if turn is not None and turn_idx != turn:
+                continue
+            if ref_filter is not None and ref_shown(qid, turn_idx) != ref_filter:
+                continue
+            judgment = scored.get((qid, turn_idx))
+            if judgment is not None:
+                totals.append(judgment["total"])
+        if totals:
+            pool[qid] = totals
+    return pool
+
+
+def render_report(result):
+    def fmt(stats):
+        if stats is None:
+            return "—"
+        ci = f"[{stats['ci95'][0]:.2f}, {stats['ci95'][1]:.2f}]"
+        return f"{stats['mean']:.2f} ({stats['n_turns']} tur, {stats['n_questions']} pytań)" \
+            f"  95% CI {ci}"
+
+    lines = [
+        f"# Łodyga — wyniki ({result['protocol']})",
+        "",
+        f"- Model: {result['model_id']} · Sędzia: {result['judge_model']}",
+        f"- Oceny: `{result['judgments_file']}`",
+        f"- Bootstrap: {result['bootstrap_iterations']} iteracji, seed {result['seed']} "
+        "(resampling pytań z zachowaniem obu tur razem)",
+        (
+            f"- Tury ocenione: {result['n_scored_turns']} · "
+            f"Tury bez oceny: {result['n_unscored_turns']}"
+        ),
+        "",
+        "## Wynik ogólny (średnia arytmetyczna wszystkich ocenionych tur)",
+        "",
+        f"**{result['overall']['mean']:.2f}**  ({result['overall']['n_turns']} tur, "
+        f"{result['overall']['n_questions']} pytań; 95% CI "
+        f"[{result['overall']['ci95'][0]:.2f}, {result['overall']['ci95'][1]:.2f}])",
+        "",
+        "## Średnie wg metryki",
+        "",
+        "| Metryka | Średnia |",
+        "|---|---|",
+    ]
+    labels = {"1": "Tura 1", "2": "Tura 2"}
+    for key, stats in result["by_turn"].items():
+        lines.append(f"| {labels.get(key, key)} | {fmt(stats)} |")
+    lines.append("")
+    lines.append("## Średnie wg kategorii")
+    lines.append("")
+    lines.append("| Kategoria | Średnia |")
+    lines.append("|---|---|")
+    for cat, stats in result["by_category"].items():
+        lines.append(f"| {CATEGORY_LABELS.get(cat, cat)} | {fmt(stats)} |")
+    lines.append("")
+    lines.append("## Odniesienia (z / bez referencji)")
+    lines.append("")
+    lines.append("| Grupa | Średnia |")
+    lines.append("|---|---|")
+    lines.append(f"| z referencją | {fmt(result['by_reference']['reference'])} |")
+    lines.append(f"| bez referencji | {fmt(result['by_reference']['no_reference'])} |")
+    lines.append("")
+    lines.append("## Średnie wymiarów (na ocenioną turę)")
+    lines.append("")
+    for name, value in result["dimensions"].items():
+        lines.append(f"- **{name}**: {value:.2f}")
+    lines.append("")
+    lines.append("## Odsetek odpowiedzi w języku polskim")
+    lines.append("")
+    if result["polish_rate"] is None:
+        lines.append("Nie wyliczono (brak pliku odpowiedzi `--answers`).")
+    else:
+        lines.append(
+            f"**{result['polish_rate'] * 100:.1f}%** odpowiedzi uznano za polskie "
+            "(heurystyka: polskie znaki diakrytyczne lub co najmniej dwa "
+            "charakterystyczne polskie słowa; statystyka opisowa, nie czynnik"
+            " mnożący wynik)."
+        )
+    lines.append("")
+    lines.append("## Tury bez oceny")
+    lines.append("")
+    unscored = result["unscored_reasons"]
+    if unscored:
+        for reason, count in unscored.items():
+            lines.append(f"- {reason}: {count}")
+    else:
+        lines.append("Brak.")
+    return "\n".join(lines) + "\n"
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--judgments",
+        type=Path,
+        required=True,
+        help="judgments JSONL from judge_lodyga.py",
+    )
+    parser.add_argument(
+        "--questions",
+        type=Path,
+        default=Path("data/mt_bench/question.jsonl"),
+        help="Łodyga question file (provides categories and references)",
+    )
+    parser.add_argument(
+        "--answers",
+        type=Path,
+        help="answers JSONL from generate_answers.py (for the Polish-language rate)",
+    )
+    parser.add_argument("--output-json", type=Path)
+    parser.add_argument("--report", type=Path)
+    parser.add_argument("--iterations", type=int, default=10000)
+    parser.add_argument("--seed", type=int, default=12345)
+    args = parser.parse_args()
+
+    scored, unscored, meta = load_judgments(args.judgments)
+    questions = load_questions(args.questions)
+    answers = load_answers(args.answers) if args.answers else {}
+
+    if not scored:
+        raise SystemExit(f"error: no scored turns in {args.judgments}")
+
+    rng = random.Random(args.seed)
+    qids = list(questions)
+
+    def ref_shown(qid, turn):
+        info = questions[qid]
+        return info["reference_turn1"] if turn == 1 else info["reference_turn2"]
+
+    overall = metric(build_pool(qids, scored), rng, args.iterations)
+    by_turn = {
+        str(t): metric(build_pool(qids, scored, turn=t), rng, args.iterations)
+        for t in (1, 2)
+    }
+    categories = {}
+    for qid, info in questions.items():
+        categories.setdefault(info["category"], []).append(qid)
+    by_category = {
+        cat: metric(build_pool(cat_qids, scored), rng, args.iterations)
+        for cat, cat_qids in sorted(categories.items())
+    }
+    by_reference = {
+        "reference": metric(
+            build_pool(qids, scored, ref_filter=True, ref_shown=ref_shown), rng, args.iterations
+        ),
+        "no_reference": metric(
+            build_pool(qids, scored, ref_filter=False, ref_shown=ref_shown), rng, args.iterations
+        ),
+    }
+
+    dimensions = {name: 0.0 for name in ("correctness", "task_completion", "usefulness", "polish")}
+    for judgment in scored.values():
+        for name in dimensions:
+            dimensions[name] += judgment[name]
+    n_dim = len(scored)
+    dimensions = {name: value / n_dim for name, value in dimensions.items()}
+
+    polish_rate = None
+    n_polish = n_total = 0
+    if answers:
+        for qid, turns in answers.items():
+            for turn_idx, text in enumerate(turns, start=1):
+                if (qid, turn_idx) in scored:
+                    n_total += 1
+                    if is_polish(text):
+                        n_polish += 1
+        if n_total:
+            polish_rate = n_polish / n_total
+
+    detail = []
+    for qid in qids:
+        info = questions[qid]
+        turns = {}
+        for t in (1, 2):
+            if (qid, t) in scored:
+                turns[str(t)] = {"status": "scored", "total": scored[(qid, t)]["total"]}
+            else:
+                turns[str(t)] = {"status": "unscored"}
+        detail.append(
+            {
+                "question_id": qid,
+                "category": info["category"],
+                "reference_turn1": info["reference_turn1"],
+                "reference_turn2": info["reference_turn2"],
+                "turns": turns,
+            }
+        )
+
+    result = {
+        "protocol": PROTOCOL,
+        "judgments_file": str(args.judgments),
+        "questions_file": str(args.questions),
+        "answers_file": str(args.answers) if args.answers else None,
+        "model_id": meta["model_id"],
+        "judge_model": meta["judge_model"],
+        "seed": args.seed,
+        "bootstrap_iterations": args.iterations,
+        "generated": time.time(),
+        "overall": overall,
+        "by_turn": by_turn,
+        "by_category": by_category,
+        "by_reference": by_reference,
+        "dimensions": dimensions,
+        "polish_rate": polish_rate,
+        "n_questions": len(qids),
+        "n_scored_turns": len(scored),
+        "n_unscored_turns": sum(unscored.values()),
+        "unscored_reasons": unscored,
+        "questions": detail,
+    }
+
+    default_json = args.judgments.with_name(args.judgments.stem + "__aggregate.json")
+    default_report = args.judgments.with_name(args.judgments.stem + "__report.md")
+    output_json = args.output_json or default_json
+    report = args.report or default_report
+    output_json.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
+    report.write_text(render_report(result), encoding="utf-8")
+
+    print(
+        f"overall mean {overall['mean']:.2f} 95% CI "
+        f"[{overall['ci95'][0]:.2f}, {overall['ci95'][1]:.2f}] "
+        f"({overall['n_turns']} scored turns, {overall['n_questions']} questions)"
+    )
+    print(f"wrote {output_json}")
+    print(f"wrote {report}")
+
+
+if __name__ == "__main__":
+    main()
