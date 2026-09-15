@@ -23,10 +23,19 @@ def load_tokenizer(cfg):
     )
 
 
-def complete(cfg, prompt):
+def hosted_model_id(cfg):
+    api = cfg["api"]
+    if api.get("model"):
+        return api["model"]
+    req = urllib.request.Request(api["base_url"].rstrip("/") + "/models")
+    with urllib.request.urlopen(req, timeout=api.get("timeout", 600)) as response:
+        return json.load(response)["data"][0]["id"]
+
+
+def complete(cfg, prompt_ids):
     api = cfg["api"]
     generation = dict(cfg.get("generation", {}))
-    payload = {"model": api["model"], "prompt": prompt, **generation}
+    payload = {"model": hosted_model_id(cfg), "prompt": prompt_ids, **generation}
     payload.pop("base_url", None)
     payload.pop("api_key_env", None)
     body = json.dumps(payload).encode()
@@ -48,7 +57,10 @@ def render(tokenizer, messages, enable_thinking=None):
     kwargs = {"tokenize": False, "add_generation_prompt": True}
     if enable_thinking is not None:
         kwargs["enable_thinking"] = enable_thinking
-    return tokenizer.apply_chat_template(messages, **kwargs)
+    prompt = tokenizer.apply_chat_template(messages, **kwargs)
+    # Match the tested SGLang path: send exact token IDs and prevent the server
+    # from adding a BOS token or rendering a second chat template.
+    return tokenizer.encode(prompt, add_special_tokens=False)
 
 
 def clean_answer(text):

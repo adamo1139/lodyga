@@ -63,7 +63,8 @@ FastChat dependencies and judge prompt configuration are restored.
 
 The project runner deliberately uses `/v1/completions`, not
 `/v1/chat/completions`: it renders each model's own chat template locally with
-`transformers`, then sends the resulting string to a vLLM-compatible server.
+`transformers`, then sends the resulting token-ID list to a SGLang/vLLM-compatible
+server. This avoids server-side BOS insertion or a second chat-template pass.
 Turn 2 is rendered with turn 1 included as an assistant message. Responses are
 cleaned of accidental end-of-turn markers before being inserted into the next
 template, so chat-control tokens do not become conversational content.
