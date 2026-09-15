@@ -1,10 +1,7 @@
-gradio==4.31.4
-plotly==5.18.0
-# Needed by generate_answers.py (the upstream browser requirements are above).
+# Renderowanie szablonu czatu w generate_answers.py
 transformers>=4.55
 huggingface_hub>=0.30
 
-# Language identification for the descriptive Polish-share statistic
-# (aggregate_lodyga.py). The OpenLID v3 model is ~1.2 GB and is fetched from the
-# Hugging Face cache on first use; pass --no-language-detection to skip it.
+# Detekcja języka w aggregate_lodyga.py (OpenLID v3, ~1,2 GB, pobierany raz
+# z cache'u Hugging Face). Można pominąć flagą --no-language-detection.
 fasttext>=0.9.2
