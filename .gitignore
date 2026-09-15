@@ -1,9 +1,11 @@
 
-# Beads / Dolt files (added by bd init)
+# Beads: keep the whole tracker private (see lodyga-dhf)
+/.beads/
+# Credential key material (never commit)
+.beads-credential-key
+# Dolt artifacts
 .dolt/
 *.db
-.beads-credential-key
-.beads/proxieddb/
 
 # API keys (see custom_scoring.md; never commit)
 .env
