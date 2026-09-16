@@ -15,6 +15,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka v11/iter_0000800 | chat | nie | 3 | **1,12** | 1,08–1,15 | 0 | 94% | 2,24 | 1,88 | 0,82 | 0,50 | 0,18 | 0,28 | 0,81 | 2,22 |
 | poziomka v11/iter_0001718 | compl. | tak | 3 | **1,06** | 0,92–1,16 | 12 | 87% | 2,07 | 1,86 | 0,97 | 1,22 | 0,05 | 0,58 | 0,55 | 1,22 |
 | poziomka v11/iter_0000400 | chat | nie | 3 | **1,04** | 0,95–1,13 | 0 | 90% | 2,12 | 1,62 | 0,95 | 0,60 | 0,05 | 0,53 | 0,80 | 1,60 |
+| polanka-3.7B-exp | compl. | tak | 3 | **0,97** | 0,81–1,19 | 0 | 88% | 1,60 | 1,53 | 1,07 | 1,10 | 0,45 | 0,57 | 0,40 | 1,08 |
 | polanka-3.7B-exp | chat | brak | 3 | **0,95** | 0,87–1,00 | 8 | 87% | 1,50 | 1,27 | 1,02 | 1,29 | 0,47 | 0,55 | 0,37 | 1,13 |
 | poziomka v11/iter_0000800 | chat | tak | 3 | **0,68** | 0,62–0,71 | 42 | 70% | 1,17 | 0,51 | 0,37 | 0,99 | 0,23 | 0,33 | 0,38 | 1,42 |
 | poziomka 0909/iter_0000400 | compl. | mixed 53% | 3 | **0,66** | 0,62–0,72 | 0 | 94% | 1,35 | 0,85 | 0,68 | 0,63 | 0,15 | 0,22 | 0,53 | 0,92 |
@@ -42,15 +43,13 @@ Sampling identyczny wszędzie (`temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
 | Bielik 11B v3 | 11B | **7,53** | 9,06 | 6,55 |
 | Bielik 4.5B v3 | 4,5B | **5,69** | 8,54 | 4,87 |
 | poziomka v11/1718 | ~4B | **1,40** | 0,95 | 0,05 |
-| polanka 3.7B exp | 3,7B | **0,95** | 1,29 | 0,47 |
+| polanka 3.7B exp | 3,7B | **0,97** | 1,10 | 0,45 |
 
-Trzy modele w zbliżonej klasie wielkości dzieli przepaść: 5,69 wobec 1,40 i 0,95.
 Podwojenie wielkości Bielika daje +1,84, a różnica między rodzinami przy tej
 samej skali sięga +4,29. **To, czym i jak model był trenowany, waży tu ponad dwa
-razy więcej niż liczba parametrów.**
-
-Bielik nie jest więc typowy dla swojej klasy — jest wyjątkiem. Dwa niezależne
-eksperymentalne modele polskie o podobnej wielkości siedzą poniżej 1,5.
+razy więcej niż liczba parametrów.** Bielik nie jest typowy dla swojej klasy —
+jest wyjątkiem; dwa niezależne eksperymentalne modele polskie o podobnej
+wielkości siedzą poniżej 1,5.
 
 Najostrzej widać to w kategoriach z referencjami. Oba Bieliki mają matematykę
 powyżej 8,5; Poziomka i Polanka nie przekraczają 1,3. Nie chodzi o styl, tylko
@@ -59,11 +58,31 @@ wymyśliła własną metodę („pole to suma kwadratów długości boków") i p
 zamiast 3.
 
 Odsetek polszczyzny nie porządkuje modeli: 4,5B ma 97%, czyli więcej niż 11B
-(94%), przy wyniku niższym o 1,84. Rozpoznawalność języka i jakość odpowiedzi to
-osobne rzeczy — dlatego ta statystyka nigdy nie wchodzi do punktacji.
+(94%), przy wyniku niższym o 1,84. Dlatego ta statystyka nigdy nie wchodzi do
+punktacji.
 
-Spadek w turze 2 jest tym łagodniejszy, im lepszy model: 0,84 u 11B, 0,81
-u 4,5B, około 0,70 u Poziomki i Polanki.
+## Rozumowanie nie pomogło ani razu
+
+Zmierzyliśmy oba warianty na trzech rodzinach i wyszły trzy różne mechanizmy,
+ale ani jednego przypadku, w którym myślenie by pomogło.
+
+| model | z myśleniem | bez myślenia | co się dzieje |
+|---|---|---|---|
+| poziomka v11 (4 checkpointy) | 0,41–0,68 | **1,04–1,40** | zapętla się, nie domyka `</think>`, 42–62 pustych tur |
+| poziomka 0909/0400 | 0,66 | 0,66 (mixed) | zapętla się rzadziej, ale wynik bez zmian |
+| polanka 3.7B | 0,97 | 0,95 | rozumuje czysto w 95% tur, zero pustych, wynik ten sam |
+
+**Polanka jest najczystszym przypadkiem.** Szablon z repo HF uruchamia
+rozumowanie w 457 z 480 tur, model domyka blok za każdym razem — zero pustych
+odpowiedzi, wobec 8 w wariancie bez myślenia. Nic się nie psuje po drodze,
+a wynik stoi w miejscu: 0,97 wobec 0,95, przy rozrzucie sięgającym 0,19.
+Matematyka wręcz **spadła** z 1,29 na 1,10, kodowanie z 0,47 na 0,45 — czyli
+reasoning nie pomaga dokładnie tam, gdzie powinien pomagać najbardziej.
+
+U Poziomki v11 mechanizm jest inny: tam myślenie realnie szkodzi, bo model
+zapętla się w bloku rozumowania i wyczerpuje limit tokenów. Ale to nie jest
+wyłącznie efekt pustych tur — licząc same niepuste odpowiedzi,
+`v11/iter_0001718` z myśleniem miał 0,83 wobec 1,33 bez myślenia.
 
 ## „mixed" — czego nie udało się zmierzyć
 
@@ -73,23 +92,10 @@ w niej wyłączyć tak jak w v11. Prefill — prompt kończący się zamkniętym
 otworzył sobie własny blok mimo wszystko. Dlatego ten wiersz ma `mixed 53%`,
 a nie `nie`, i nie wolno go zestawiać z wierszami `nie` z serii v11.
 
-## Myślenie szkodzi każdemu checkpointowi v11
-
-| checkpoint | z myśleniem | bez myślenia | puste (z myśl.) |
-|---|---|---|---|
-| `v11/iter_0000400` | 0,50 | **1,04** | 50 |
-| `v11/iter_0000800` | 0,68 | **1,12** | 42 |
-| `v11/iter_0001200` | 0,41 | **1,40** | 62 |
-| `v11/iter_0001718` | 0,59 | **1,40** | 45 |
-
-Wszędzie wyłączenie reasoningu podnosi wynik dwukrotnie lub więcej i likwiduje
-wszystkie puste odpowiedzi; zakresy nigdzie się nie stykają. To nie jest wyłącznie
-efekt pustych tur: licząc same niepuste odpowiedzi, `v11/iter_0001718`
-z myśleniem miał 0,83 wobec 1,33 bez myślenia.
-
-U serii 0909 jest inaczej: wyzerowanie pustych tur i skok polszczyzny z 80% na
-94% **nie zmieniły wyniku ani o setną** (0,66 w obu wariantach). Tam ogranicza
-nie zapętlanie się, tylko jakość samych odpowiedzi.
+Podobne zastrzeżenie dotyczy wiersza `polanka / compl. / tak`: szablon z repo HF
+otwiera blok rozumowania, ale szablon w serwowanym katalogu tego nie robi. Ten
+wiersz mierzy więc, czy Polanka **potrafi** skorzystać z rozumowania, a nie jak
+zachowuje się domyślnie po wystawieniu.
 
 ## Cały przyrost v11 mieści się między 800 a 1200 krokiem
 
@@ -103,3 +109,6 @@ nie zapętlanie się, tylko jakość samych odpowiedzi.
 Od 400 do 800 zakresy zachodzą na siebie. Między 800 a 1200 jest skok o 0,28 przy
 rozłącznych zakresach — jedyna realna poprawa w całej serii. Od 1200 do 1718
 znowu nic. Z 1318 przebadanych kroków tylko okno 800–1200 cokolwiek wniosło.
+
+Spadek w turze 2 jest tym łagodniejszy, im lepszy model: 0,84 u Bielika 11B,
+0,81 u 4,5B, około 0,70 u Poziomki i Polanki.
