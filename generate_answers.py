@@ -24,9 +24,16 @@ def load_tokenizer(cfg):
         from huggingface_hub import snapshot_download
 
         path = Path(snapshot_download(path, allow_patterns=[f"{subfolder}/*"])) / subfolder
-    return AutoTokenizer.from_pretrained(
+    tokenizer = AutoTokenizer.from_pretrained(
         str(path), trust_remote_code=cfg["model"].get("trust_remote_code", False)
     )
+    # Część modeli instruct nie ma `chat_template` w tokenizer_config.json, choć
+    # karta modelu podaje format promptu. Wtedy szablon wpisuje się wprost do
+    # configu, w `chat_template.template`, i to on jest źródłem prawdy.
+    template = cfg.get("chat_template", {}).get("template")
+    if template:
+        tokenizer.chat_template = template
+    return tokenizer
 
 
 def hosted_model_id(cfg):

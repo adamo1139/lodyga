@@ -1,0 +1,34 @@
+# APT3-1B-Instruct-v1 (Azurro), serwowany przez SGLang:
+#   python3 -m sglang.launch_server --model-path /media/nvme_2tb/maked/models/apt3-1b-instruct \
+#       --trust-remote-code --port 2300 --host 0.0.0.0 --data-parallel-size 4
+#
+# Model nie ma `chat_template` w tokenizer_config.json, ale karta modelu podaje
+# format w stylu Mistrala: <s>[INST] pytanie [/INST] odpowiedź</s>. Szablon
+# wpisany poniżej odtwarza go dokładnie, więc idziemy przez /completions
+# z lokalnym renderowaniem - chat API nie miałoby czego użyć.
+[model]
+id = "apt3_1b_instruct"
+tokenizer = "Azurro/APT3-1B-Instruct-v1"
+trust_remote_code = true
+
+[chat_template]
+template = "{{ '<s>' }}{% for m in messages %}{% if m['role'] == 'user' %}{{ '[INST] ' + m['content'] + ' [/INST]' }}{% else %}{{ ' ' + m['content'] + '</s>' }}{% endif %}{% endfor %}"
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/models/apt3-1b-instruct"
+mode = "completions"
+concurrency = 100
+timeout = 600
+
+# UWAGA: kontekst tego modelu to tylko 2048 tokenów - najmniej w całej tabeli.
+# Prompt tury 2 zawiera odpowiedź z tury 1, więc budżet liczy się podwójnie:
+# 766 + 2*600 = 1966, mieści się. Przy 1600 jak u Qry, a tym bardziej przy 3500
+# jak u reszty, zapytania kończyłyby się błędem.
+[generation]
+max_tokens = 600
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+stop = ["</s>"]
