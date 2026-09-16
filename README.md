@@ -7,10 +7,10 @@ Połowa pytań ma wzorcową odpowiedź, którą dostaje sędzia LLM.
 
 ```bash
 cp .env.example .env
-./lodyga.py run --config config.poziomka.toml --judge config.judge.example.toml
+./lodyga.py run --config configs/config.poziomka.toml --judge configs/config.judge.example.toml
 ```
 
-W `.env` wpisz klucz do OpenRouter, a w kopii `config.example.toml` swój
+W `.env` wpisz klucz do OpenRouter, a w kopii `configs/config.example.toml` swój
 endpoint. Jedna komenda generuje odpowiedzi, ocenia je i liczy wynik. Wszystko
 ląduje w `data/mt_bench/runs/`.
 

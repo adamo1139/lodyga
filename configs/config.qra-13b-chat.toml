@@ -1,0 +1,30 @@
+# Qra-13B-chat (TeeZee), serwowany przez SGLang:
+#   python3 -m sglang.launch_server --model-path /media/nvme_2tb/maked/models/qra-13b-chat \
+#       --trust-remote-code --port 2300 --host 0.0.0.0 --pipeline-parallel-size 4
+#
+# Inna rodzina niż reszta tabeli: architektura Llama, szablon w stylu Alpaki
+# (### Instruction / ### Response), eos to </s>, a nie <|im_end|>. Bez reasoningu,
+# więc jeden wariant.
+[model]
+id = "qra_13b_chat"
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/models/qra-13b-chat"
+mode = "chat"
+concurrency = 100
+timeout = 600
+
+# UWAGA: kontekst tego modelu to 4096 tokenów, czyli mniej niż połowa tego, co
+# miały pozostałe modele. Prompt tury 2 zawiera odpowiedź z tury 1, więc budżet
+# liczy się podwójnie: 766 + 2*1600 = 3966, mieści się. Przy 3500 jak u reszty
+# tabeli zapytania kończyłyby się błędem 400.
+# Realnie nie ogranicza: w dotychczasowych przebiegach 0-0,6% odpowiedzi
+# przekraczało ~1600 tokenów.
+[generation]
+max_tokens = 1600
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+stop = ["</s>"]

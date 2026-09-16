@@ -21,7 +21,7 @@
 
 # Local working judge config (copy config.judge.example.toml). Kept out of git
 # so a local judge/model choice cannot silently become the committed default.
-/config.judge.toml
+/configs/config.judge.toml
 
 # Python
 __pycache__/

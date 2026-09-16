@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Łodyga — one command to run a whole evaluation.
 
-    ./lodyga.py run --config config.poziomka.toml --judge config.judge.toml
+    ./lodyga.py run --config configs/config.poziomka.toml --judge configs/config.judge.toml
 
 Generates answers, judges them, and aggregates the scores into a single
 timestamped run directory, so the three stages can never describe different
 runs. Individual stages remain reachable for re-judging or re-aggregating
 existing results:
 
-    ./lodyga.py judge --run-dir latest --judge config.judge.toml
+    ./lodyga.py judge --run-dir latest --judge configs/config.judge.toml
     ./lodyga.py aggregate --run-dir latest
     ./lodyga.py list
 
@@ -27,9 +27,10 @@ PROJECT_DIR = Path(__file__).resolve().parent
 
 def _default_judge_config():
     for name in ("config.judge.toml", "judge.toml", "config.judge.example.toml"):
-        path = PROJECT_DIR / name
-        if path.exists():
-            return path
+        for base in (PROJECT_DIR / "configs", PROJECT_DIR):
+            path = base / name
+            if path.exists():
+                return path
     return None
 
 
