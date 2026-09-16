@@ -21,6 +21,12 @@ concurrency = 30
 # switching to a different judge.
 [generation]
 seed = 42
+# Tier "flex" u OpenAI kosztuje połowę tego co domyślny (0,1/0,6 zamiast
+# 0,2/1,2 USD za milion tokenów) w zamian za wyższe opóźnienia i mniejszą
+# dostępność. OpenRouter kieruje wtedy wyłącznie na endpointy flex - bez
+# awaryjnego zejścia na droższy tier - więc przy braku mocy zwróci błąd
+# pojemności, który chat() obsłuży jak każdy inny błąd przejściowy.
+service_tier = "flex"
 # gpt-5.6-luna accepts: none, low, medium (the model default), high, xhigh, max.
 # Łodyga 0.1 pins "none": the judge scores straight from the rubric prompt, which
 # is cheaper and more reproducible. Pinning it also means a change to the model's
