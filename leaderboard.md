@@ -9,6 +9,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | model | API | myślenie | przeb. | wynik | rozrzut | puste | pol. | piśm. | role | wnios. | mat. | kod. | ekstr. | ścisłe | human. |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Bielik-11B-v3-Instruct | chat | brak | 3 | **7,53** | 7,30–7,74 | 0 | 94% | 6,83 | 7,45 | 7,35 | 9,06 | 6,55 | 8,25 | 7,00 | 7,78 |
+| Bielik-PL-Minitron-7B-v3.0-Instruct | chat | brak | 3 | **6,41** | 6,29–6,58 | 0 | 94% | 6,25 | 5,99 | 5,77 | 8,66 | 5,00 | 7,07 | 6,10 | 6,50 |
 | Bielik-4.5B-v3-Instruct | chat | brak | 3 | **5,69** | 5,60–5,86 | 0 | 97% | 4,77 | 5,73 | 5,35 | 8,54 | 4,87 | 5,85 | 5,03 | 5,55 |
 | Bielik-1.5B-v3-Instruct | chat | brak | 3 | **3,83** | 3,72–3,96 | 0 | 93% | 3,95 | 4,00 | 2,77 | 6,02 | 2,87 | 4,15 | 3,38 | 3,65 |
 | Qra-13B-chat | chat | brak | 3 | **3,30** | 3,12–3,40 | 0 | 90% | 3,90 | 4,03 | 3,87 | 2,05 | 1,53 | 3,32 | 3,57 | 4,12 |
@@ -58,9 +59,20 @@ znaków, a p95 1437.
 | polanka 3.7B exp | 3,7B | **0,97** | 1,10 | 0,45 |
 
 **Największy model w tabeli przegrywa z najmniejszym.** Qra ma 13B parametrów
-i 3,30, Bielik 1,5B ma prawie dziewięć razy mniej i 3,83. W obrębie jednej
-rodziny skala działa przewidywalnie — u Bielika każde potrojenie daje około
-+1,85 — ale między rodzinami nie znaczy nic.
+i 3,30, Bielik 1,5B ma prawie dziewięć razy mniej i 3,83. Bielik 7B daje 6,41,
+czyli prawie dwa razy więcej od prawie dwa razy większej Qry.
+
+W obrębie jednej rodziny skala działa za to bardzo przewidywalnie. Cztery punkty
+Bielika układają się blisko prostej względem logarytmu liczby parametrów:
+1,5B → 4,5B daje +1,86, 4,5B → 7B daje +0,72, 7B → 11B daje +1,12. Przyrost
+skaluje się z proporcją wielkości, nie z różnicą bezwzględną.
+
+`Bielik-PL-Minitron-7B` jest tu wart osobnej uwagi z dwóch powodów. Po pierwsze,
+powstał przez przycinanie i destylację z większego modelu, a nie przez trening od
+zera w tej wielkości — i mimo to leży dokładnie na trendzie rodziny, więc
+destylacja nie kosztowała nic mierzalnego. Po drugie, „PL" w nazwie oznacza
+tokenizer APT4, zaadaptowany do polskiego; nie widać, żeby zmieniało to jego
+pozycję względem pozostałych Bielików.
 
 ## Modele dzielą się na te, które liczą, i te, które piszą
 
