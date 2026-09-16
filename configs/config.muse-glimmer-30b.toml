@@ -1,0 +1,37 @@
+# Muse-Glimmer-30B (meta-models), serwowany przez vLLM:
+#   vllm serve /media/nvme_2tb/maked/models/glimmer --port 2300 --host 0.0.0.0 \
+#       --max-model-len 32768 --max-num-seqs 32 --reasoning-parser muse_glimmer \
+#       --pipeline-parallel-size 8
+#
+# Tryb "chat" jest tu jedyną opcją: model nie ma `chat_template` w
+# tokenizer_config.json, a jego tokenizer (klasa TokenizersBackend) nie ładuje
+# się lokalnie przez transformers. Szablon renderuje więc serwer.
+#
+# Serwer ma --reasoning-parser muse_glimmer, więc ślad rozumowania wróci
+# w osobnym polu `reasoning_content` i nie trafi do ocenianej odpowiedzi.
+[model]
+id = "muse_glimmer_30b"
+
+[chat_template]
+# Ten model nie zna `enable_thinking`. Siłę rozumowania ustawia się linią
+# w wiadomości systemowej; dopuszczalne wartości to low / medium / high / xhigh.
+system = "Reasoning strength: high"
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/models/glimmer"
+mode = "chat"
+# Serwer ma --max-num-seqs 32, więc powyżej tej wartości zapytania i tak czekają
+# w kolejce po naszej stronie.
+concurrency = 32
+timeout = 600
+
+# UWAGA: to NIE jest sampling z reszty tabeli. Karta modelu zaleca temperature
+# 1.0, top_p 0.95, top_k 64 i nie wspomina o repetition_penalty. Protokół
+# dopuszcza sampling per model (custom_scoring.md, "Answer generation"), ale
+# oznacza to, że ten wiersz nie jest sterowany tym samym samplingiem co reszta.
+[generation]
+max_tokens = 3500
+temperature = 1.0
+top_p = 0.95
+top_k = 64

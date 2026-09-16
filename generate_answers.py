@@ -258,6 +258,11 @@ def main(argv=None):
     # Prefill decyduje o tym samym, jeśli jest ustawiony: liczy się to, czy
     # prompt kończy się otwartym blokiem rozumowania.
     prefilled = prefill.rstrip().endswith("<think>") if prefill else think is True
+    # Niektóre modele sterują rozumowaniem przez wiadomość systemową, a nie przez
+    # `enable_thinking` czy prefill - np. Muse-Glimmer oczekuje linii
+    # "Reasoning strength: high". Treść wpisuje się w `chat_template.system`.
+    system_prompt = cfg.get("chat_template", {}).get("system")
+    system = [{"role": "system", "content": system_prompt}] if system_prompt else []
     # Questions are independent, so they run concurrently; the two turns of one
     # question stay sequential because turn 2 needs turn 1 in its prompt.
     workers = max(1, int(cfg["api"].get("concurrency", args.concurrency)))
@@ -266,10 +271,10 @@ def main(argv=None):
 
     def answer_question(q):
         reasoning1, answer1 = answer_turn(
-            cfg, model, tokenizer, [{"role": "user", "content": q["turns"][0]}], think,
+            cfg, model, tokenizer, system + [{"role": "user", "content": q["turns"][0]}], think,
             prefilled, mode, prefill,
         )
-        messages = [
+        messages = system + [
             {"role": "user", "content": q["turns"][0]},
             assistant_message(answer1),
             {"role": "user", "content": q["turns"][1]},
@@ -321,6 +326,7 @@ def main(argv=None):
             empty_answers=empty,
             api_mode=mode,
             prefill=prefill or None,
+            system_prompt=system_prompt,
         )
     print(f"{model_id}: wrote {output} ({empty} empty answers of {2 * len(rows)} turns)")
     return run_dir
