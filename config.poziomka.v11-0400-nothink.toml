@@ -1,0 +1,30 @@
+# Checkpoint v11-0400, wariant nothink. Serwer odpalany osobno dla każdego
+# checkpointu, zawsze na porcie 2300:
+#   python3 -m sglang.launch_server --model-path /media/nvme_2tb/maked/poziomka_train/poziomka_sft_run2_v11_8192_hf/iter_0000400 \
+#       --trust-remote-code --port 2300 --host 0.0.0.0 --reasoning-parser qwen3
+[model]
+id = "poziomka_v11_iter_0000400_nothink"
+# Tryb "chat" renderuje szablon po stronie serwera, więc tokenizer nie jest tu
+# potrzebny - checkpointy leżą na maszynie z serwerem, nie lokalnie.
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+# Serwer raportuje model pod pełną ścieżką, którą dostał w --model-path.
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run2_v11_8192_hf/iter_0000400"
+mode = "chat"
+concurrency = 30
+timeout = 600
+
+# Sampling identyczny we wszystkich checkpointach i obu wariantach - inaczej
+# porównanie nic nie znaczy. max_tokens 3500 mieści się w oknie 8192 razem
+# z kontekstem tury 2.
+[generation]
+max_tokens = 3500
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+stop = ["<|im_end|>"]
