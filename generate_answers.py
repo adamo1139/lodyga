@@ -98,11 +98,19 @@ def chat_complete(cfg, model, messages, enable_thinking):
     return message.get("reasoning_content") or "", message.get("content") or ""
 
 
-def render(tokenizer, messages, enable_thinking=None):
+def render(tokenizer, messages, enable_thinking=None, prefill=""):
+    """Wyrenderuj prompt lokalnie, opcjonalnie doklejając prefill odpowiedzi.
+
+    `prefill` to tekst dopisany po `<|im_start|>assistant`, zanim model zacznie
+    generować. Służy do wymuszenia zachowania, którego szablon nie potrafi sam:
+    `"<think>\\n</think>\\n"` zamyka blok rozumowania z góry, więc model nie ma
+    czego kontynuować i odpowiada od razu. Tak da się wyłączyć myślenie w
+    modelach, których szablon nie zna `enable_thinking`.
+    """
     kwargs = {"tokenize": False, "add_generation_prompt": True}
     if enable_thinking is not None:
         kwargs["enable_thinking"] = enable_thinking
-    prompt = tokenizer.apply_chat_template(messages, **kwargs)
+    prompt = tokenizer.apply_chat_template(messages, **kwargs) + prefill
     # Match the tested SGLang path: send exact token IDs and prevent the server
     # from adding a BOS token or rendering a second chat template.
     return tokenizer.encode(prompt, add_special_tokens=False)
@@ -148,7 +156,7 @@ def split_reasoning(text, prefilled):
     return "", text.strip()
 
 
-def answer_turn(cfg, model, tokenizer, messages, think, prefilled, mode):
+def answer_turn(cfg, model, tokenizer, messages, think, prefilled, mode, prefill=""):
     """Generate one turn; returns (reasoning, answer).
 
     Both endpoints end up in the same place: the trace separated from the
@@ -162,7 +170,7 @@ def answer_turn(cfg, model, tokenizer, messages, think, prefilled, mode):
         # No reasoning parser on the server: the trace is inline, exactly as on
         # the /completions path.
         return split_reasoning(clean_answer(content), prefilled)
-    prompt_ids = render(tokenizer, messages, think)
+    prompt_ids = render(tokenizer, messages, think, prefill)
     return split_reasoning(clean_answer(complete(cfg, model, prompt_ids)), prefilled)
 
 
@@ -233,9 +241,16 @@ def main(argv=None):
     model = hosted_model_id(cfg)
     questions = [json.loads(line) for line in args.questions.read_text().splitlines() if line]
     think = cfg.get("chat_template", {}).get("enable_thinking")
+    # Prefill odpowiedzi asystenta, doklejany po prompcie generacji. Działa tylko
+    # przy mode = "completions", bo tylko tam budujemy prompt sami.
+    prefill = cfg.get("chat_template", {}).get("prefill", "")
+    if prefill and mode != "completions":
+        raise SystemExit("error: chat_template.prefill wymaga api.mode = 'completions'")
     # `enable_thinking = false` makes the template close the block immediately,
     # so only an explicit true leaves an open <think> for the model to finish.
-    prefilled = think is True
+    # Prefill decyduje o tym samym, jeśli jest ustawiony: liczy się to, czy
+    # prompt kończy się otwartym blokiem rozumowania.
+    prefilled = prefill.rstrip().endswith("<think>") if prefill else think is True
     # Questions are independent, so they run concurrently; the two turns of one
     # question stay sequential because turn 2 needs turn 1 in its prompt.
     workers = max(1, int(cfg["api"].get("concurrency", args.concurrency)))
@@ -245,7 +260,7 @@ def main(argv=None):
     def answer_question(q):
         reasoning1, answer1 = answer_turn(
             cfg, model, tokenizer, [{"role": "user", "content": q["turns"][0]}], think,
-            prefilled, mode,
+            prefilled, mode, prefill,
         )
         messages = [
             {"role": "user", "content": q["turns"][0]},
@@ -253,7 +268,7 @@ def main(argv=None):
             {"role": "user", "content": q["turns"][1]},
         ]
         reasoning2, answer2 = answer_turn(
-            cfg, model, tokenizer, messages, think, prefilled, mode
+            cfg, model, tokenizer, messages, think, prefilled, mode, prefill
         )
         with lock:
             done[0] += 1
@@ -298,6 +313,7 @@ def main(argv=None):
             turns=2 * len(rows),
             empty_answers=empty,
             api_mode=mode,
+            prefill=prefill or None,
         )
     print(f"{model_id}: wrote {output} ({empty} empty answers of {2 * len(rows)} turns)")
     return run_dir

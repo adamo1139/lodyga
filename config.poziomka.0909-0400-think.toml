@@ -1,26 +1,30 @@
-# Checkpoint 0909-0400, wariant think. Serwer odpalany osobno dla każdego
-# checkpointu, zawsze na porcie 2300:
-#   python3 -m sglang.launch_server --model-path /media/nvme_2tb/maked/poziomka_train/poziomka_sft_run2_09_09_hf/iter_0000400 \
+# Checkpoint 0909-0400 (seria run2_09_09), wariant think.
+#   python3 -m sglang.launch_server \
+#       --model-path /media/nvme_2tb/maked/poziomka_train/poziomka_sft_run2_09_09_hf/iter_0000400 \
 #       --trust-remote-code --port 2300 --host 0.0.0.0 --reasoning-parser qwen3
+#
+# Ta seria ma inny szablon czatu niż v11: nie zna klucza `enable_thinking`, więc
+# chat_template_kwargs jest po cichu ignorowane, a model myśli zawsze. Dlatego
+# oba warianty idą przez /completions - prompt budujemy lokalnie i to my
+# decydujemy, czy blok rozumowania jest otwarty.
 [model]
 id = "poziomka_0909_iter_0000400_think"
-# Tryb "chat" renderuje szablon po stronie serwera, więc tokenizer nie jest tu
-# potrzebny - checkpointy leżą na maszynie z serwerem, nie lokalnie.
+tokenizer = "cpral/poziomka_sft_2026_09_09_hf"
+tokenizer_subfolder = "iter_0000400"
+trust_remote_code = true
 
 [chat_template]
-enable_thinking = true
+# Szablon nie ma przełącznika, więc nic nie ustawiamy - model myśli sam z siebie,
+# a ślad rozumowania odcinamy po `</think>`.
 
 [api]
 base_url = "http://192.168.1.26:2300/v1"
-# Serwer raportuje model pod pełną ścieżką, którą dostał w --model-path.
 model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run2_09_09_hf/iter_0000400"
-mode = "chat"
+mode = "completions"
 concurrency = 100
 timeout = 600
 
-# Sampling identyczny we wszystkich checkpointach i obu wariantach - inaczej
-# porównanie nic nie znaczy. max_tokens 3500 mieści się w oknie 8192 razem
-# z kontekstem tury 2.
+# Sampling identyczny jak we wszystkich pozostałych checkpointach.
 [generation]
 max_tokens = 3500
 temperature = 0.9
