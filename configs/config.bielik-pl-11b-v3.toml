@@ -1,0 +1,31 @@
+# Bielik-PL-11B v3.0 Instruct (speakleash), serwowany przez SGLang:
+#   python3 -m sglang.launch_server --model-path <ścieżka albo speakleash/Bielik-PL-11B-v3.0-Instruct> \
+#       --port 2300 --host 0.0.0.0 --pipeline-parallel-size 4
+#
+# Szablon czatu to czysty ChatML, bez `enable_thinking` i bez `<think>` - model
+# bez reasoningu, więc jeden wariant.
+#
+# Wariant "PL" ma tokenizer APT4 zaadaptowany do polskiego: słownik 32000 wobec
+# 32128 w zwykłym Bieliku 11B. Architektura i liczba warstw (50) są identyczne,
+# więc zestawienie tych dwóch wierszy mierzy sam wpływ tokenizera.
+[model]
+id = "bielik_pl_11b_v3_instruct"
+# Tryb "chat": szablon renderuje serwer, tokenizer nie jest potrzebny.
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+# Puste = runner raz odpyta /models i weźmie nazwę, którą serwer wystawia.
+model = ""
+mode = "chat"
+concurrency = 100
+timeout = 600
+
+# Sampling identyczny jak w reszcie tabeli. Kontekst 32768, więc 3500 mieści się
+# z zapasem.
+[generation]
+max_tokens = 3500
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+stop = ["<|im_end|>"]
