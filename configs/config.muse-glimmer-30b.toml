@@ -10,12 +10,12 @@
 # Serwer ma --reasoning-parser muse_glimmer, więc ślad rozumowania wróci
 # w osobnym polu `reasoning_content` i nie trafi do ocenianej odpowiedzi.
 [model]
-id = "muse_glimmer_30b"
+id = "muse_glimmer_30b_low"
 
 [chat_template]
 # Ten model nie zna `enable_thinking`. Siłę rozumowania ustawia się linią
 # w wiadomości systemowej; dopuszczalne wartości to low / medium / high / xhigh.
-system = "Reasoning strength: high"
+system = "Reasoning strength: low"
 
 [api]
 base_url = "http://192.168.1.26:2300/v1"
