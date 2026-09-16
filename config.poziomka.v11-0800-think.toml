@@ -1,21 +1,21 @@
-# Checkpoint v11-8000, wariant nothink. Serwer odpalany osobno dla każdego
+# Checkpoint v11-0800, wariant think. Serwer odpalany osobno dla każdego
 # checkpointu, zawsze na porcie 2300:
-#   python3 -m sglang.launch_server --model-path /media/nvme_2tb/maked/poziomka_train/poziomka_sft_run2_v11_8192_hf/iter_0008000 \
+#   python3 -m sglang.launch_server --model-path /media/nvme_2tb/maked/poziomka_train/poziomka_sft_run2_v11_8192_hf/iter_0000800 \
 #       --trust-remote-code --port 2300 --host 0.0.0.0 --reasoning-parser qwen3
 [model]
-id = "poziomka_v11_iter_0008000_nothink"
+id = "poziomka_v11_iter_0000800_think"
 # Tryb "chat" renderuje szablon po stronie serwera, więc tokenizer nie jest tu
 # potrzebny - checkpointy leżą na maszynie z serwerem, nie lokalnie.
 
 [chat_template]
-enable_thinking = false
+enable_thinking = true
 
 [api]
 base_url = "http://192.168.1.26:2300/v1"
 # Serwer raportuje model pod pełną ścieżką, którą dostał w --model-path.
-model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run2_v11_8192_hf/iter_0008000"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run2_v11_8192_hf/iter_0000800"
 mode = "chat"
-concurrency = 30
+concurrency = 100
 timeout = 600
 
 # Sampling identyczny we wszystkich checkpointach i obu wariantach - inaczej
