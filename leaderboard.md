@@ -11,6 +11,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | Bielik-11B-v3-Instruct | chat | brak | 3 | **7,53** | 7,30–7,74 | 0 | 94% | 6,83 | 7,45 | 7,35 | 9,06 | 6,55 | 8,25 | 7,00 | 7,78 |
 | Bielik-4.5B-v3-Instruct | chat | brak | 3 | **5,69** | 5,60–5,86 | 0 | 97% | 4,77 | 5,73 | 5,35 | 8,54 | 4,87 | 5,85 | 5,03 | 5,55 |
 | Bielik-1.5B-v3-Instruct | chat | brak | 3 | **3,83** | 3,72–3,96 | 0 | 93% | 3,95 | 4,00 | 2,77 | 6,02 | 2,87 | 4,15 | 3,38 | 3,65 |
+| Qra-13B-chat | chat | brak | 3 | **3,30** | 3,12–3,40 | 0 | 90% | 3,90 | 4,03 | 3,87 | 2,05 | 1,53 | 3,32 | 3,57 | 4,12 |
 | poziomka v11/iter_0001718 | chat | nie | 3 | **1,40** | 1,31–1,51 | 0 | 93% | 2,28 | 2,09 | 1,75 | 0,95 | 0,05 | 0,77 | 1,25 | 2,12 |
 | poziomka v11/iter_0001200 | chat | nie | 3 | **1,40** | 1,30–1,46 | 0 | 90% | 2,50 | 2,01 | 1,62 | 1,25 | 0,17 | 0,57 | 0,83 | 2,27 |
 | poziomka v11/iter_0000800 | chat | nie | 3 | **1,12** | 1,08–1,15 | 0 | 94% | 2,24 | 1,88 | 0,82 | 0,50 | 0,18 | 0,28 | 0,81 | 2,22 |
@@ -34,36 +35,40 @@ to zakres wyników z kolejnych przebiegów. API: `chat` to `/chat/completions`,
 oznacza, że model nie generuje rozumowania w tej konfiguracji.
 
 Sampling identyczny wszędzie (`temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
-`repetition_penalty = 1,05`, `max_tokens = 3500`), sędzia też
-(`openai/gpt-5.6-luna`, `reasoning_effort = none`, `seed = 42`).
+`repetition_penalty = 1,05`), sędzia też (`openai/gpt-5.6-luna`,
+`reasoning_effort = none`, `seed = 42`). Wyjątek: Qra ma okno 4096 tokenów,
+więc `max_tokens` obniżono z 3500 do 1600 — inaczej prompt tury 2 nie mieściłby
+się w kontekście. Realnie nic to nie ucina: mediana odpowiedzi Qry to 347
+znaków, a p95 1437.
 
-## Najmniejszy Bielik bije modele trzy razy większe
+## Liczba parametrów nie przewiduje wyniku
 
 | model | parametry | wynik | matematyka | kodowanie |
 |---|---|---|---|---|
 | Bielik 11B v3 | 11B | **7,53** | 9,06 | 6,55 |
 | Bielik 4.5B v3 | 4,5B | **5,69** | 8,54 | 4,87 |
 | Bielik 1.5B v3 | 1,5B | **3,83** | 6,02 | 2,87 |
-| poziomka v11/1718 | ~4B | 1,40 | 0,95 | 0,05 |
-| polanka 3.7B exp | 3,7B | 0,97 | 1,10 | 0,45 |
+| Qra-13B-chat | 13B | **3,30** | 2,05 | 1,53 |
+| poziomka v11/1718 | ~4B | **1,40** | 0,95 | 0,05 |
+| polanka 3.7B exp | 3,7B | **0,97** | 1,10 | 0,45 |
 
-Bielik 1,5B ma **dwa i pół razy mniej parametrów niż Poziomka i Polanka, a wynik
-blisko trzykrotnie wyższy**. Jego matematyka to 6,02 przy 0,95 i 1,10
-u konkurencji. Przewaga rodziny Bielika nie bierze się więc ze skali — widać ją
-nawet w najmniejszym wariancie.
+**Największy model w tabeli przegrywa z najmniejszym.** Qra ma 13B parametrów
+i 3,30, Bielik 1,5B ma prawie dziewięć razy mniej i 3,83. W obrębie jednej
+rodziny skala działa przewidywalnie — u Bielika każde potrojenie daje około
++1,85 — ale między rodzinami nie znaczy nic.
 
-Trzy punkty samego Bielika układają się regularnie: przy każdym potrojeniu
-liczby parametrów wynik rośnie o mniej więcej 1,85 (1,5B → 4,5B: +1,86;
-4,5B → 11B: +1,84). Przy trzech punktach to jeszcze nie prawo skalowania, ale
-zbieżność jest uderzająca. Dla porównania, cała różnica między rodzinami przy
-podobnej skali sięga +4,29 — czyli **ponad dwa razy więcej niż daje potrojenie
-modelu**.
+## Modele dzielą się na te, które liczą, i te, które piszą
 
-Najostrzej widać to w kategoriach z referencjami, gdzie sędzia sprawdza
-poprawność, a nie styl. Wszystkie Bieliki mają matematykę powyżej 6; Poziomka
-i Polanka nie przekraczają 1,3. Nie chodzi o język, tylko o to, że te modele
-**nie rozwiązują zadań**. Polanka na pytanie o pole trójkąta wymyśliła własną
-metodę („pole to suma kwadratów długości boków") i podała 10 zamiast 3.
+Qra nie jest słaba językowo. Humanistyka 4,12, odgrywanie ról 4,03,
+piśmiennictwo 3,90 i wnioskowanie 3,87 to wyniki lepsze niż u Bielika 1,5B
+w tych samych kategoriach (odpowiednio 3,65, 4,00, 3,95 i 2,77). Cała jej strata
+siedzi w zadaniach obliczeniowych: **matematyka 2,05 wobec 6,02, kodowanie 1,53
+wobec 2,87**.
+
+Ten podział przechodzi przez całą tabelę. Bieliki mają matematykę od 6,02 do
+9,06. Qra 2,05. Poziomka i Polanka poniżej 1,3. To kategorie z referencjami,
+gdzie sędzia sprawdza poprawność wyniku, a nie styl — i to one, a nie
+polszczyzna, rozstrzygają o miejscu w tabeli.
 
 Odsetek polszczyzny nie porządkuje modeli: Bielik 4,5B ma 97%, czyli więcej niż
 11B (94%), przy wyniku niższym o 1,84. Dlatego ta statystyka nigdy nie wchodzi
@@ -86,11 +91,6 @@ odpowiedzi, wobec 8 w wariancie bez myślenia. Nic się nie psuje po drodze,
 a wynik stoi w miejscu: 0,97 wobec 0,95, przy rozrzucie sięgającym 0,19.
 Matematyka wręcz **spadła** z 1,29 na 1,10 — czyli reasoning nie pomaga
 dokładnie tam, gdzie powinien pomagać najbardziej.
-
-U Poziomki v11 mechanizm jest inny: tam myślenie realnie szkodzi, bo model
-zapętla się w bloku rozumowania i wyczerpuje limit tokenów. Ale to nie jest
-wyłącznie efekt pustych tur — licząc same niepuste odpowiedzi,
-`v11/iter_0001718` z myśleniem miał 0,83 wobec 1,33 bez myślenia.
 
 ## „mixed" — czego nie udało się zmierzyć
 
@@ -117,6 +117,3 @@ zachowuje się domyślnie po wystawieniu.
 Od 400 do 800 zakresy zachodzą na siebie. Między 800 a 1200 jest skok o 0,28 przy
 rozłącznych zakresach — jedyna realna poprawa w całej serii. Od 1200 do 1718
 znowu nic. Z 1318 przebadanych kroków tylko okno 800–1200 cokolwiek wniosło.
-
-Spadek w turze 2 jest tym łagodniejszy, im lepszy model: 0,84 u Bielika 11B,
-0,81 u 4,5B i 1,5B, około 0,70 u Poziomki i Polanki.
