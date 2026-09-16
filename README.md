@@ -3,7 +3,7 @@
 80 pytań po polsku, w ośmiu kategoriach po dziesięć: piśmiennictwo, odgrywanie
 ról, wnioskowanie, matematyka, kodowanie, ekstrakcja, nauki ścisłe i
 humanistyka. Każde ma drugą turę, która nawiązuje do pierwszej odpowiedzi.
-Połowa pytań ma wzorcową odpowiedź, którą dostaje sędzia.
+Połowa pytań ma wzorcową odpowiedź, którą dostaje sędzia LLM.
 
 ```bash
 cp .env.example .env

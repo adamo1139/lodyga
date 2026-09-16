@@ -234,7 +234,7 @@ def main(argv=None):
     parser.add_argument(
         "--concurrency",
         type=int,
-        default=8,
+        default=30,
         help="turns judged at once; overridden by api.concurrency in the judge config",
     )
     args = parser.parse_args(argv)

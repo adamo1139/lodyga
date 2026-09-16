@@ -16,7 +16,7 @@ timeout = 600
 # Questions in flight at once. The two turns of one question stay sequential —
 # turn 2 needs turn 1 in its prompt — so this parallelises across questions and
 # lets SGLang batch them. Sampling is unaffected, so results do not depend on it.
-concurrency = 16
+concurrency = 30
 
 # max_tokens must be set explicitly: the OpenAI /v1/completions default is 16
 # tokens, so omitting it truncates every answer rather than lifting the limit.
