@@ -12,8 +12,10 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | v11/iter_0001200 | `/chat/completions` | nie | 3 | **1,40** | 1,30–1,46 | 0 | 90% | 2,50 | 2,01 | 1,62 | 1,25 | 0,17 | 0,57 | 0,83 | 2,27 |
 | v11/iter_0000800 | `/chat/completions` | nie | 3 | **1,12** | 1,08–1,15 | 0 | 94% | 2,24 | 1,88 | 0,82 | 0,50 | 0,18 | 0,28 | 0,81 | 2,22 |
 | v11/iter_0001718 | `/completions` | tak | 3 | **1,06** | 0,92–1,16 | 12 | 87% | 2,07 | 1,86 | 0,97 | 1,22 | 0,05 | 0,58 | 0,55 | 1,22 |
+| v11/iter_0000400 | `/chat/completions` | nie | 3 | **1,04** | 0,95–1,13 | 0 | 90% | 2,12 | 1,62 | 0,95 | 0,60 | 0,05 | 0,53 | 0,80 | 1,60 |
 | v11/iter_0000800 | `/chat/completions` | tak | 3 | **0,68** | 0,62–0,71 | 42 | 70% | 1,17 | 0,51 | 0,37 | 0,99 | 0,23 | 0,33 | 0,38 | 1,42 |
 | v11/iter_0001718 | `/chat/completions` | tak | 3 | **0,59** | 0,55–0,63 | 45 | 69% | 1,08 | 0,41 | 0,37 | 0,79 | 0,02 | 0,45 | 0,53 | 1,08 |
+| v11/iter_0000400 | `/chat/completions` | tak | 3 | **0,50** | 0,45–0,57 | 50 | 65% | 1,07 | 0,38 | 0,33 | 0,51 | 0,40 | 0,40 | 0,10 | 0,83 |
 | v11/iter_0001200 | `/chat/completions` | tak | 3 | **0,41** | 0,29–0,47 | 62 | 57% | 0,75 | 0,52 | 0,17 | 0,48 | 0,02 | 0,25 | 0,30 | 0,77 |
 
 Kolumny kategorii: piśmiennictwo, odgrywanie ról, wnioskowanie, matematyka,
@@ -32,13 +34,14 @@ to, co w kolumnach.
 
 | checkpoint | z myśleniem | bez myślenia | puste (z myśl.) |
 |---|---|---|---|
+| `iter_0000400` | 0,50 | **1,04** | 50 |
 | `iter_0000800` | 0,68 | **1,12** | 42 |
 | `iter_0001200` | 0,41 | **1,40** | 62 |
 | `iter_0001718` | 0,59 | **1,40** | 45 |
 
-Po trzy przebiegi na wariant, zakresy nigdzie się nie stykają. Wyłączenie
-reasoningu podnosi wynik wszędzie i za każdym razem likwiduje **wszystkie** puste
-odpowiedzi.
+Cztery checkpointy, po trzy przebiegi na wariant, i za każdym razem to samo:
+wyłączenie reasoningu podnosi wynik dwukrotnie lub więcej i likwiduje
+**wszystkie** puste odpowiedzi. Zakresy nigdzie się nie stykają.
 
 To nie jest wyłącznie efekt pustych tur. Licząc same niepuste odpowiedzi,
 `iter_0001718` z myśleniem miał 0,83 wobec 1,33 bez myślenia: nawet gdy model
@@ -48,24 +51,28 @@ Puste odpowiedzi biorą się z zapętlenia — model powtarza to samo zdanie w b
 rozumowania i wyczerpuje limit tokenów, nie domykając `</think>`. Stąd też spadki
 odsetka polszczyzny do 57–70%: część odpowiedzi to puste stringi.
 
-## Krzywa treningu jest płaska po 1200 kroku
+## Cały przyrost mieści się między 800 a 1200 krokiem
 
 Bez myślenia, czyli w wariancie, który wypada najlepiej:
 
 | checkpoint | wynik | zakres |
 |---|---|---|
+| `iter_0000400` | 1,04 | 0,95–1,13 |
 | `iter_0000800` | 1,12 | 1,08–1,15 |
 | `iter_0001200` | **1,40** | 1,30–1,46 |
 | `iter_0001718` | **1,40** | 1,31–1,51 |
 
-Między 800 a 1200 krokiem jest realny przyrost (zakresy się nie stykają). Między
-1200 a 1718 nie ma **żadnego** — te same 1,40 i zachodzące na siebie zakresy.
-Pięćset kroków więcej nie dało nic.
+Od 400 do 800 kroku zakresy zachodzą na siebie, więc przyrostu nie widać. Między
+800 a 1200 jest skok o 0,28 przy rozłącznych zakresach — jedyna realna poprawa
+w całej serii. Od 1200 do 1718 znowu nic: ten sam wynik 1,40 i zachodzące
+zakresy.
 
-W wariancie z myśleniem kolejność jest wręcz nieuporządkowana: 0,68 przy 800,
-potem spadek do 0,41 przy 1200 i 0,59 przy 1718. Liczba pustych odpowiedzi też
-skacze (42 → 62 → 45) zamiast maleć. Zdolność do domknięcia rozumowania nie
-poprawia się monotonicznie wraz z treningiem.
+Innymi słowy, z 1318 przebadanych kroków treningu tylko okno 800–1200 cokolwiek
+wniosło. Ani wcześniejsze 800 kroków, ani późniejsze 518 nie zmieniły wyniku.
+
+W wariancie z myśleniem kolejność jest nieuporządkowana: 0,50 → 0,68 → 0,41 →
+0,59. Liczba pustych odpowiedzi skacze (50 → 42 → 62 → 45) zamiast maleć.
+Zdolność do domknięcia rozumowania nie poprawia się wraz z treningiem.
 
 Tura 2 wypada gorzej od tury 1 we wszystkich konfiguracjach: model gubi wątek
 przy pytaniu uzupełniającym.
