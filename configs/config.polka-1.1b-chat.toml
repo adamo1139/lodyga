@@ -1,0 +1,28 @@
+# polka-1.1b-chat (eryk-mazus), serwowana przez SGLang:
+#   python3 -m sglang.launch_server --model-path /media/nvme_2tb/maked/models/polka-1-1b-chat \
+#       --trust-remote-code --port 2300 --host 0.0.0.0 --data-parallel-size 4
+#
+# ChatML, eos <|im_end|>, bez reasoningu - jeden wariant. Szablon sam dokleja
+# systemowy prompt "Jesteś pomocnym asystentem." Tokenizer rozszerzony o polski:
+# słownik 43904. Architektura Llama, 22 warstwy, 1,1B parametrów.
+[model]
+id = "polka_1.1b_chat"
+# Tryb "chat": szablon renderuje serwer, tokenizer nie jest potrzebny.
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/models/polka-1-1b-chat"
+mode = "chat"
+concurrency = 100
+timeout = 600
+
+# UWAGA: kontekst tego modelu to 4096 tokenów, jak u Qry. Prompt tury 2 zawiera
+# odpowiedź z tury 1, więc budżet liczy się podwójnie: 766 + 2*1600 = 3966,
+# mieści się. Przy 3500 jak u reszty tabeli zapytania kończyłyby się błędem.
+[generation]
+max_tokens = 1600
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+stop = ["<|im_end|>"]
