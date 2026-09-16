@@ -14,6 +14,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | v11/iter_0001718 | compl. | tak | 3 | **1,06** | 0,92–1,16 | 12 | 87% | 2,07 | 1,86 | 0,97 | 1,22 | 0,05 | 0,58 | 0,55 | 1,22 |
 | v11/iter_0000400 | chat | nie | 3 | **1,04** | 0,95–1,13 | 0 | 90% | 2,12 | 1,62 | 0,95 | 0,60 | 0,05 | 0,53 | 0,80 | 1,60 |
 | v11/iter_0000800 | chat | tak | 3 | **0,68** | 0,62–0,71 | 42 | 70% | 1,17 | 0,51 | 0,37 | 0,99 | 0,23 | 0,33 | 0,38 | 1,42 |
+| 0909/iter_0000400 | compl. | mixed 53% | 3 | **0,66** | 0,62–0,72 | 0 | 94% | 1,35 | 0,85 | 0,68 | 0,63 | 0,15 | 0,22 | 0,53 | 0,92 |
 | 0909/iter_0000400 | compl. | tak | 3 | **0,66** | 0,61–0,71 | 22 | 80% | 1,33 | 0,98 | 0,85 | 0,46 | 0,07 | 0,27 | 0,28 | 1,03 |
 | v11/iter_0001718 | chat | tak | 3 | **0,59** | 0,55–0,63 | 45 | 69% | 1,08 | 0,41 | 0,37 | 0,79 | 0,02 | 0,45 | 0,53 | 1,08 |
 | v11/iter_0000400 | chat | tak | 3 | **0,50** | 0,45–0,57 | 50 | 65% | 1,07 | 0,38 | 0,33 | 0,51 | 0,40 | 0,40 | 0,10 | 0,83 |
@@ -30,20 +31,42 @@ Sampling identyczny wszędzie (`temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
 `repetition_penalty = 1,05`, `max_tokens = 3500`), sędzia też
 (`openai/gpt-5.6-luna`, `reasoning_effort = none`, `seed = 42`).
 
+## „mixed" — czego nie udało się zmierzyć
+
+Szablon serii 0909 nie zna klucza `enable_thinking`, więc myślenia nie da się
+w niej wyłączyć tak jak w v11. Próbowaliśmy prefillem: prompt kończy się już
+zamkniętym blokiem `<think></think>`, żeby model nie miał czego kontynuować.
+**Zadziałało tylko w 47% tur** — w pozostałych 256 z 480 model otworzył sobie
+własny blok mimo wszystko.
+
+Dlatego ten wiersz ma w kolumnie „myślenie" wartość `mixed 53%`, a nie `nie`.
+Nie jest to pomiar modelu bez reasoningu i nie wolno go zestawiać z wierszami
+`nie` z serii v11, gdzie wyłączenie jest strukturalnie pewne.
+
 ## Dwie serie treningowe
 
 `v11` to `poziomka_sft_run2_v11_8192_hf`, `0909` to `poziomka_sft_run2_09_09_hf`.
-Różnią się nie tylko danymi, ale i szablonem czatu: v11 ma przełącznik
-`enable_thinking`, którego 0909 nie ma w ogóle. Dla 0909 myślenie wyłącza się
-prefillem — prompt kończy się zamkniętym blokiem `<think></think>` — co działa
-w około 75% tur; w pozostałych model otwiera sobie własny blok. U v11 wyłączenie
-jest strukturalnie pewne.
-
 0909 był trenowany na oknie 3072 tokenów i uruchomiony na 8192. Ekstrapolacja nie
-zaszkodziła: stosunek tury 2 do tury 1 wynosi 0,76, czyli tyle samo co u v11
+zaszkodziła: stosunek tury 2 do tury 1 wynosi 0,68–0,76, czyli tyle samo co u v11
 trenowanego natywnie na 8192.
 
-## Myślenie szkodzi każdemu checkpointowi
+## U serii 0909 puste odpowiedzi nie są problemem
+
+| wariant | wynik | puste | polszczyzna |
+|---|---|---|---|
+| `0909` z myśleniem | 0,66 | 22 | 80% |
+| `0909` mixed | 0,66 | **0** | **94%** |
+
+Wyzerowanie pustych odpowiedzi i skok polszczyzny o 14 punktów **nie zmieniły
+wyniku ani o jedną setną**. To odróżnia tę serię od v11, gdzie zniknięcie pustych
+tur podnosiło wynik dwukrotnie. Tutaj ogranicza nie zapętlanie się, tylko jakość
+samych odpowiedzi.
+
+Warto to zestawić z v11 na tym samym etapie treningu: `v11/iter_0000400` bez
+myślenia miał 1,04, a 0909 w najlepszym wariancie 0,66 — choć część tej różnicy
+bierze się z tych 53% tur, które i tak myślały.
+
+## Myślenie szkodzi każdemu checkpointowi v11
 
 | checkpoint | z myśleniem | bez myślenia | puste (z myśl.) |
 |---|---|---|---|
@@ -51,42 +74,23 @@ trenowanego natywnie na 8192.
 | `v11/iter_0000800` | 0,68 | **1,12** | 42 |
 | `v11/iter_0001200` | 0,41 | **1,40** | 62 |
 | `v11/iter_0001718` | 0,59 | **1,40** | 45 |
-| `0909/iter_0000400` | 0,66 | — | 22 |
 
-Wszędzie, gdzie zmierzono oba warianty, wyłączenie reasoningu podnosi wynik
-dwukrotnie lub więcej i likwiduje wszystkie puste odpowiedzi. Zakresy nigdzie
-się nie stykają.
-
-To nie jest wyłącznie efekt pustych tur. Licząc same niepuste odpowiedzi,
-`v11/iter_0001718` z myśleniem miał 0,83 wobec 1,33 bez myślenia.
-
-Puste odpowiedzi biorą się z zapętlenia — model powtarza to samo zdanie w bloku
-rozumowania i wyczerpuje limit tokenów, nie domykając `</think>`.
-
-## Seria 0909 domyka rozumowanie, ale nie odpowiada lepiej
-
-`0909/iter_0000400` z myśleniem ma **22 puste tury** wobec 42–62 u wszystkich
-checkpointów v11, i 80% polszczyzny wobec 57–70%. Ta seria potrafi zakończyć
-rozumowanie zamiast zapętlić się do limitu.
-
-Nie przełożyło się to jednak na wynik: 0,66 wobec 0,68 u najlepszego v11
-z myśleniem, przy nakładających się zakresach. Model odpowiada częściej, ale te
-odpowiedzi nie są istotnie lepsze. Ma za to najlepsze wnioskowanie wśród
-wariantów z myśleniem (0,85), przy matematyce 0,46 i kodowaniu 0,07.
+Wszędzie wyłączenie reasoningu podnosi wynik dwukrotnie lub więcej i likwiduje
+wszystkie puste odpowiedzi; zakresy nigdzie się nie stykają. To nie jest wyłącznie
+efekt pustych tur: licząc same niepuste odpowiedzi, `v11/iter_0001718`
+z myśleniem miał 0,83 wobec 1,33 bez myślenia.
 
 ## Cały przyrost v11 mieści się między 800 a 1200 krokiem
 
-Bez myślenia, czyli w wariancie, który wypada najlepiej:
-
-| checkpoint | wynik | zakres |
+| checkpoint | bez myślenia | zakres |
 |---|---|---|
 | `v11/iter_0000400` | 1,04 | 0,95–1,13 |
 | `v11/iter_0000800` | 1,12 | 1,08–1,15 |
 | `v11/iter_0001200` | **1,40** | 1,30–1,46 |
 | `v11/iter_0001718` | **1,40** | 1,31–1,51 |
 
-Od 400 do 800 zakresy zachodzą na siebie. Między 800 a 1200 jest skok o 0,28
-przy rozłącznych zakresach — jedyna realna poprawa w całej serii. Od 1200 do 1718
+Od 400 do 800 zakresy zachodzą na siebie. Między 800 a 1200 jest skok o 0,28 przy
+rozłącznych zakresach — jedyna realna poprawa w całej serii. Od 1200 do 1718
 znowu nic. Z 1318 przebadanych kroków tylko okno 800–1200 cokolwiek wniosło.
 
 W wariancie z myśleniem kolejność jest nieuporządkowana: 0,50 → 0,68 → 0,41 →
