@@ -8,6 +8,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 
 | model | API | myślenie | przeb. | wynik | rozrzut | puste | pol. | piśm. | role | wnios. | mat. | kod. | ekstr. | ścisłe | human. |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Bielik-11B-v3-Instruct | chat | brak | 3 | **7,53** | 7,30–7,74 | 0 | 94% | 6,83 | 7,45 | 7,35 | 9,06 | 6,55 | 8,25 | 7,00 | 7,78 |
 | Bielik-4.5B-v3-Instruct | chat | brak | 3 | **5,69** | 5,60–5,86 | 0 | 97% | 4,77 | 5,73 | 5,35 | 8,54 | 4,87 | 5,85 | 5,03 | 5,55 |
 | poziomka v11/iter_0001718 | chat | nie | 3 | **1,40** | 1,31–1,51 | 0 | 93% | 2,28 | 2,09 | 1,75 | 0,95 | 0,05 | 0,77 | 1,25 | 2,12 |
 | poziomka v11/iter_0001200 | chat | nie | 3 | **1,40** | 1,30–1,46 | 0 | 90% | 2,50 | 2,01 | 1,62 | 1,25 | 0,17 | 0,57 | 0,83 | 2,27 |
@@ -33,25 +34,29 @@ Sampling identyczny wszędzie (`temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
 `repetition_penalty = 1,05`, `max_tokens = 3500`), sędzia też
 (`openai/gpt-5.6-luna`, `reasoning_effort = none`, `seed = 42`).
 
-## Bielik 4.5B jest cztery razy lepszy od najlepszej Poziomki
+## Skala robi różnicę, ale rodzina robi większą
 
-| | Bielik 4.5B v3 | poziomka v11/1718 bez myśl. |
-|---|---|---|
-| wynik | **5,69** | 1,40 |
-| matematyka | **8,54** | 0,95 |
-| kodowanie | **4,87** | 0,05 |
-| polszczyzna | 97% | 93% |
-| tura 2 / tura 1 | 0,81 | 0,70 |
+| model | wynik | matematyka | kodowanie |
+|---|---|---|---|
+| Bielik 11B v3 | **7,53** | 9,06 | 6,55 |
+| Bielik 4.5B v3 | **5,69** | 8,54 | 4,87 |
+| poziomka v11/1718 bez myśl. | **1,40** | 0,95 | 0,05 |
 
-Największa przepaść jest w kategoriach z referencjami, czyli tam, gdzie sędzia
-sprawdza poprawność, a nie styl: matematyka 8,54 wobec 0,95 i kodowanie 4,87
-wobec 0,05. Poziomka nie tyle pisze gorzej, co **nie rozwiązuje zadań**.
+Dwukrotny wzrost wielkości Bielika daje +1,84. Przeskok z Poziomki na Bielika
+4.5B — czyli przy porównywalnej liczbie parametrów — daje +4,29. Różnica między
+rodzinami jest więc ponad dwa razy większa niż między 4,5B a 11B tej samej
+rodziny.
 
-Bielik ma też najrówniejszy profil w tabeli — wszystkie kategorie między 4,77
-a 8,54, bez ani jednej zapaści. Poziomka rozciąga się od 0,05 do 2,50.
+Widać to najostrzej w kategoriach z referencjami. Oba Bieliki mają matematykę
+powyżej 8,5, Poziomka nie przekracza 1,25. Kodowanie: 6,55 i 4,87 wobec 0,05.
+Poziomka nie tyle pisze gorzej, co **nie rozwiązuje zadań**.
 
-Dla samego benchmarku jest to dobra wiadomość: skala 0–10 realnie się rozciąga,
-a niskie wyniki Poziomki nie są artefaktem zbyt surowego sędziego.
+Ciekawostka: 4,5B ma **wyższy odsetek polszczyzny niż 11B** (97% wobec 94%),
+mimo dużo niższego wyniku. Rozpoznawalność języka i jakość odpowiedzi to
+naprawdę osobne rzeczy.
+
+Spadek w turze 2 jest tym łagodniejszy, im lepszy model: 0,84 u 11B, 0,81
+u 4,5B, około 0,70 u Poziomki.
 
 ## „mixed" — czego nie udało się zmierzyć
 
@@ -91,7 +96,3 @@ nie zapętlanie się, tylko jakość samych odpowiedzi.
 Od 400 do 800 zakresy zachodzą na siebie. Między 800 a 1200 jest skok o 0,28 przy
 rozłącznych zakresach — jedyna realna poprawa w całej serii. Od 1200 do 1718
 znowu nic. Z 1318 przebadanych kroków tylko okno 800–1200 cokolwiek wniosło.
-
-Tura 2 wypada gorzej od tury 1 we wszystkich konfiguracjach: model gubi wątek
-przy pytaniu uzupełniającym. Najłagodniej u Bielika (0,81), najostrzej
-u Poziomki (~0,70).
