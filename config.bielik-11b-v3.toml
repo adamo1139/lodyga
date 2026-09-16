@@ -1,0 +1,27 @@
+# Bielik 11B v3 Instruct, serwowany przez SGLang:
+#   python3 -m sglang.launch_server --model-path speakleash/Bielik-11B-v3.0-Instruct \
+#       --port 2300 --host 0.0.0.0 --pipeline-parallel-size 2
+#
+# Szablon czatu to czysty ChatML, bez `enable_thinking` i bez `<think>` - model
+# bez reasoningu, więc ma tylko jeden wariant.
+[model]
+id = "bielik_11b_v3_instruct"
+# Tryb "chat": szablon renderuje serwer, tokenizer nie jest potrzebny.
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+# Puste = runner raz odpyta /models i weźmie nazwę, którą serwer faktycznie
+# wystawia. Wygodne, gdy model idzie prosto z repo HF, a nie z lokalnej ścieżki.
+model = ""
+mode = "chat"
+concurrency = 100
+timeout = 600
+
+# Sampling identyczny jak przy Poziomce i Bieliku 4.5B.
+[generation]
+max_tokens = 3500
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+stop = ["<|im_end|>"]
