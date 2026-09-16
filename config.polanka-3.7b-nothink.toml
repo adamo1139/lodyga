@@ -1,0 +1,31 @@
+# Polanka 3.7B (exp wip 260901), wariant nothink. Serwowana przez SGLang:
+#   python3 -m sglang.launch_server \
+#       --model-path /media/nvme_2tb/maked/models/polanka_3.7b_exp_wip_260901 \
+#       --port 2300 --host 0.0.0.0
+#
+# W przeciwieństwie do Bielików Polanka JEST modelem reasoning i jej szablon zna
+# `enable_thinking`. Przy `false` wypisuje od razu zamknięty blok
+# `<think>\n\n</think>\n\n`, czyli wyłączenie myślenia jest strukturalnie pewne -
+# tak jak u Poziomki v11, a nie jak przy serii 0909, gdzie trzeba było prefillu.
+[model]
+id = "polanka_3.7b_nothink"
+# Tryb "chat": szablon renderuje serwer, tokenizer nie jest potrzebny.
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/models/polanka_3.7b_exp_wip_260901"
+mode = "chat"
+concurrency = 100
+timeout = 600
+
+# Sampling identyczny jak przy Poziomce i Bieliku.
+[generation]
+max_tokens = 3500
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+stop = ["<|im_end|>"]
