@@ -65,6 +65,39 @@ def complete(cfg, model, prompt_ids):
     return result["choices"][0]["text"]
 
 
+def chat_complete(cfg, model, messages, enable_thinking):
+    """One /v1/chat/completions call; returns (reasoning, answer).
+
+    Here the server renders its own chat template, so no tokenizer is needed.
+    `enable_thinking` is forwarded as `chat_template_kwargs`, which SGLang and
+    vLLM pass through to the template.
+
+    Servers started with a reasoning parser split the trace into
+    `reasoning_content` and leave `content` clean; without one the trace arrives
+    inline in `content` and is separated by the caller.
+    """
+    api = cfg["api"]
+    payload = {"model": model, "messages": messages, **dict(cfg.get("generation", {}))}
+    if enable_thinking is not None:
+        payload["chat_template_kwargs"] = {"enable_thinking": enable_thinking}
+    body = json.dumps(payload).encode()
+    headers = {"Content-Type": "application/json"}
+    key_name = api.get("api_key_env")
+    if key_name:
+        import os
+
+        key = os.environ.get(key_name)
+        if key:
+            headers["Authorization"] = f"Bearer {key}"
+    req = urllib.request.Request(
+        api["base_url"].rstrip("/") + "/chat/completions", body, headers
+    )
+    with urllib.request.urlopen(req, timeout=api.get("timeout", 600)) as response:
+        result = json.load(response)
+    message = result["choices"][0]["message"]
+    return message.get("reasoning_content") or "", message.get("content") or ""
+
+
 def render(tokenizer, messages, enable_thinking=None):
     kwargs = {"tokenize": False, "add_generation_prompt": True}
     if enable_thinking is not None:
@@ -113,6 +146,24 @@ def split_reasoning(text, prefilled):
         # to an answer, which would put the trace in front of the judge.
         return text.strip(), ""
     return "", text.strip()
+
+
+def answer_turn(cfg, model, tokenizer, messages, think, prefilled, mode):
+    """Generate one turn; returns (reasoning, answer).
+
+    Both endpoints end up in the same place: the trace separated from the
+    answer, so only the answer is ever judged.
+    """
+    if mode == "chat":
+        reasoning, content = chat_complete(cfg, model, messages, think)
+        if reasoning.strip():
+            # The server already split the trace out for us.
+            return reasoning.strip(), clean_answer(content)
+        # No reasoning parser on the server: the trace is inline, exactly as on
+        # the /completions path.
+        return split_reasoning(clean_answer(content), prefilled)
+    prompt_ids = render(tokenizer, messages, think)
+    return split_reasoning(clean_answer(complete(cfg, model, prompt_ids)), prefilled)
 
 
 def assistant_message(answer):
@@ -170,7 +221,15 @@ def main(argv=None):
         runs.write_meta(run_dir, meta)
         runs.update_stage(run_dir, "generate", "running")
         print(f"run directory: {run_dir}", flush=True)
-    tokenizer = load_tokenizer(cfg)
+    # Domyślnie "completions": szablon czatu renderujemy lokalnie i wysyłamy
+    # gotowe ID tokenów, bo tylko tak mamy pewną kontrolę nad blokiem <think>.
+    # Przez chat API sterowanie reasoningiem bywa zawodne - serwer może zignorować
+    # chat_template_kwargs albo model i tak wstawi własny <think>. Tryb "chat"
+    # jest dla modeli, które to obsługują poprawnie; nie potrzebuje tokenizera.
+    mode = cfg["api"].get("mode", "completions")
+    if mode not in ("completions", "chat"):
+        raise SystemExit(f"error: api.mode musi być 'completions' albo 'chat', nie {mode!r}")
+    tokenizer = load_tokenizer(cfg) if mode == "completions" else None
     model = hosted_model_id(cfg)
     questions = [json.loads(line) for line in args.questions.read_text().splitlines() if line]
     think = cfg.get("chat_template", {}).get("enable_thinking")
@@ -184,18 +243,17 @@ def main(argv=None):
     done = [0]
 
     def answer_question(q):
-        t1_prompt = render(tokenizer, [{"role": "user", "content": q["turns"][0]}], think)
-        reasoning1, answer1 = split_reasoning(
-            clean_answer(complete(cfg, model, t1_prompt)), prefilled
+        reasoning1, answer1 = answer_turn(
+            cfg, model, tokenizer, [{"role": "user", "content": q["turns"][0]}], think,
+            prefilled, mode,
         )
         messages = [
             {"role": "user", "content": q["turns"][0]},
             assistant_message(answer1),
             {"role": "user", "content": q["turns"][1]},
         ]
-        t2_prompt = render(tokenizer, messages, think)
-        reasoning2, answer2 = split_reasoning(
-            clean_answer(complete(cfg, model, t2_prompt)), prefilled
+        reasoning2, answer2 = answer_turn(
+            cfg, model, tokenizer, messages, think, prefilled, mode
         )
         with lock:
             done[0] += 1
@@ -239,6 +297,7 @@ def main(argv=None):
             questions=len(rows),
             turns=2 * len(rows),
             empty_answers=empty,
+            api_mode=mode,
         )
     print(f"{model_id}: wrote {output} ({empty} empty answers of {2 * len(rows)} turns)")
     return run_dir

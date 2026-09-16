@@ -1,15 +1,23 @@
 [model]
 id = "poziomka_iter_0001718"
+# Potrzebny tylko przy api.mode = "completions" - wtedy szablon czatu renderujemy
+# lokalnie. W trybie "chat" tę sekcję można pominąć poza `id`.
 tokenizer = "../../Ling-V2/poziomka_sft_2026_09_14_hf/iter_0001718"
 tokenizer_subfolder = ""
 trust_remote_code = true
 
 [chat_template]
-# Omit this key if the model's template should use its default behavior.
+# Pomiń ten klucz, żeby szablon zachował się domyślnie.
 enable_thinking = true
 
 [api]
 base_url = "http://192.168.1.26:2300"
+# "completions" (domyślnie) renderuje szablon lokalnie i wysyła ID tokenów - tylko
+# tak mamy pewną kontrolę nad blokiem <think>, bo przez chat API serwer potrafi
+# zignorować chat_template_kwargs albo model sam wstawi <think>. Używaj "chat"
+# dla modeli, które sterowanie reasoningiem obsługują poprawnie; wtedy szablon
+# renderuje serwer i tokenizer nie jest potrzebny.
+mode = "completions"
 # Served model name, as the endpoint reports it. Leave empty only as a fallback:
 # the runner then queries /models once and uses the first entry.
 model = "poziomka_iter_0001718"

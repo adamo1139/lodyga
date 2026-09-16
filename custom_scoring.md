@@ -63,6 +63,15 @@ the explanation.
   it, so the follow-up is answered from what a user would actually see. Turn 2
   still reasons freshly; the discarded trace remains archived in the answer
   file.
+- Answers are generated through one of two endpoints, set per model in
+  `api.mode` and recorded in the run metadata. `completions` (the default)
+  renders the chat template locally and sends token IDs, which is the only way
+  to control the `<think>` block reliably: over chat completions a server may
+  ignore `chat_template_kwargs`, or the model may open its own block regardless.
+  `chat` sends messages and lets the server render its own template; it needs no
+  tokenizer and suits models whose reasoning control works that way. Either way
+  the trace is separated from the answer — from `reasoning_content` when the
+  server splits it, otherwise at `</think>` — and only the answer is judged.
 - Each model is run from its own config file that specifies the model, its
   chat template, and its generation settings (sampling parameters and token
   limits). There is no protocol-wide token limit and no cross-model sampling
