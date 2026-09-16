@@ -28,6 +28,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka sft 2026-09-14/iter_0001718 | chat | tak | 3 | **0,59** | 0,55–0,63 | 45 | 69% | 1,08 | 0,41 | 0,37 | 0,79 | 0,02 | 0,45 | 0,53 | 1,08 |
 | poziomka sft 2026-09-14/iter_0000400 | chat | tak | 3 | **0,50** | 0,45–0,57 | 50 | 65% | 1,07 | 0,38 | 0,33 | 0,51 | 0,40 | 0,40 | 0,10 | 0,83 |
 | poziomka sft 2026-09-14/iter_0001200 | chat | tak | 3 | **0,41** | 0,29–0,47 | 62 | 57% | 0,75 | 0,52 | 0,17 | 0,48 | 0,02 | 0,25 | 0,30 | 0,77 |
+| APT3-1B-Instruct-v1 | compl. | brak | 3 | **0,38** | 0,34–0,44 | 0 | 94% | 0,53 | 0,53 | 0,45 | 0,48 | 0,17 | 0,30 | 0,13 | 0,47 |
 
 Kolumny kategorii: piśmiennictwo, odgrywanie ról, wnioskowanie, matematyka,
 kodowanie, ekstrakcja, nauki ścisłe, humanistyka. „Puste" to tury, w których
@@ -44,9 +45,9 @@ a `sft 2026-09-09` to `cpral/poziomka_sft_2026_09_09_hf` (lokalnie katalogi
 
 Sampling identyczny wszędzie (`temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
 `repetition_penalty = 1,05`), sędzia też (`openai/gpt-5.6-luna`,
-`reasoning_effort = none`, `seed = 42`). Wyjątek: Qra ma okno 4096 tokenów,
-więc `max_tokens` obniżono z 3500 do 1600 — inaczej prompt tury 2 nie mieściłby
-się w kontekście. Realnie nic to nie ucina: mediana odpowiedzi Qry to 347
-znaków, a p95 1437.
+`reasoning_effort = none`, `seed = 42`). Wyjątkiem jest `max_tokens`, które
+musi się zmieścić w oknie kontekstu modelu, liczonym podwójnie ze względu na
+turę 2: 3500 przy oknie 32768 i większym, 1600 dla Qry i Polki (okno 4096),
+600 dla APT3 (okno 2048).
 
 
