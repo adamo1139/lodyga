@@ -15,6 +15,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka v11/iter_0000800 | chat | nie | 3 | **1,12** | 1,08–1,15 | 0 | 94% | 2,24 | 1,88 | 0,82 | 0,50 | 0,18 | 0,28 | 0,81 | 2,22 |
 | poziomka v11/iter_0001718 | compl. | tak | 3 | **1,06** | 0,92–1,16 | 12 | 87% | 2,07 | 1,86 | 0,97 | 1,22 | 0,05 | 0,58 | 0,55 | 1,22 |
 | poziomka v11/iter_0000400 | chat | nie | 3 | **1,04** | 0,95–1,13 | 0 | 90% | 2,12 | 1,62 | 0,95 | 0,60 | 0,05 | 0,53 | 0,80 | 1,60 |
+| polanka-3.7B-exp | chat | brak | 3 | **0,95** | 0,87–1,00 | 8 | 87% | 1,50 | 1,27 | 1,02 | 1,29 | 0,47 | 0,55 | 0,37 | 1,13 |
 | poziomka v11/iter_0000800 | chat | tak | 3 | **0,68** | 0,62–0,71 | 42 | 70% | 1,17 | 0,51 | 0,37 | 0,99 | 0,23 | 0,33 | 0,38 | 1,42 |
 | poziomka 0909/iter_0000400 | compl. | mixed 53% | 3 | **0,66** | 0,62–0,72 | 0 | 94% | 1,35 | 0,85 | 0,68 | 0,63 | 0,15 | 0,22 | 0,53 | 0,92 |
 | poziomka 0909/iter_0000400 | compl. | tak | 3 | **0,66** | 0,61–0,71 | 22 | 80% | 1,33 | 0,98 | 0,85 | 0,46 | 0,07 | 0,27 | 0,28 | 1,03 |
@@ -28,35 +29,41 @@ model nie wygenerował odpowiedzi (na 160). „Pol." to odsetek odpowiedzi
 rozpoznanych jako polskie — statystyka opisowa, nie składnik wyniku. „Rozrzut"
 to zakres wyników z kolejnych przebiegów. API: `chat` to `/chat/completions`,
 `compl.` to `/completions` z szablonem renderowanym lokalnie. „Myślenie: brak"
-oznacza model, który w ogóle nie ma reasoningu w szablonie czatu.
+oznacza, że model nie generuje rozumowania w tej konfiguracji.
 
 Sampling identyczny wszędzie (`temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
 `repetition_penalty = 1,05`, `max_tokens = 3500`), sędzia też
 (`openai/gpt-5.6-luna`, `reasoning_effort = none`, `seed = 42`).
 
-## Skala robi różnicę, ale rodzina robi większą
+## Bielik odstaje od reszty, i to nie skalą
 
-| model | wynik | matematyka | kodowanie |
-|---|---|---|---|
-| Bielik 11B v3 | **7,53** | 9,06 | 6,55 |
-| Bielik 4.5B v3 | **5,69** | 8,54 | 4,87 |
-| poziomka v11/1718 bez myśl. | **1,40** | 0,95 | 0,05 |
+| model | parametry | wynik | matematyka | kodowanie |
+|---|---|---|---|---|
+| Bielik 11B v3 | 11B | **7,53** | 9,06 | 6,55 |
+| Bielik 4.5B v3 | 4,5B | **5,69** | 8,54 | 4,87 |
+| poziomka v11/1718 | ~4B | **1,40** | 0,95 | 0,05 |
+| polanka 3.7B exp | 3,7B | **0,95** | 1,29 | 0,47 |
 
-Dwukrotny wzrost wielkości Bielika daje +1,84. Przeskok z Poziomki na Bielika
-4.5B — czyli przy porównywalnej liczbie parametrów — daje +4,29. Różnica między
-rodzinami jest więc ponad dwa razy większa niż między 4,5B a 11B tej samej
-rodziny.
+Trzy modele w zbliżonej klasie wielkości dzieli przepaść: 5,69 wobec 1,40 i 0,95.
+Podwojenie wielkości Bielika daje +1,84, a różnica między rodzinami przy tej
+samej skali sięga +4,29. **To, czym i jak model był trenowany, waży tu ponad dwa
+razy więcej niż liczba parametrów.**
 
-Widać to najostrzej w kategoriach z referencjami. Oba Bieliki mają matematykę
-powyżej 8,5, Poziomka nie przekracza 1,25. Kodowanie: 6,55 i 4,87 wobec 0,05.
-Poziomka nie tyle pisze gorzej, co **nie rozwiązuje zadań**.
+Bielik nie jest więc typowy dla swojej klasy — jest wyjątkiem. Dwa niezależne
+eksperymentalne modele polskie o podobnej wielkości siedzą poniżej 1,5.
 
-Ciekawostka: 4,5B ma **wyższy odsetek polszczyzny niż 11B** (97% wobec 94%),
-mimo dużo niższego wyniku. Rozpoznawalność języka i jakość odpowiedzi to
-naprawdę osobne rzeczy.
+Najostrzej widać to w kategoriach z referencjami. Oba Bieliki mają matematykę
+powyżej 8,5; Poziomka i Polanka nie przekraczają 1,3. Nie chodzi o styl, tylko
+o to, że te modele **nie rozwiązują zadań**. Polanka na pytanie o pole trójkąta
+wymyśliła własną metodę („pole to suma kwadratów długości boków") i podała 10
+zamiast 3.
+
+Odsetek polszczyzny nie porządkuje modeli: 4,5B ma 97%, czyli więcej niż 11B
+(94%), przy wyniku niższym o 1,84. Rozpoznawalność języka i jakość odpowiedzi to
+osobne rzeczy — dlatego ta statystyka nigdy nie wchodzi do punktacji.
 
 Spadek w turze 2 jest tym łagodniejszy, im lepszy model: 0,84 u 11B, 0,81
-u 4,5B, około 0,70 u Poziomki.
+u 4,5B, około 0,70 u Poziomki i Polanki.
 
 ## „mixed" — czego nie udało się zmierzyć
 
