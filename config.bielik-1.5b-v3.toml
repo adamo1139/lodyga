@@ -1,0 +1,28 @@
+# Bielik 1.5B v3 Instruct, serwowany przez SGLang:
+#   python3 -m sglang.launch_server \
+#       --model-path /media/nvme_2tb/maked/models/bielik1_5b \
+#       --trust-remote-code --port 2300 --host 0.0.0.0 --pipeline-parallel-size 2
+#
+# Szablon czatu to czysty ChatML - nie ma w nim ani `enable_thinking`, ani
+# `<think>`. To model bez reasoningu, więc ma tylko jeden wariant, bez podziału
+# na myślenie i jego brak.
+[model]
+id = "bielik_1.5b_v3_instruct"
+# Tryb "chat": szablon renderuje serwer, tokenizer nie jest potrzebny.
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/models/bielik1_5b"
+mode = "chat"
+concurrency = 100
+timeout = 600
+
+# Sampling identyczny jak przy checkpointach Poziomki, żeby wyniki dało się
+# zestawiać. Kontekst modelu to 32768, więc 3500 mieści się z zapasem.
+[generation]
+max_tokens = 3500
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+stop = ["<|im_end|>"]
