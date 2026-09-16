@@ -34,4 +34,5 @@ options:
                         default 1
 ```
 
-Cały protokół opisuje [`custom_scoring.md`](custom_scoring.md).
+Cały protokół opisuje [`custom_scoring.md`](custom_scoring.md), a wyniki
+zmierzonych modeli zbiera [`leaderboard.md`](leaderboard.md).
