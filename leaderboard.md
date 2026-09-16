@@ -8,9 +8,11 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 
 | model | API | myślenie | przeb. | wynik | rozrzut | puste | pol. | piśm. | role | wnios. | mat. | kod. | ekstr. | ścisłe | human. |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| poziomka_iter_0001718 | `/chat/completions` | nie | 1 | **1,33** | 1,02–1,66 | 0 | 94% | 2,15 | **2,85** | 1,10 | 0,56 | 0,00 | 0,40 | 1,15 | **2,35** |
-| poziomka_iter_0001718 | `/completions` | tak | 3 | **1,06** | 0,92–1,16 | 12 | 87% | 2,07 | 1,86 | 0,97 | **1,22** | 0,05 | 0,58 | 0,55 | 1,22 |
-| poziomka_iter_0001718 | `/chat/completions` | tak | 1 | **0,70** | 0,45–0,97 | 49 | 67% | 1,05 | 0,53 | 0,30 | 1,00 | **0,55** | **0,90** | 0,25 | 1,00 |
+| v11/iter_0001200 | `/chat/completions` | nie | 3 | **1,40** | 1,30–1,46 | 0 | 90% | 2,50 | 2,01 | 1,62 | 1,25 | 0,17 | 0,57 | 0,83 | 2,27 |
+| v11/iter_0001718 | `/chat/completions` | nie | 1 | **1,33** | 1,02–1,66 | 0 | 94% | 2,15 | 2,85 | 1,10 | 0,56 | 0,00 | 0,40 | 1,15 | 2,35 |
+| v11/iter_0001718 | `/completions` | tak | 3 | **1,06** | 0,92–1,16 | 12 | 87% | 2,07 | 1,86 | 0,97 | 1,22 | 0,05 | 0,58 | 0,55 | 1,22 |
+| v11/iter_0001718 | `/chat/completions` | tak | 1 | **0,70** | 0,45–0,97 | 49 | 67% | 1,05 | 0,53 | 0,30 | 1,00 | 0,55 | 0,90 | 0,25 | 1,00 |
+| v11/iter_0001200 | `/chat/completions` | tak | 3 | **0,41** | 0,29–0,47 | 62 | 57% | 0,75 | 0,52 | 0,17 | 0,48 | 0,02 | 0,25 | 0,30 | 0,77 |
 
 Kolumny kategorii: piśmiennictwo, odgrywanie ról, wnioskowanie, matematyka,
 kodowanie, ekstrakcja, nauki ścisłe, humanistyka. „Puste" to tury, w których
@@ -19,33 +21,43 @@ rozpoznanych jako polskie — statystyka opisowa, nie składnik wyniku. „Rozrz
 to zakres przebiegów tam, gdzie było ich kilka, a 95% przedział ufności tam,
 gdzie był jeden.
 
-Wszystkie wiersze to ten sam checkpoint SFT
-`poziomka_sft_run2_v11_8192_hf/iter_0001718`, z identycznym samplingiem
-(`temperature = 0,9`, `top_p = 0,9`, `top_k = 40`, `repetition_penalty = 1,05`,
-`max_tokens = 3500`) i tym samym sędzią (`openai/gpt-5.6-luna`,
-`reasoning_effort = none`, `seed = 42`). Różni je tylko to, co w kolumnach.
+Wszystkie wiersze to checkpointy SFT z `poziomka_sft_run2_v11_8192_hf`, z
+identycznym samplingiem (`temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
+`repetition_penalty = 1,05`, `max_tokens = 3500`) i tym samym sędzią
+(`openai/gpt-5.6-luna`, `reasoning_effort = none`, `seed = 42`). Różni je tylko
+to, co w kolumnach.
 
-## Myślenie szkodzi temu checkpointowi
+## Myślenie szkodzi obu checkpointom
 
-Wyłączenie reasoningu podniosło wynik z 0,70 do 1,33 i zlikwidowało wszystkie 49
-pustych odpowiedzi. To nie jest wyłącznie efekt tych pustych tur: licząc same
-niepuste odpowiedzi, wariant z myśleniem ma 0,83, a bez myślenia 1,33. Nawet gdy
-model domknie rozumowanie i odpowie, odpowiada gorzej niż wtedy, gdy nie myślał
-wcale.
+| checkpoint | z myśleniem | bez myślenia |
+|---|---|---|
+| `iter_0001200` | 0,41 | **1,40** |
+| `iter_0001718` | 0,70 | **1,33** |
 
-Reasoning pomaga tylko tam, gdzie trzeba coś policzyć lub wyciągnąć z tekstu:
-matematyka, ekstrakcja, kodowanie. W pozostałych pięciu kategoriach szkodzi,
-najmocniej przy odgrywaniu ról (0,53 wobec 2,85) — model zamiast wejść w rolę,
-rozmyśla nad tym, jak w nią wejść.
+Przy `iter_0001200` mamy po trzy przebiegi na wariant i zakresy nawet się nie
+zbliżają: 0,29–0,47 wobec 1,30–1,46. Wyłączenie reasoningu podnosi wynik ponad
+trzykrotnie i likwiduje wszystkie 62 puste odpowiedzi.
 
-Puste odpowiedzi biorą się z zapętlenia: model powtarza to samo zdanie w bloku
-rozumowania i wyczerpuje limit tokenów, nie domykając `</think>`. Stąd też spadek
-odsetka polszczyzny do 67% — jedna trzecia odpowiedzi to puste stringi.
+Przy `iter_0001200` wariant bez myślenia wygrywa **we wszystkich ośmiu
+kategoriach**. Przy `iter_0001718` myślenie wygrywało jeszcze w matematyce,
+ekstrakcji i kodowaniu — czyli tam, gdzie reasoning ma sens. Wcześniejszy
+checkpoint nie ma nawet tego.
 
-Tura 2 wypada gorzej od tury 1 we wszystkich konfiguracjach (np. 1,54 → 1,12 bez
-myślenia): model gubi wątek przy pytaniu uzupełniającym.
+To nie jest wyłącznie efekt pustych tur. Licząc same niepuste odpowiedzi,
+`iter_0001718` z myśleniem ma 0,83, a bez myślenia 1,33: nawet gdy model domknie
+rozumowanie i odpowie, odpowiada gorzej niż wtedy, gdy nie myślał wcale.
 
-Dwa wiersze mają po jednym przebiegu, więc ich wynik jest oszacowany mniej
-precyzyjnie niż ten z trzech przebiegów. Zaobserwowany rozrzut między przebiegami
-tej samej konfiguracji wynosił ±0,12, a różnica między wariantami z myśleniem i
-bez sięga 0,63 — czyli jest wielokrotnie większa niż szum.
+Puste odpowiedzi biorą się z zapętlenia — model powtarza to samo zdanie w bloku
+rozumowania i wyczerpuje limit tokenów, nie domykając `</think>`. Stąd też spadki
+odsetka polszczyzny do 57–67%: część odpowiedzi to puste stringi.
+
+## Co zmienia dłuższy trening
+
+Bez myślenia oba checkpointy są nierozróżnialne (1,40 wobec 1,33, w granicach
+rozrzutu). Z myśleniem późniejszy `iter_0001718` wypada lepiej od `iter_0001200`
+(0,70 wobec 0,41), a liczba pustych odpowiedzi spada z 62 do 49. Wygląda to tak,
+jakby dłuższy trening uczył głównie domykania rozumowania, a nie odpowiadania
+lepiej.
+
+Tura 2 wypada gorzej od tury 1 we wszystkich konfiguracjach (np. 1,63 → 1,17 przy
+`iter_0001200` bez myślenia): model gubi wątek przy pytaniu uzupełniającym.
