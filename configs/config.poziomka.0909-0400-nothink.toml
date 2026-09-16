@@ -23,7 +23,7 @@ prefill = "<think>\n</think>\n"
 base_url = "http://192.168.1.26:2300/v1"
 model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run2_09_09_hf/iter_0000400"
 mode = "completions"
-concurrency = 100
+concurrency = 80
 timeout = 600
 
 # Sampling identyczny jak we wszystkich pozostałych checkpointach.

@@ -15,7 +15,7 @@ id = "bielik_minitron_7b_v3_instruct"
 base_url = "http://192.168.1.26:2300/v1"
 model = "/media/nvme_2tb/maked/models/bielik-7b"
 mode = "chat"
-concurrency = 100
+concurrency = 80
 timeout = 600
 
 # Sampling identyczny jak przy checkpointach Poziomki, żeby wyniki dało się

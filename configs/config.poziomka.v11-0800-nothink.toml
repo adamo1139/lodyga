@@ -15,7 +15,7 @@ base_url = "http://192.168.1.26:2300/v1"
 # Serwer raportuje model pod pełną ścieżką, którą dostał w --model-path.
 model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run2_v11_8192_hf/iter_0000800"
 mode = "chat"
-concurrency = 100
+concurrency = 80
 timeout = 600
 
 # Sampling identyczny we wszystkich checkpointach i obu wariantach - inaczej

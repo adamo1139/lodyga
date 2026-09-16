@@ -24,7 +24,7 @@ model = "poziomka_iter_0001718"
 # Questions in flight at once (default 30, or --concurrency). Turns within a
 # question stay sequential, so this only batches independent questions and does
 # not change what is generated.
-concurrency = 30
+concurrency = 80
 # api_key_env = "OPENAI_API_KEY"
 timeout = 600
 

@@ -13,7 +13,7 @@ id = "polka_1.1b_chat"
 base_url = "http://192.168.1.26:2300/v1"
 model = "/media/nvme_2tb/maked/models/polka-1-1b-chat"
 mode = "chat"
-concurrency = 100
+concurrency = 80
 timeout = 600
 
 # UWAGA: kontekst tego modelu to 4096 tokenów, jak u Qry. Prompt tury 2 zawiera

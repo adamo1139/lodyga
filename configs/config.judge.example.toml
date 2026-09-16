@@ -10,7 +10,7 @@ max_retries = 5
 # Turns judged at once. Judging is latency-bound, so this is the main lever on
 # wall-clock: 160 turns took 327 s serially, and 22 s when measured at 16.
 # Raise carefully - OpenRouter rate limits apply per key.
-concurrency = 30
+concurrency = 80
 
 # Every key below is sent verbatim to the chat-completions endpoint, so it must
 # be a parameter the judge model actually supports. gpt-5.6-luna is a reasoning

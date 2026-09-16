@@ -14,7 +14,7 @@ base_url = "http://192.168.1.26:2300/v1"
 # wystawia. Wygodne, gdy model idzie prosto z repo HF, a nie z lokalnej ścieżki.
 model = ""
 mode = "chat"
-concurrency = 100
+concurrency = 80
 timeout = 600
 
 # Sampling identyczny jak przy Poziomce i Bieliku 4.5B.

@@ -17,7 +17,7 @@ base_url = "http://192.168.1.26:2300/v1"
 # Puste = runner raz odpyta /models i weźmie nazwę, którą serwer wystawia.
 model = ""
 mode = "chat"
-concurrency = 100
+concurrency = 80
 timeout = 600
 
 # Sampling identyczny jak w reszcie tabeli. Kontekst 32768, więc 3500 mieści się

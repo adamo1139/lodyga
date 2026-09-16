@@ -208,7 +208,7 @@ def main(argv=None):
     parser.add_argument(
         "--concurrency",
         type=int,
-        default=30,
+        default=80,
         help="questions in flight at once; overridden by api.concurrency in the config",
     )
     args = parser.parse_args(argv)
