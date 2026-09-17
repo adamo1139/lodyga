@@ -8,6 +8,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 
 | model | API | myślenie | przeb. | wynik | rozrzut | puste | pol. | piśm. | role | wnios. | mat. | kod. | ekstr. | ścisłe | human. |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| GLM-5.3-Flash (OpenRouter) | chat | tak | 3 | **8,71** | 8,56–8,79 | 0 | 96% | 7,65 | 8,35 | 8,88 | 10,00 | 9,50 | 9,08 | 8,10 | 8,09 |
 | Muse-Glimmer-30B | chat | low | 3 | **8,18** | 8,11–8,29 | 0 | 91% | 7,13 | 7,87 | 8,50 | 9,65 | 8,77 | 8,88 | 7,20 | 7,47 |
 | Bielik-11B-v3-Instruct | chat | brak | 3 | **7,53** | 7,30–7,74 | 0 | 94% | 6,83 | 7,45 | 7,35 | 9,06 | 6,55 | 8,25 | 7,00 | 7,78 |
 | Bielik-PL-11B-v3.0-Instruct | chat | brak | 3 | **7,27** | 7,15–7,46 | 0 | 94% | 6,78 | 6,88 | 7,76 | 8,79 | 6,27 | 7,98 | 6,87 | 6,92 |
