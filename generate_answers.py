@@ -36,15 +36,31 @@ def load_tokenizer(cfg):
     return tokenizer
 
 
+def auth_headers(cfg):
+    """Nagłówki zapytania, z kluczem jeśli `api.api_key_env` go wskazuje."""
+    headers = {"Content-Type": "application/json"}
+    key_name = cfg["api"].get("api_key_env")
+    if key_name:
+        import os
+
+        key = os.environ.get(key_name)
+        if key:
+            headers["Authorization"] = f"Bearer {key}"
+    return headers
+
+
 def hosted_model_id(cfg):
     """Served model name from the config; the /models endpoint is a fallback.
 
-    Resolved once per run so generation does not re-query the server.
+    Resolved once per run so generation does not re-query the server. Zapytanie
+    o /models też musi nieść klucz - endpoint z autoryzacją odrzuci je inaczej.
     """
     api = cfg["api"]
     if api.get("model"):
         return api["model"]
-    req = urllib.request.Request(api["base_url"].rstrip("/") + "/models")
+    req = urllib.request.Request(
+        api["base_url"].rstrip("/") + "/models", headers=auth_headers(cfg)
+    )
     with urllib.request.urlopen(req, timeout=api.get("timeout", 600)) as response:
         served = json.load(response)["data"][0]["id"]
     print(f"api.model is empty; using served model {served!r} from /models")
@@ -58,14 +74,7 @@ def complete(cfg, model, prompt_ids):
     payload.pop("base_url", None)
     payload.pop("api_key_env", None)
     body = json.dumps(payload).encode()
-    headers = {"Content-Type": "application/json"}
-    key_name = api.get("api_key_env")
-    if key_name:
-        import os
-
-        key = os.environ.get(key_name)
-        if key:
-            headers["Authorization"] = f"Bearer {key}"
+    headers = auth_headers(cfg)
     req = urllib.request.Request(api["base_url"].rstrip("/") + "/completions", body, headers)
     with urllib.request.urlopen(req, timeout=api.get("timeout", 600)) as response:
         result = json.load(response)
@@ -88,14 +97,7 @@ def chat_complete(cfg, model, messages, enable_thinking):
     if enable_thinking is not None:
         payload["chat_template_kwargs"] = {"enable_thinking": enable_thinking}
     body = json.dumps(payload).encode()
-    headers = {"Content-Type": "application/json"}
-    key_name = api.get("api_key_env")
-    if key_name:
-        import os
-
-        key = os.environ.get(key_name)
-        if key:
-            headers["Authorization"] = f"Bearer {key}"
+    headers = auth_headers(cfg)
     req = urllib.request.Request(
         api["base_url"].rstrip("/") + "/chat/completions", body, headers
     )
@@ -213,6 +215,9 @@ def main(argv=None):
     )
     args = parser.parse_args(argv)
     cfg = tomllib.loads(args.config.read_text())
+    # Endpoint modelu może wymagać klucza (api.api_key_env); wczytujemy .env tak
+    # samo jak sędzia, żeby nie trzeba go było eksportować ręcznie.
+    runs.load_dotenv()
     model_id = cfg["model"]["id"]
     # A new timestamped run directory per invocation; nothing is ever
     # overwritten. --output remains for one-off files (tests, spot checks).

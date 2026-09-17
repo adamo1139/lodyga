@@ -35,6 +35,24 @@ QUESTIONS = DATA_DIR / "question.jsonl"
 STAGES = ("generate", "judge", "aggregate")
 
 
+def load_dotenv(path=None):
+    """Minimalny czytnik .env; prawdziwe zmienne środowiskowe mają pierwszeństwo.
+
+    Plik szukany jest obok tego modułu, a nie w katalogu roboczym, więc runnery
+    znajdują klucze niezależnie od tego, skąd je uruchomiono. Używają go zarówno
+    generowanie (gdy endpoint modelu wymaga klucza), jak i sędzia.
+    """
+    path = Path(path) if path else PROJECT_DIR / ".env"
+    if not path.exists():
+        return
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
+
+
 def _slug(text):
     """Filesystem-safe fragment of a model id."""
     return re.sub(r"[^A-Za-z0-9._-]+", "_", str(text)).strip("_") or "model"

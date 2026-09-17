@@ -144,23 +144,6 @@ def validate(content):
     return judgment, None
 
 
-def load_dotenv(path=None):
-    """Minimal .env loader; real environment variables take precedence.
-
-    Resolved next to this file rather than in the working directory, so the
-    runner finds the key no matter where it is invoked from.
-    """
-    path = Path(path) if path else runs.PROJECT_DIR / ".env"
-    if not path.exists():
-        return
-    for line in path.read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, _, value = line.partition("=")
-        os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
-
-
 def chat(cfg, prompt):
     """POST one chat completion; returns (response, payload).
 
@@ -260,7 +243,7 @@ def main(argv=None):
     raw_path = output.with_name(output.stem + "__raw.jsonl")
     meta_path = output.with_name(output.stem + "__meta.json")
 
-    load_dotenv()
+    runs.load_dotenv()
     key_name = cfg["api"].get("api_key_env", "OPENROUTER_API_KEY")
     if not os.environ.get(key_name):
         sys.exit(f"error: {key_name} is not set; add it to .env or export it")

@@ -1,0 +1,24 @@
+# GLM 5.3 Flash, kwantyzacja exl3 3.05bpw ("glm-5-3-flash-305bpw").
+# Inny port niż reszta (7654) i endpoint wymagający klucza.
+[model]
+id = "glm_5.3_flash_305bpw"
+# Tryb "chat": szablon renderuje serwer, tokenizer nie jest potrzebny.
+
+[api]
+base_url = "http://192.168.1.26:7654/v1"
+# Puste = runner raz odpyta /models i weźmie nazwę, którą serwer wystawia.
+model = ""
+mode = "chat"
+# Klucz trzymamy w .env (GLM_API_KEY), nie w configu - config idzie do gita,
+# a kopia trafia do każdego katalogu przebiegu.
+api_key_env = "GLM_API_KEY"
+concurrency = 80
+timeout = 600
+
+# Sampling jak w reszcie tabeli.
+[generation]
+max_tokens = 3500
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
