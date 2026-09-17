@@ -15,9 +15,15 @@ api_key_env = "GLM_API_KEY"
 concurrency = 80
 timeout = 600
 
-# Sampling jak w reszcie tabeli.
+# Sampling jak w reszcie tabeli, poza max_tokens.
+#
+# UWAGA: u modelu rozumującego `max_tokens` obejmuje ŚLAD ROZUMOWANIA razem
+# z odpowiedzią. Przy 3500 GLM regularnie wyczerpywał budżet na samym myśleniu.
+# Okno modelu to 32768, a ślad jest odrzucany z kontekstu tury 2, więc najgorszy
+# przypadek to 401 + 15000 + 325 + 40 = 15766 promptu plus 15000 generacji,
+# czyli 30766 z 32768.
 [generation]
-max_tokens = 3500
+max_tokens = 15000
 temperature = 0.9
 top_p = 0.9
 top_k = 40
