@@ -15,7 +15,10 @@ api_key_env = "GLM_API_KEY"
 concurrency = 80
 timeout = 600
 
-# Sampling jak w reszcie tabeli, poza max_tokens.
+# Sampling zalecany dla GLM 5.3 Flash, a NIE ten z reszty tabeli: temperature
+# 1.0, top_p 0.95, bez top_k i bez repetition penalty. Protokół dopuszcza
+# sampling per model (custom_scoring.md, "Answer generation"), ale ten wiersz
+# nie jest przez to sterowany identycznie jak pozostałe.
 #
 # UWAGA: u modelu rozumującego `max_tokens` obejmuje ŚLAD ROZUMOWANIA razem
 # z odpowiedzią. Przy 3500 GLM regularnie wyczerpywał budżet na samym myśleniu.
@@ -24,7 +27,5 @@ timeout = 600
 # czyli 30766 z 32768.
 [generation]
 max_tokens = 15000
-temperature = 0.9
-top_p = 0.9
-top_k = 40
-repetition_penalty = 1.05
+temperature = 1.0
+top_p = 0.95
