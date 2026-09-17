@@ -1,31 +1,29 @@
-# GLM 5.3 Flash, kwantyzacja exl3 3.05bpw ("glm-5-3-flash-305bpw").
-# Inny port niż reszta (7654) i endpoint wymagający klucza.
+# GLM 5.3 Flash przez OpenRouter.
+#
+# UWAGA: to NIE jest ten sam artefakt co lokalna kwantyzacja exl3 3.05bpw.
+# OpenRouter kieruje do dostawców serwujących model w pełnej precyzji, więc
+# wiersz w tabeli opisuje model, a nie nasz lokalny kwant.
 [model]
-id = "glm_5.3_flash_305bpw"
-# Tryb "chat": szablon renderuje serwer, tokenizer nie jest potrzebny.
+id = "glm_5.3_flash_openrouter"
 
 [api]
-base_url = "http://192.168.1.26:7654/v1"
-# Puste = runner raz odpyta /models i weźmie nazwę, którą serwer wystawia.
-model = ""
+base_url = "https://openrouter.ai/api/v1"
+model = "z-ai/glm-5.3-flash"
 mode = "chat"
-# Klucz trzymamy w .env (GLM_API_KEY), nie w configu - config idzie do gita,
-# a kopia trafia do każdego katalogu przebiegu.
-api_key_env = "GLM_API_KEY"
+# Ten sam klucz co sędzia.
+api_key_env = "OPENROUTER_API_KEY"
 concurrency = 80
-timeout = 3600
+timeout = 1800
 
-# Sampling zalecany dla GLM 5.3 Flash, a NIE ten z reszty tabeli: temperature
+# Sampling zalecany dla GLM 5.3 Flash, a nie ten z reszty tabeli: temperature
 # 1.0, top_p 0.95, bez top_k i bez repetition penalty. Protokół dopuszcza
-# sampling per model (custom_scoring.md, "Answer generation"), ale ten wiersz
-# nie jest przez to sterowany identycznie jak pozostałe.
+# sampling per model (custom_scoring.md, "Answer generation").
 #
-# UWAGA: u modelu rozumującego `max_tokens` obejmuje ŚLAD ROZUMOWANIA razem
-# z odpowiedzią. Przy 3500 GLM regularnie wyczerpywał budżet na samym myśleniu.
-# Okno modelu to 32768, a ślad jest odrzucany z kontekstu tury 2, więc najgorszy
-# przypadek to 401 + 15000 + 325 + 40 = 15766 promptu plus 15000 generacji,
-# czyli 30766 z 32768.
+# max_tokens obejmuje ślad rozumowania razem z odpowiedzią - przy 3500 model
+# wyczerpywał budżet na samym myśleniu. W próbce sam ślad sięgał 20 tys. znaków
+# przy odpowiedzi poniżej 4 tys., więc limit musi mieć spory zapas. Kontekst
+# u dostawców to 1M, więc 40000 nie zbliża się do żadnej granicy.
 [generation]
-max_tokens = 15000
+max_tokens = 40000
 temperature = 1.0
 top_p = 0.95

@@ -91,6 +91,11 @@ def chat_complete(cfg, model, messages, enable_thinking):
     Servers started with a reasoning parser split the trace into
     `reasoning_content` and leave `content` clean; without one the trace arrives
     inline in `content` and is separated by the caller.
+
+    Nazwa pola nie jest ustandaryzowana: SGLang i vLLM używają
+    `reasoning_content`, a OpenRouter `reasoning`. Czytamy oba, bo inaczej ślad
+    po cichu przepadłby z archiwum, a pole `reasoning` w pliku odpowiedzi
+    sugerowałoby, że model w ogóle nie rozumował.
     """
     api = cfg["api"]
     payload = {"model": model, "messages": messages, **dict(cfg.get("generation", {}))}
@@ -104,7 +109,8 @@ def chat_complete(cfg, model, messages, enable_thinking):
     with urllib.request.urlopen(req, timeout=api.get("timeout", 600)) as response:
         result = json.load(response)
     message = result["choices"][0]["message"]
-    return message.get("reasoning_content") or "", message.get("content") or ""
+    reasoning = message.get("reasoning_content") or message.get("reasoning") or ""
+    return reasoning, message.get("content") or ""
 
 
 def render(tokenizer, messages, enable_thinking=None, prefill=""):
