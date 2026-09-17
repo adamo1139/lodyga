@@ -8,6 +8,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 
 | model | API | myślenie | przeb. | wynik | rozrzut | puste | pol. | piśm. | role | wnios. | mat. | kod. | ekstr. | ścisłe | human. |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Muse-Glimmer-30B | chat | low | 3 | **8,18** | 8,11–8,29 | 0 | 91% | 7,13 | 7,87 | 8,50 | 9,65 | 8,77 | 8,88 | 7,20 | 7,47 |
 | Bielik-11B-v3-Instruct | chat | brak | 3 | **7,53** | 7,30–7,74 | 0 | 94% | 6,83 | 7,45 | 7,35 | 9,06 | 6,55 | 8,25 | 7,00 | 7,78 |
 | Bielik-PL-11B-v3.0-Instruct | chat | brak | 3 | **7,27** | 7,15–7,46 | 0 | 94% | 6,78 | 6,88 | 7,76 | 8,79 | 6,27 | 7,98 | 6,87 | 6,92 |
 | Bielik-PL-Minitron-7B-v3.0-Instruct | chat | brak | 3 | **6,41** | 6,29–6,58 | 0 | 94% | 6,25 | 5,99 | 5,77 | 8,66 | 5,00 | 7,07 | 6,10 | 6,50 |
@@ -45,7 +46,10 @@ a `sft 2026-09-09` to `cpral/poziomka_sft_2026_09_09_hf` (lokalnie katalogi
 
 Sampling identyczny wszędzie (`temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
 `repetition_penalty = 1,05`), sędzia też (`openai/gpt-5.6-luna`,
-`reasoning_effort = none`, `seed = 42`). Wyjątkiem jest `max_tokens`, które
+`reasoning_effort = none`, `seed = 42`). Wyjątkiem jest Muse-Glimmer, który chodzi na samplingu zalecanym przez kartę
+modelu (`temperature = 1,0`, `top_p = 0,95`, `top_k = 64`, bez repetition
+penalty); protokół dopuszcza sampling per model. Drugim wyjątkiem jest
+`max_tokens`, które
 musi się zmieścić w oknie kontekstu modelu, liczonym podwójnie ze względu na
 turę 2: 3500 przy oknie 32768 i większym, 1600 dla Qry i Polki (okno 4096),
 600 dla APT3 (okno 2048).
