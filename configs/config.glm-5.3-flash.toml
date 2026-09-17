@@ -13,7 +13,7 @@ mode = "chat"
 # a kopia trafia do każdego katalogu przebiegu.
 api_key_env = "GLM_API_KEY"
 concurrency = 80
-timeout = 600
+timeout = 3600
 
 # Sampling zalecany dla GLM 5.3 Flash, a NIE ten z reszty tabeli: temperature
 # 1.0, top_p 0.95, bez top_k i bez repetition penalty. Protokół dopuszcza
