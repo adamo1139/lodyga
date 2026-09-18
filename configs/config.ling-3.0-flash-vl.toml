@@ -22,4 +22,4 @@ max_tokens = 40000
 temperature = 0.9
 top_p = 0.9
 top_k = 40
-reasoning_effort = "high"
+reasoning_effort = "low"
