@@ -11,6 +11,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | DeepSeek-V4.1-Flash (:nitro) | chat | low | 3 | **9,29** | 9,22–9,34 | 0 | 91% | 8,65 | 9,50 | 9,27 | 9,93 | 9,82 | 9,23 | 8,80 | 9,15 |
 | GLM-5.3-Flash (OpenRouter) | chat | tak | 3 | **8,71** | 8,56–8,79 | 0 | 96% | 7,65 | 8,35 | 8,88 | 10,00 | 9,50 | 9,08 | 8,10 | 8,09 |
 | Muse-Glimmer-30B | chat | low | 3 | **8,18** | 8,11–8,29 | 0 | 91% | 7,13 | 7,87 | 8,50 | 9,65 | 8,77 | 8,88 | 7,20 | 7,47 |
+| Ling-3.0-Flash | chat | tak* | 3 | **7,73** | 7,70–7,78 | 0 | 91% | 5,82 | 6,57 | 8,62 | 9,70 | 8,68 | 9,18 | 7,20 | 6,05 |
 | gpt-oss-120b | chat | high | 3 | **7,64** | 7,54–7,75 | 0 | 89% | 7,02 | 6,42 | 7,60 | 9,90 | 8,47 | 8,68 | 6,30 | 6,75 |
 | MiMo-v2.5 | chat | low | 3 | **7,60** | 7,48–7,84 | 1 | 88% | 5,79 | 6,72 | 8,39 | 9,89 | 8,16 | 9,03 | 6,36 | 5,99 |
 | Bielik-11B-v3-Instruct | chat | brak | 3 | **7,53** | 7,30–7,74 | 0 | 94% | 6,83 | 7,45 | 7,35 | 9,06 | 6,55 | 8,25 | 7,00 | 7,78 |
@@ -43,7 +44,9 @@ model nie wygenerował odpowiedzi (na 160). „Pol." to odsetek odpowiedzi
 rozpoznanych jako polskie — statystyka opisowa, nie składnik wyniku. „Rozrzut"
 to zakres wyników z kolejnych przebiegów. API: `chat` to `/chat/completions`,
 `compl.` to `/completions` z szablonem renderowanym lokalnie. „Myślenie: brak"
-oznacza, że model nie generuje rozumowania w tej konfiguracji.
+oznacza, że model nie generuje rozumowania w tej konfiguracji. `tak*` przy
+Lingu: model rozumuje w każdej turze (480/480), ale dostawca nie wystawia
+`reasoning_effort`, więc siły rozumowania nie da się przypiąć.
 
 Serie Poziomki nazwane są datą publikacji repozytorium:
 `sft 2026-09-14` to [`cpral/poziomka_sft_2026_09_14_hf`](https://huggingface.co/cpral/poziomka_sft_2026_09_14_hf),
@@ -60,6 +63,8 @@ Sampling protokolarny to `temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
   i bez repetition penalty).
 - **MiMo v2.5**: sampling protokolarny bez repetition penalty,
   `reasoning_effort = low`.
+- **Ling 3.0 Flash**: sampling protokolarny bez repetition penalty; siły
+  rozumowania nie da się ustawić, bo dostawca nie obsługuje `reasoning_effort`.
 - **DeepSeek V4.1 Flash i Nemotron 3.5 Lightning**: sampling protokolarny bez
   repetition penalty, `reasoning_effort = low`. Nemotron nie obsługuje `top_k`
   ani repetition penalty, więc idzie tylko na `temperature` i `top_p`. DeepSeek
