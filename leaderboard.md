@@ -77,4 +77,16 @@ Sampling protokolarny to `temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
   (okno 4096), 600 dla APT3 (okno 2048). U modeli rozumujących ślad wchodzi do
   tego samego budżetu co odpowiedź, stąd 40000 dla GLM-a i obu gpt-oss.
 
+## Gromada modeli rozumujących
+
+Cztery modele mieszczą się w 7,36–7,73: Nemotron 3.5 Lightning, MiMo v2.5,
+gpt-oss-120b i Ling 3.0 Flash. Dzielące je różnice są rzędu rozrzutu między
+przebiegami tego samego modelu, a profile mają niemal identyczne — matematyka
+9,7–9,9, piśmiennictwo 5,8–7,0, czyli rozstrzał około czterech punktów między
+najlepszą a najgorszą kategorią.
+
+Od gromady odstają dwa modele: DeepSeek V4.1 Flash (9,29), jedyny bez słabszej
+strony językowej, i GLM 5.3 Flash (8,71). Czoła tabeli nie wyznacza więc ani
+skala, ani sama obecność rozumowania — rozumują wszystkie cztery modele
+z gromady.
 
