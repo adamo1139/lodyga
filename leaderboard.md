@@ -12,6 +12,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | GLM-5.3-Flash (OpenRouter) | chat | tak | 3 | **8,71** | 8,56–8,79 | 0 | 96% | 7,65 | 8,35 | 8,88 | 10,00 | 9,50 | 9,08 | 8,10 | 8,09 |
 | Muse-Glimmer-30B | chat | low | 3 | **8,18** | 8,11–8,29 | 0 | 91% | 7,13 | 7,87 | 8,50 | 9,65 | 8,77 | 8,88 | 7,20 | 7,47 |
 | gpt-oss-120b | chat | high | 3 | **7,64** | 7,54–7,75 | 0 | 89% | 7,02 | 6,42 | 7,60 | 9,90 | 8,47 | 8,68 | 6,30 | 6,75 |
+| MiMo-v2.5 | chat | low | 3 | **7,60** | 7,48–7,84 | 1 | 88% | 5,79 | 6,72 | 8,39 | 9,89 | 8,16 | 9,03 | 6,36 | 5,99 |
 | Bielik-11B-v3-Instruct | chat | brak | 3 | **7,53** | 7,30–7,74 | 0 | 94% | 6,83 | 7,45 | 7,35 | 9,06 | 6,55 | 8,25 | 7,00 | 7,78 |
 | Nemotron-3.5-Lightning | chat | low | 3 | **7,36** | 7,27–7,42 | 0 | 62% | 5,77 | 6,10 | 7,62 | 9,72 | 8,93 | 8,37 | 6,23 | 6,13 |
 | Bielik-PL-11B-v3.0-Instruct | chat | brak | 3 | **7,27** | 7,15–7,46 | 0 | 94% | 6,78 | 6,88 | 7,76 | 8,79 | 6,27 | 7,98 | 6,87 | 6,92 |
@@ -57,6 +58,8 @@ Sampling protokolarny to `temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
   bez repetition penalty).
 - **GLM 5.3 Flash**: sampling zalecany przez kartę (1,0 / 0,95, bez top_k
   i bez repetition penalty).
+- **MiMo v2.5**: sampling protokolarny bez repetition penalty,
+  `reasoning_effort = low`.
 - **DeepSeek V4.1 Flash i Nemotron 3.5 Lightning**: sampling protokolarny bez
   repetition penalty, `reasoning_effort = low`. Nemotron nie obsługuje `top_k`
   ani repetition penalty, więc idzie tylko na `temperature` i `top_p`. DeepSeek
