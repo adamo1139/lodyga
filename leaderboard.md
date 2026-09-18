@@ -10,8 +10,10 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | GLM-5.3-Flash (OpenRouter) | chat | tak | 3 | **8,71** | 8,56–8,79 | 0 | 96% | 7,65 | 8,35 | 8,88 | 10,00 | 9,50 | 9,08 | 8,10 | 8,09 |
 | Muse-Glimmer-30B | chat | low | 3 | **8,18** | 8,11–8,29 | 0 | 91% | 7,13 | 7,87 | 8,50 | 9,65 | 8,77 | 8,88 | 7,20 | 7,47 |
+| gpt-oss-120b | chat | high | 3 | **7,64** | 7,54–7,75 | 0 | 89% | 7,02 | 6,42 | 7,60 | 9,90 | 8,47 | 8,68 | 6,30 | 6,75 |
 | Bielik-11B-v3-Instruct | chat | brak | 3 | **7,53** | 7,30–7,74 | 0 | 94% | 6,83 | 7,45 | 7,35 | 9,06 | 6,55 | 8,25 | 7,00 | 7,78 |
 | Bielik-PL-11B-v3.0-Instruct | chat | brak | 3 | **7,27** | 7,15–7,46 | 0 | 94% | 6,78 | 6,88 | 7,76 | 8,79 | 6,27 | 7,98 | 6,87 | 6,92 |
+| gpt-oss-20b | chat | high | 3 | **7,26** | 7,21–7,33 | 1 | 89% | 6,20 | 5,32 | 8,00 | 9,86 | 9,05 | 8,47 | 5,75 | 5,50 |
 | Bielik-PL-Minitron-7B-v3.0-Instruct | chat | brak | 3 | **6,41** | 6,29–6,58 | 0 | 94% | 6,25 | 5,99 | 5,77 | 8,66 | 5,00 | 7,07 | 6,10 | 6,50 |
 | Bielik-4.5B-v3-Instruct | chat | brak | 3 | **5,69** | 5,60–5,86 | 0 | 97% | 4,77 | 5,73 | 5,35 | 8,54 | 4,87 | 5,85 | 5,03 | 5,55 |
 | Bielik-1.5B-v3-Instruct | chat | brak | 3 | **3,83** | 3,72–3,96 | 0 | 93% | 3,95 | 4,00 | 2,77 | 6,02 | 2,87 | 4,15 | 3,38 | 3,65 |
@@ -45,14 +47,20 @@ Serie Poziomki nazwane są datą publikacji repozytorium:
 a `sft 2026-09-09` to `cpral/poziomka_sft_2026_09_09_hf` (lokalnie katalogi
 `poziomka_sft_run2_v11_8192_hf` i `poziomka_sft_run2_09_09_hf`).
 
-Sampling identyczny wszędzie (`temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
-`repetition_penalty = 1,05`), sędzia też (`openai/gpt-5.6-luna`,
-`reasoning_effort = none`, `seed = 42`). Wyjątkiem jest Muse-Glimmer, który chodzi na samplingu zalecanym przez kartę
-modelu (`temperature = 1,0`, `top_p = 0,95`, `top_k = 64`, bez repetition
-penalty); protokół dopuszcza sampling per model. Drugim wyjątkiem jest
-`max_tokens`, które
-musi się zmieścić w oknie kontekstu modelu, liczonym podwójnie ze względu na
-turę 2: 3500 przy oknie 32768 i większym, 1600 dla Qry i Polki (okno 4096),
-600 dla APT3 (okno 2048).
+Sampling protokolarny to `temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
+`repetition_penalty = 1,05`; sędzia wszędzie ten sam (`openai/gpt-5.6-luna`,
+`reasoning_effort = none`, `seed = 42`). Odstępstwa, dopuszczone przez protokół:
+
+- **Muse-Glimmer**: sampling zalecany przez kartę modelu (1,0 / 0,95 / top_k 64,
+  bez repetition penalty).
+- **GLM 5.3 Flash**: sampling zalecany przez kartę (1,0 / 0,95, bez top_k
+  i bez repetition penalty).
+- **gpt-oss 20B i 120B**: sampling protokolarny, ale bez repetition penalty —
+  kara za powtórzenia jest nie na miejscu przy modelu, który powtarza wątki
+  w śladzie rozumowania.
+- **`max_tokens`** musi zmieścić się w oknie kontekstu, liczonym podwójnie ze
+  względu na turę 2: 3500 przy oknie 32768 i większym, 1600 dla Qry i Polki
+  (okno 4096), 600 dla APT3 (okno 2048). U modeli rozumujących ślad wchodzi do
+  tego samego budżetu co odpowiedź, stąd 40000 dla GLM-a i obu gpt-oss.
 
 
