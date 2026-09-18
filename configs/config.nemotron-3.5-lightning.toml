@@ -4,7 +4,9 @@ id = "nemotron_3.5_lightning"
 
 [api]
 base_url = "https://openrouter.ai/api/v1"
-model = "nvidia/nemotron-3.5-lightning:free"
+# Wariant płatny, nie :free - darmowy endpoint był zakolejkowany tak mocno,
+# że pojedyncze trywialne zapytanie nie wróciło w osiem minut.
+model = "nvidia/nemotron-3.5-lightning"
 mode = "chat"
 api_key_env = "OPENROUTER_API_KEY"
 concurrency = 80
@@ -23,4 +25,4 @@ timeout = 1800
 max_tokens = 40000
 temperature = 0.9
 top_p = 0.9
-reasoning_effort = "high"
+reasoning_effort = "low"
