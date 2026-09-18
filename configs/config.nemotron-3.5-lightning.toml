@@ -10,7 +10,7 @@ model = "nvidia/nemotron-3.5-lightning"
 mode = "chat"
 api_key_env = "OPENROUTER_API_KEY"
 concurrency = 80
-timeout = 1800
+timeout = 300
 
 # Sampling protokolarny bez repetition penalty - jak przy gpt-oss. Kara za
 # powtórzenia jest nie na miejscu przy modelu, który wraca do tych samych myśli
