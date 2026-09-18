@@ -6,6 +6,7 @@ import json
 import threading
 import time
 import tomllib
+import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -34,6 +35,38 @@ def load_tokenizer(cfg):
     if template:
         tokenizer.chat_template = template
     return tokenizer
+
+
+class RequestFailed(RuntimeError):
+    """Zapytanie nie powiodło się mimo ponowień."""
+
+
+def request_json(cfg, url, payload):
+    """POST z ponowieniami; zwraca odpowiedź JSON.
+
+    Ponawiamy tylko błędy przejściowe - przeciążenie, limity przepustowości,
+    chwilowe awarie sieci - tak samo jak sędzia. Błąd trwały, np. zły model albo
+    zły klucz, leci od razu, bo ponawianie go niczego nie zmieni.
+    """
+    api = cfg["api"]
+    body = json.dumps(payload).encode()
+    headers = auth_headers(cfg)
+    retries = int(api.get("max_retries", 5))
+    for attempt in range(retries + 1):
+        if attempt:
+            time.sleep(2 ** (attempt - 1))
+        try:
+            request = urllib.request.Request(url, body, headers)
+            with urllib.request.urlopen(request, timeout=api.get("timeout", 600)) as response:
+                return json.load(response)
+        except urllib.error.HTTPError as error:
+            transient = error.code in (408, 409, 429, 500, 502, 503, 504)
+            detail = f"HTTP {error.code} {error.read().decode(errors='replace')[:160]}"
+        except (urllib.error.URLError, TimeoutError, OSError) as error:
+            transient = True
+            detail = f"{type(error).__name__}: {getattr(error, 'reason', error)}"
+        if not transient or attempt >= retries:
+            raise RequestFailed(f"po {attempt + 1} próbach: {detail}")
 
 
 def auth_headers(cfg):
@@ -73,11 +106,7 @@ def complete(cfg, model, prompt_ids):
     payload = {"model": model, "prompt": prompt_ids, **generation}
     payload.pop("base_url", None)
     payload.pop("api_key_env", None)
-    body = json.dumps(payload).encode()
-    headers = auth_headers(cfg)
-    req = urllib.request.Request(api["base_url"].rstrip("/") + "/completions", body, headers)
-    with urllib.request.urlopen(req, timeout=api.get("timeout", 600)) as response:
-        result = json.load(response)
+    result = request_json(cfg, api["base_url"].rstrip("/") + "/completions", payload)
     return result["choices"][0]["text"]
 
 
@@ -101,13 +130,7 @@ def chat_complete(cfg, model, messages, enable_thinking):
     payload = {"model": model, "messages": messages, **dict(cfg.get("generation", {}))}
     if enable_thinking is not None:
         payload["chat_template_kwargs"] = {"enable_thinking": enable_thinking}
-    body = json.dumps(payload).encode()
-    headers = auth_headers(cfg)
-    req = urllib.request.Request(
-        api["base_url"].rstrip("/") + "/chat/completions", body, headers
-    )
-    with urllib.request.urlopen(req, timeout=api.get("timeout", 600)) as response:
-        result = json.load(response)
+    result = request_json(cfg, api["base_url"].rstrip("/") + "/chat/completions", payload)
     message = result["choices"][0]["message"]
     reasoning = message.get("reasoning_content") or message.get("reasoning") or ""
     return reasoning, message.get("content") or ""
@@ -172,11 +195,25 @@ def split_reasoning(text, prefilled):
 
 
 def answer_turn(cfg, model, tokenizer, messages, think, prefilled, mode, prefill=""):
-    """Generate one turn; returns (reasoning, answer).
+    """Generate one turn; returns (reasoning, answer, error).
 
     Both endpoints end up in the same place: the trace separated from the
     answer, so only the answer is ever judged.
+
+    Zapytanie, które nie powiodło się mimo ponowień, daje pustą odpowiedź i opis
+    błędu - tak samo jak model, który nic nie wygenerował. Jedna awaria u
+    dostawcy nie może kasować całego przebiegu, bo pusta odpowiedź i tak dostaje
+    od sędziego zero. Liczbę takich tur raportujemy osobno, żeby masowej awarii
+    nie dało się pomylić ze słabym modelem.
     """
+    try:
+        reasoning, answer = _answer_turn(cfg, model, tokenizer, messages, think, prefilled, mode, prefill)
+        return reasoning, answer, None
+    except RequestFailed as error:
+        return "", "", str(error)
+
+
+def _answer_turn(cfg, model, tokenizer, messages, think, prefilled, mode, prefill=""):
     if mode == "chat":
         reasoning, content = chat_complete(cfg, model, messages, think)
         if reasoning.strip():
@@ -281,7 +318,7 @@ def main(argv=None):
     done = [0]
 
     def answer_question(q):
-        reasoning1, answer1 = answer_turn(
+        reasoning1, answer1, error1 = answer_turn(
             cfg, model, tokenizer, system + [{"role": "user", "content": q["turns"][0]}], think,
             prefilled, mode, prefill,
         )
@@ -290,15 +327,22 @@ def main(argv=None):
             assistant_message(answer1),
             {"role": "user", "content": q["turns"][1]},
         ]
-        reasoning2, answer2 = answer_turn(
+        reasoning2, answer2, error2 = answer_turn(
             cfg, model, tokenizer, messages, think, prefilled, mode, prefill
         )
+        errors = [e for e in (error1, error2) if e]
         with lock:
             done[0] += 1
-            empty = [t for t, a in ((1, answer1), (2, answer2)) if not a]
-            note = f" (no answer on turn {', '.join(map(str, empty))})" if empty else ""
+            failed = [t for t, e in ((1, error1), (2, error2)) if e]
+            empty = [t for t, a in ((1, answer1), (2, answer2)) if not a and not (
+                (t == 1 and error1) or (t == 2 and error2))]
+            note = ""
+            if empty:
+                note += f" (no answer on turn {', '.join(map(str, empty))})"
+            if failed:
+                note += f" (REQUEST FAILED on turn {', '.join(map(str, failed))}: {errors[0]})"
             print(f"{model_id}: question {q['question_id']} complete{note} [{done[0]}/{len(questions)}]", flush=True)
-        return {
+        row = {
             "question_id": q["question_id"],
             "model_id": model_id,
             # `turns` holds the judged answers only; the reasoning traces are
@@ -312,6 +356,11 @@ def main(argv=None):
             ],
             "tstamp": time.time(),
         }
+        if errors:
+            # Zapisane w pliku odpowiedzi, żeby dało się odróżnić turę, w której
+            # model nic nie wygenerował, od tury, której nie udało się pobrać.
+            row["request_errors"] = [error1, error2]
+        return row
 
     print(f"{model_id}: generating {len(questions)} questions with {workers} workers", flush=True)
     try:
@@ -327,6 +376,13 @@ def main(argv=None):
         for row in rows:
             fout.write(json.dumps(row, ensure_ascii=False) + "\n")
     empty = sum(1 for r in rows for t in r["choices"][0]["turns"] if not t.strip())
+    failed = sum(1 for r in rows for e in r.get("request_errors", []) if e)
+    if failed:
+        print(
+            f"UWAGA: {failed} z {2 * len(rows)} tur nie udało się pobrać mimo ponowień; "
+            "zapisano je jako puste odpowiedzi i sędzia oceni je na zero",
+            flush=True,
+        )
     if run_dir is not None:
         runs.update_stage(
             run_dir,
@@ -335,6 +391,7 @@ def main(argv=None):
             questions=len(rows),
             turns=2 * len(rows),
             empty_answers=empty,
+            failed_requests=failed,
             api_mode=mode,
             prefill=prefill or None,
             system_prompt=system_prompt,
