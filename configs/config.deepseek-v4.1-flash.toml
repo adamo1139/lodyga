@@ -1,0 +1,30 @@
+# deepseek/deepseek-v4.1-flash przez OpenRouter.
+[model]
+id = "deepseek_v4.1_flash"
+
+[api]
+base_url = "https://openrouter.ai/api/v1"
+# Wariant :nitro sortuje endpointy po przepustowości i dopuszcza tier
+# priority. Płacimy stawkę priority tylko wtedy, gdy ten endpoint
+# faktycznie wygra sortowanie po szybkości.
+model = "deepseek/deepseek-v4.1-flash:nitro"
+mode = "chat"
+api_key_env = "OPENROUTER_API_KEY"
+concurrency = 80
+timeout = 1800
+
+# Sampling protokolarny bez repetition penalty - jak przy gpt-oss. Kara za
+# powtórzenia jest nie na miejscu przy modelu, który wraca do tych samych myśli
+# w śladzie rozumowania.
+#
+# Ślad rozumowania wchodzi do tego samego budżetu co odpowiedź, stąd wysoki
+# max_tokens. Siłę rozumowania przypinamy jawnie, żeby zmiana domyślnej wartości
+# u dostawcy nie przesunęła po cichu wyniku.
+[generation]
+max_tokens = 40000
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+# Niska siła rozumowania: ślad to główny koszt czasu przy tych modelach
+# (u gpt-oss stanowił 78% wygenerowanego tekstu).
+reasoning_effort = "low"
