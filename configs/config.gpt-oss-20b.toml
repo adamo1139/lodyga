@@ -1,0 +1,25 @@
+# gpt-oss-20b przez OpenRouter (openai/gpt-oss-20b).
+[model]
+id = "gpt_oss_20b"
+
+[api]
+base_url = "https://openrouter.ai/api/v1"
+model = "openai/gpt-oss-20b"
+mode = "chat"
+api_key_env = "OPENROUTER_API_KEY"
+concurrency = 80
+timeout = 1800
+
+# Sampling jak w tabeli, ale BEZ repetition penalty - modele rozumujące karze
+# się nim za powtórzenia w śladzie rozumowania, gdzie nawroty do tej samej myśli
+# są naturalne.
+#
+# To model rozumujący: siłę rozumowania przypinamy jawnie, żeby zmiana wartości
+# domyślnej u dostawcy nie przesunęła po cichu wyniku. Ślad wchodzi do tego
+# samego budżetu co odpowiedź, stąd wysoki max_tokens; kontekst to 131072.
+[generation]
+max_tokens = 40000
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+reasoning_effort = "high"
