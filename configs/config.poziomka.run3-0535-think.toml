@@ -1,0 +1,32 @@
+# Poziomka SFT run3 v11 16384, checkpoint iter_0000535, wariant think.
+#   /media/nvme_2tb/maked/poziomka_train/poziomka_sft_run3_v11_16384_hf/iter_0000535
+#
+# Nowa seria: okno kontekstu 16384 zamiast 8192 w run2. Szablon ma przełącznik
+# enable_thinking i działa - przy false model odpowiada od razu, przy true
+# rozumuje. Serwer ma parser rozumowania, więc ślad wraca w osobnym polu.
+[model]
+id = "poziomka_run3_iter_0000535_think"
+
+[chat_template]
+enable_thinking = true
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run3_v11_16384_hf/iter_0000535"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+# max_tokens 7800 - najwyższa wartość, przy której KAŻDA tura mieści się
+# w oknie 16384 niezależnie od tego, jak długa wyjdzie odpowiedź z tury 1.
+# Prompt tury 2 to najdłuższa para pytań (401 + 325) plus szablon (~40) plus
+# odpowiedź z tury 1, czyli w najgorszym razie 766 + 7800 = 8566; z generacją
+# daje 16366 z 16384. Powyżej tej wartości długa pierwsza odpowiedź wypchnęłaby
+# turę 2 poza okno i serwer odrzuciłby zapytanie.
+[generation]
+max_tokens = 7800
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+stop = ["<|im_end|>"]
