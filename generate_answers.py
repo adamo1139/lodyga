@@ -294,7 +294,7 @@ def main(argv=None):
         raise SystemExit(f"error: api.mode musi być 'completions' albo 'chat', nie {mode!r}")
     tokenizer = load_tokenizer(cfg) if mode == "completions" else None
     model = hosted_model_id(cfg)
-    questions = [json.loads(line) for line in args.questions.read_text().splitlines() if line]
+    questions = list(runs.read_jsonl(args.questions))
     think = cfg.get("chat_template", {}).get("enable_thinking")
     # Prefill odpowiedzi asystenta, doklejany po prompcie generacji. Działa tylko
     # przy mode = "completions", bo tylko tam budujemy prompt sami.

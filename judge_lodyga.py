@@ -183,10 +183,7 @@ def chat(cfg, prompt):
 def load_answers(path):
     answers = {}
     model_id = None
-    for line in path.read_text().splitlines():
-        if not line.strip():
-            continue
-        row = json.loads(line)
+    for row in runs.read_jsonl(path):
         if model_id is None and row.get("model_id"):
             model_id = row["model_id"]
         turns = row.get("choices", [{}])[0].get("turns", [])
@@ -248,8 +245,7 @@ def main(argv=None):
     if not os.environ.get(key_name):
         sys.exit(f"error: {key_name} is not set; add it to .env or export it")
 
-    lines = [line for line in args.questions.read_text().splitlines() if line.strip()]
-    questions = [json.loads(line) for line in lines]
+    questions = list(runs.read_jsonl(args.questions))
     answers, model_id = load_answers(answers_file)
     model_id = model_id or answers_file.stem
 

@@ -128,10 +128,7 @@ def load_judgments(path):
     scored = {}
     unscored = defaultdict(int)
     meta = {"model_id": None, "judge_model": None}
-    for line in path.read_text().splitlines():
-        if not line.strip():
-            continue
-        row = json.loads(line)
+    for row in runs.read_jsonl(path):
         if meta["model_id"] is None:
             meta["model_id"] = row.get("model_id")
         if meta["judge_model"] is None:
@@ -146,10 +143,7 @@ def load_judgments(path):
 
 def load_questions(path):
     questions = {}
-    for line in path.read_text().splitlines():
-        if not line.strip():
-            continue
-        q = json.loads(line)
+    for q in runs.read_jsonl(path):
         ref_turn1, ref_turn2 = per_turn_reference(q)
         questions[q["question_id"]] = {
             "category": q.get("category"),
@@ -161,10 +155,7 @@ def load_questions(path):
 
 def load_answers(path):
     answers = {}
-    for line in path.read_text().splitlines():
-        if not line.strip():
-            continue
-        row = json.loads(line)
+    for row in runs.read_jsonl(path):
         turns = row.get("choices", [{}])[0].get("turns", [])
         if len(turns) == 2:
             answers[row["question_id"]] = turns

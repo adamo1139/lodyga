@@ -35,6 +35,19 @@ QUESTIONS = DATA_DIR / "question.jsonl"
 STAGES = ("generate", "judge", "aggregate")
 
 
+def read_jsonl(path):
+    """Wczytaj plik JSONL, dzieląc WYŁĄCZNIE na znaku nowej linii.
+
+    Nie używamy `str.splitlines()`, bo dzieli ono także na `\\v`, `\\f`, `\\x85`,
+    `\\u2028` i `\\u2029`, a `json.dumps(ensure_ascii=False)` tych znaków nie
+    escapuje. Jeden `\\u2028` w odpowiedzi modelu rozbijał wtedy linię JSON na
+    dwie i wywracał cały przebieg na „Unterminated string".
+    """
+    for line in Path(path).read_text(encoding="utf-8").split("\n"):
+        if line.strip():
+            yield json.loads(line)
+
+
 def load_dotenv(path=None):
     """Minimalny czytnik .env; prawdziwe zmienne środowiskowe mają pierwszeństwo.
 
