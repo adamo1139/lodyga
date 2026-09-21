@@ -167,7 +167,15 @@ def chat(cfg, prompt):
         request = urllib.request.Request(url, body, headers)
         try:
             with urllib.request.urlopen(request, timeout=api.get("timeout", 600)) as response:
-                return json.load(response), payload
+                body_json = json.load(response)
+            # OpenRouter sygnalizuje limit zapytań ciałem `{"error": {...}}`
+            # przy statusie HTTP 200, więc sam kod HTTP tego nie wyłapie.
+            error_body = body_json.get("error") or {}
+            code = error_body.get("code")
+            if code not in (408, 429, 500, 502, 503, 504):
+                return body_json, payload
+            transient = True
+            detail = f"upstream {code} {str(error_body.get('message'))[:200]}"
         except urllib.error.HTTPError as error:
             transient = error.code in (408, 429, 500, 502, 503, 504)
             detail = f"HTTP {error.code} {error.read().decode(errors='replace')[:200]}"

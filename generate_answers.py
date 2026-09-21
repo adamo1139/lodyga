@@ -58,7 +58,15 @@ def request_json(cfg, url, payload):
         try:
             request = urllib.request.Request(url, body, headers)
             with urllib.request.urlopen(request, timeout=api.get("timeout", 600)) as response:
-                return json.load(response)
+                body_json = json.load(response)
+            # OpenRouter sygnalizuje limit zapytań ciałem `{"error": {...}}`
+            # przy statusie HTTP 200, więc sam kod HTTP tego nie wyłapie.
+            error_body = body_json.get("error") or {}
+            code = error_body.get("code")
+            if code not in (408, 409, 429, 500, 502, 503, 504):
+                return body_json
+            transient = True
+            detail = f"upstream {code} {str(error_body.get('message'))[:160]}"
         except urllib.error.HTTPError as error:
             transient = error.code in (408, 409, 429, 500, 502, 503, 504)
             detail = f"HTTP {error.code} {error.read().decode(errors='replace')[:160]}"
