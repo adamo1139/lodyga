@@ -37,6 +37,8 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka sft 2026-09-14/iter_0000400 | chat | tak | 3 | **0,50** | 0,45–0,57 | 50 | 65% | 1,07 | 0,38 | 0,33 | 0,51 | 0,40 | 0,40 | 0,10 | 0,83 |
 | poziomka sft 2026-09-14/iter_0001200 | chat | tak | 3 | **0,41** | 0,29–0,47 | 62 | 57% | 0,75 | 0,52 | 0,17 | 0,48 | 0,02 | 0,25 | 0,30 | 0,77 |
 | APT3-1B-Instruct-v1 | compl. | brak | 3 | **0,38** | 0,34–0,44 | 0 | 94% | 0,53 | 0,53 | 0,45 | 0,48 | 0,17 | 0,30 | 0,13 | 0,47 |
+| poziomka sft 2026-09-21/iter_0000535 | chat | nie | 3 | **0,21** | 0,20–0,21 | 21 | 59% | 0,48 | 0,29 | 0,29 | 0,52 | 0,00 | 0,00 | 0,02 | 0,07 |
+| poziomka sft 2026-09-21/iter_0000535 | chat | tak | 3 | **0,09** | 0,04–0,11 | 335 | 17% | 0,03 | 0,08 | 0,28 | 0,08 | 0,22 | 0,00 | 0,00 | 0,00 |
 
 Kolumny kategorii: piśmiennictwo, odgrywanie ról, wnioskowanie, matematyka,
 kodowanie, ekstrakcja, nauki ścisłe, humanistyka. „Puste" to tury, w których
@@ -51,7 +53,16 @@ Lingu: model rozumuje w każdej turze (480/480), ale dostawca nie wystawia
 Serie Poziomki nazwane są datą publikacji repozytorium:
 `sft 2026-09-14` to [`cpral/poziomka_sft_2026_09_14_hf`](https://huggingface.co/cpral/poziomka_sft_2026_09_14_hf),
 a `sft 2026-09-09` to `cpral/poziomka_sft_2026_09_09_hf` (lokalnie katalogi
-`poziomka_sft_run2_v11_8192_hf` i `poziomka_sft_run2_09_09_hf`).
+`poziomka_sft_run2_v11_8192_hf` i `poziomka_sft_run2_09_09_hf`), a
+`sft 2026-09-21` to `cpral/poziomka_sft_2026_09_21_hf` (lokalnie
+`poziomka_sft_run3_v11_16384_hf`) — seria z oknem kontekstu 16384 zamiast 8192.
+
+Wariant `tak` serii `2026-09-21` zdominowany jest przez urwane odpowiedzi: model
+zaczyna rozumować i nie zamyka bloku przed wyczerpaniem budżetu 7800 tokenów,
+przez co 335 z 480 tur jest pustych. Odsetek polszczyzny 17% to artefakt tego
+samego zjawiska — liczą się tylko tury, w których cokolwiek powstało. Rozrzut
+(0,04–0,11) jest rzędu samego wyniku, więc liczba mówi tyle, że model jest
+bliski zeru.
 
 Sampling protokolarny to `temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
 `repetition_penalty = 1,05`; sędzia wszędzie ten sam (`openai/gpt-5.6-luna`,

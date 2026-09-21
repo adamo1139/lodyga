@@ -160,10 +160,13 @@ def chat(cfg, prompt):
     if key:
         headers["Authorization"] = f"Bearer {key}"
     url = api["base_url"].rstrip("/") + "/chat/completions"
-    retries = int(api.get("max_retries", 5))
+    # Osiem ponowień, bo limit zapytań u dostawcy potrafi trzymać minutami,
+    # a pięć prób to łącznie tylko 31 s czekania. Sen jest ograniczony do 60 s,
+    # żeby wykładnik nie rozjechał się do kilku minut na jedno zapytanie.
+    retries = int(api.get("max_retries", 8))
     for attempt in range(retries + 1):
         if attempt:
-            time.sleep(2 ** (attempt - 1))
+            time.sleep(min(2 ** (attempt - 1), 60))
         request = urllib.request.Request(url, body, headers)
         try:
             with urllib.request.urlopen(request, timeout=api.get("timeout", 600)) as response:
