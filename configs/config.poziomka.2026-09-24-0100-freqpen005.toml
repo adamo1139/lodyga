@@ -1,0 +1,40 @@
+# Poziomka SFT 2026-09-24, checkpoint iter_0000100, wariant no-think.
+#   cpral/poziomka_sft_2026_09_24_hf
+#   lokalnie: poziomka_sft_run4_v12_16384_hf/iter_0000100
+#
+# Sampling odbiega od protokolarnego, bo checkpoint zapętla się przy
+# repetition_penalty = 1,05: na 16 próbach 3 tury urywały się na limicie
+# tokenów, a jedna linia powtarzała się 223 razy. Zamiast podnosić
+# repetition_penalty (1,10 gasi pętle, ale wycina konkrety - zamiast Giżycka
+# i Węgorzewa zostają "wędrówki i szlaki") używamy frequency_penalty, która
+# skaluje karę liczbą wystąpień tokenu, zamiast karać jednakowo wszystko,
+# co już padło.
+#
+# Wartość 0,05 wybrana pomiarem na 24 pytaniach x 2 ziarna: żadna tura się
+# nie urwała (0/48), a odpowiedzi są najdłuższe spośród bezpiecznych ustawień
+# (1964 znaki wobec 1445 przy 0,15). Pętle, które zostają, są ograniczone -
+# model się powtarza, ale wychodzi z tego i kończy turę, więc kosztują punkty
+# zamiast zjadać całą odpowiedź.
+#
+# Temperatura 0,3 zamiast 0,9, bo przy 0,9 model traci spójność.
+[model]
+id = "poziomka_2026_09_24_iter_0000100_freqpen005"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run4_v12_16384_hf/iter_0000100"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+# max_tokens 7800 - najwyższa wartość, przy której KAŻDA tura mieści się
+# w oknie 16384 niezależnie od długości odpowiedzi z tury 1.
+[generation]
+max_tokens = 7800
+temperature = 0.3
+top_p = 0.9
+frequency_penalty = 0.05
+stop = ["<|im_end|>"]
