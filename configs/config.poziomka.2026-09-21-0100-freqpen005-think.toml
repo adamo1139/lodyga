@@ -1,0 +1,30 @@
+# Poziomka SFT 2026-09-21, checkpoint iter_0000100, wariant think.
+#   cpral/poziomka_sft_2026_09_21_hf
+#   lokalnie: poziomka_sft_run3_v11_16384_hf/iter_0000100
+#
+# Sampling identyczny jak w 2026-09-24/iter_0000100, żeby oba checkpointy
+# setnej iteracji dało się porównać wprost. Uzasadnienie frequency_penalty
+# opisuje config.poziomka.2026-09-24-0100-freqpen005.toml; sonda na tym
+# checkpoincie potwierdziła wybór - sampling protokolarny urywał 2 z 16 tur,
+# ten zero.
+[model]
+id = "poziomka_2026_09_21_iter_0000100_freqpen005_think"
+
+[chat_template]
+enable_thinking = true
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run3_v11_16384_hf/iter_0000100"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+# max_tokens 7800 - najwyższa wartość, przy której KAŻDA tura mieści się
+# w oknie 16384 niezależnie od długości odpowiedzi z tury 1.
+[generation]
+max_tokens = 7800
+temperature = 0.3
+top_p = 0.9
+frequency_penalty = 0.05
+stop = ["<|im_end|>"]

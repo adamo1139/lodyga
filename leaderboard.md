@@ -32,6 +32,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | polanka-3.7B-exp | compl. | tak | 3 | **0,97** | 0,81–1,19 | 0 | 88% | 1,60 | 1,53 | 1,07 | 1,10 | 0,45 | 0,57 | 0,40 | 1,08 |
 | polanka-3.7B-exp | chat | brak | 3 | **0,95** | 0,87–1,00 | 8 | 87% | 1,50 | 1,27 | 1,02 | 1,29 | 0,47 | 0,55 | 0,37 | 1,13 |
 | polka-1.1b-chat | chat | brak | 3 | **0,88** | 0,80–1,01 | 0 | 97% | 1,28 | 1,63 | 0,81 | 0,57 | 0,45 | 0,38 | 0,47 | 1,45 |
+| poziomka sft 2026-09-21/iter_0000100 | chat | nie* | 3 | **0,79** | 0,75–0,85 | 48 | 82% | 1,43 | 1,31 | 0,60 | 0,61 | 0,30 | 0,77 | 0,73 | 0,55 |
 | poziomka sft 2026-09-14/iter_0000800 | chat | tak | 3 | **0,68** | 0,62–0,71 | 42 | 70% | 1,17 | 0,51 | 0,37 | 0,99 | 0,23 | 0,33 | 0,38 | 1,42 |
 | poziomka sft 2026-09-09/iter_0000400 | compl. | mixed 53% | 3 | **0,66** | 0,62–0,72 | 0 | 94% | 1,35 | 0,85 | 0,68 | 0,63 | 0,15 | 0,22 | 0,53 | 0,92 |
 | poziomka sft 2026-09-09/iter_0000400 | compl. | tak | 3 | **0,66** | 0,61–0,71 | 22 | 80% | 1,33 | 0,98 | 0,85 | 0,46 | 0,07 | 0,27 | 0,28 | 1,03 |
@@ -39,6 +40,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka sft 2026-09-14/iter_0000400 | chat | tak | 3 | **0,50** | 0,45–0,57 | 50 | 65% | 1,07 | 0,38 | 0,33 | 0,51 | 0,40 | 0,40 | 0,10 | 0,83 |
 | poziomka sft 2026-09-14/iter_0001200 | chat | tak | 3 | **0,41** | 0,29–0,47 | 62 | 57% | 0,75 | 0,52 | 0,17 | 0,48 | 0,02 | 0,25 | 0,30 | 0,77 |
 | APT3-1B-Instruct-v1 | compl. | brak | 3 | **0,38** | 0,34–0,44 | 0 | 94% | 0,53 | 0,53 | 0,45 | 0,48 | 0,17 | 0,30 | 0,13 | 0,47 |
+| poziomka sft 2026-09-21/iter_0000100 | chat | tak | 3 | **0,37** | 0,29–0,41 | 245 | 43% | 0,55 | 0,81 | 0,48 | 0,45 | 0,07 | 0,15 | 0,19 | 0,25 |
 | poziomka sft 2026-09-21/iter_0000535 | chat | nie | 3 | **0,21** | 0,20–0,21 | 21 | 59% | 0,48 | 0,29 | 0,29 | 0,52 | 0,00 | 0,00 | 0,02 | 0,07 |
 | poziomka sft 2026-09-21/iter_0000535 | chat | tak | 3 | **0,09** | 0,04–0,11 | 335 | 17% | 0,03 | 0,08 | 0,28 | 0,08 | 0,22 | 0,00 | 0,00 | 0,00 |
 
@@ -50,7 +52,10 @@ to zakres wyników z kolejnych przebiegów. API: `chat` to `/chat/completions`,
 `compl.` to `/completions` z szablonem renderowanym lokalnie. „Myślenie: brak"
 oznacza, że model nie generuje rozumowania w tej konfiguracji. `tak*` przy
 Lingu: model rozumuje w każdej turze (480/480), ale dostawca nie wystawia
-`reasoning_effort`, więc siły rozumowania nie da się przypiąć.
+`reasoning_effort`, więc siły rozumowania nie da się przypiąć. `nie*` przy
+`2026-09-21/iter_0000100`: szablon dostał `enable_thinking = false`, ale model
+i tak rozumuje w większości tur — ta wersja serii jeszcze nie respektuje
+przełącznika.
 
 Serie Poziomki nazwane są datą publikacji repozytorium:
 `sft 2026-09-14` to [`cpral/poziomka_sft_2026_09_14_hf`](https://huggingface.co/cpral/poziomka_sft_2026_09_14_hf),
@@ -66,8 +71,9 @@ kodem, który przy otwartym bloku `<think>` kasował odpowiedzi modeli
 odpowiadających bez rozumowania: pusty `reasoning_content` z serwera brano za
 brak parsera i całą treść traktowano jako niezamknięty ślad. Po poprawce liczba
 pustych tur w `2026-09-24` spadła z 132 do 33, a wynik wzrósł z 0,73 do 1,10.
-Wiersze `2026-09-14`, `2026-09-21` i `2026-09-09` czekają na ponowny pomiar;
-do tego czasu traktuj je jako dolne oszacowanie. Wiersze `nie`/`brak` oraz
+Wiersze `2026-09-14`, `2026-09-09` oraz `2026-09-21/iter_0000535` czekają na
+ponowny pomiar; do tego czasu traktuj je jako dolne oszacowanie. Oba wiersze
+`2026-09-21/iter_0000100` i `2026-09-24` zmierzono już poprawionym kodem. Wiersze `nie`/`brak` oraz
 modele z OpenRoutera są nietknięte, bo tam prompt nie zostawia otwartego bloku.
 
 Sampling protokolarny to `temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
@@ -89,7 +95,8 @@ Sampling protokolarny to `temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
 - **gpt-oss 20B i 120B**: sampling protokolarny, ale bez repetition penalty —
   kara za powtórzenia jest nie na miejscu przy modelu, który powtarza wątki
   w śladzie rozumowania.
-- **Poziomka `sft 2026-09-24`**: `temperature = 0,3`, `top_p = 0,9`,
+- **Poziomka `sft 2026-09-24` i `sft 2026-09-21/iter_0000100`**:
+  `temperature = 0,3`, `top_p = 0,9`,
   `frequency_penalty = 0,05`, bez `top_k` i bez repetition penalty. Checkpoint
   zapętla się przy samplingu protokolarnym — na 16 próbach trzy tury urywały
   się na limicie tokenów, a jedna linia powtarzała się 223 razy.
