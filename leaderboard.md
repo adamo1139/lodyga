@@ -26,12 +26,12 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka sft 2026-09-24/iter_0000100 | chat | nie | 3 | **1,40** | 1,27–1,49 | 0 | 94% | 2,05 | 1,84 | 1,72 | 1,00 | 0,43 | 0,92 | 1,38 | 1,85 |
 | poziomka sft 2026-09-14/iter_0001200 | chat | nie | 3 | **1,40** | 1,30–1,46 | 0 | 90% | 2,50 | 2,01 | 1,62 | 1,25 | 0,17 | 0,57 | 0,83 | 2,27 |
 | poziomka sft 2026-09-14/iter_0000800 | chat | nie | 3 | **1,12** | 1,08–1,15 | 0 | 94% | 2,24 | 1,88 | 0,82 | 0,50 | 0,18 | 0,28 | 0,81 | 2,22 |
+| poziomka sft 2026-09-24/iter_0000100 | chat | tak | 3 | **1,10** | 0,97–1,21 | 33 | 86% | 2,02 | 1,53 | 0,82 | 1,10 | 0,42 | 0,77 | 1,05 | 1,12 |
 | poziomka sft 2026-09-14/iter_0001718 | compl. | tak | 3 | **1,06** | 0,92–1,16 | 12 | 87% | 2,07 | 1,86 | 0,97 | 1,22 | 0,05 | 0,58 | 0,55 | 1,22 |
 | poziomka sft 2026-09-14/iter_0000400 | chat | nie | 3 | **1,04** | 0,95–1,13 | 0 | 90% | 2,12 | 1,62 | 0,95 | 0,60 | 0,05 | 0,53 | 0,80 | 1,60 |
 | polanka-3.7B-exp | compl. | tak | 3 | **0,97** | 0,81–1,19 | 0 | 88% | 1,60 | 1,53 | 1,07 | 1,10 | 0,45 | 0,57 | 0,40 | 1,08 |
 | polanka-3.7B-exp | chat | brak | 3 | **0,95** | 0,87–1,00 | 8 | 87% | 1,50 | 1,27 | 1,02 | 1,29 | 0,47 | 0,55 | 0,37 | 1,13 |
 | polka-1.1b-chat | chat | brak | 3 | **0,88** | 0,80–1,01 | 0 | 97% | 1,28 | 1,63 | 0,81 | 0,57 | 0,45 | 0,38 | 0,47 | 1,45 |
-| poziomka sft 2026-09-24/iter_0000100 | chat | tak | 3 | **0,73** | 0,69–0,79 | 132 | 65% | 1,11 | 0,47 | 0,75 | 1,28 | 0,25 | 0,50 | 0,64 | 0,91 |
 | poziomka sft 2026-09-14/iter_0000800 | chat | tak | 3 | **0,68** | 0,62–0,71 | 42 | 70% | 1,17 | 0,51 | 0,37 | 0,99 | 0,23 | 0,33 | 0,38 | 1,42 |
 | poziomka sft 2026-09-09/iter_0000400 | compl. | mixed 53% | 3 | **0,66** | 0,62–0,72 | 0 | 94% | 1,35 | 0,85 | 0,68 | 0,63 | 0,15 | 0,22 | 0,53 | 0,92 |
 | poziomka sft 2026-09-09/iter_0000400 | compl. | tak | 3 | **0,66** | 0,61–0,71 | 22 | 80% | 1,33 | 0,98 | 0,85 | 0,46 | 0,07 | 0,27 | 0,28 | 1,03 |
@@ -61,12 +61,14 @@ a `sft 2026-09-09` to `cpral/poziomka_sft_2026_09_09_hf` (lokalnie katalogi
 `cpral/poziomka_sft_2026_09_24_hf` (lokalnie `poziomka_sft_run4_v12_16384_hf`).
 Obie ostatnie serie mają okno kontekstu 16384 zamiast 8192.
 
-Wariant `tak` serii `2026-09-21` zdominowany jest przez urwane odpowiedzi: model
-zaczyna rozumować i nie zamyka bloku przed wyczerpaniem budżetu 7800 tokenów,
-przez co 335 z 480 tur jest pustych. Odsetek polszczyzny 17% to artefakt tego
-samego zjawiska — liczą się tylko tury, w których cokolwiek powstało. Rozrzut
-(0,04–0,11) jest rzędu samego wyniku, więc liczba mówi tyle, że model jest
-bliski zeru.
+**Wiersze `myślenie: tak` Poziomki poza `2026-09-24` są zaniżone.** Mierzono je
+kodem, który przy otwartym bloku `<think>` kasował odpowiedzi modeli
+odpowiadających bez rozumowania: pusty `reasoning_content` z serwera brano za
+brak parsera i całą treść traktowano jako niezamknięty ślad. Po poprawce liczba
+pustych tur w `2026-09-24` spadła z 132 do 33, a wynik wzrósł z 0,73 do 1,10.
+Wiersze `2026-09-14`, `2026-09-21` i `2026-09-09` czekają na ponowny pomiar;
+do tego czasu traktuj je jako dolne oszacowanie. Wiersze `nie`/`brak` oraz
+modele z OpenRoutera są nietknięte, bo tam prompt nie zostawia otwartego bloku.
 
 Sampling protokolarny to `temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
 `repetition_penalty = 1,05`; sędzia wszędzie ten sam (`openai/gpt-5.6-luna`,

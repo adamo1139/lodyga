@@ -224,12 +224,19 @@ def answer_turn(cfg, model, tokenizer, messages, think, prefilled, mode, prefill
 def _answer_turn(cfg, model, tokenizer, messages, think, prefilled, mode, prefill=""):
     if mode == "chat":
         reasoning, content = chat_complete(cfg, model, messages, think)
+        content = clean_answer(content)
         if reasoning.strip():
             # The server already split the trace out for us.
-            return reasoning.strip(), clean_answer(content)
-        # No reasoning parser on the server: the trace is inline, exactly as on
-        # the /completions path.
-        return split_reasoning(clean_answer(content), prefilled)
+            return reasoning.strip(), content
+        # Pusty ślad znaczy jedno z dwojga: serwer nie ma parsera rozumowania
+        # i ślad siedzi w treści, albo parser jest, ale model odpowiedział bez
+        # rozumowania. Rozróżnia je obecność znacznika. Bez tego sprawdzenia
+        # split_reasoning() przy prefilled=True brało całą odpowiedź za
+        # niezamknięty blok <think> i kasowało ją - na modelu poziomka
+        # 2026-09-24 gubiło to 29 z 80 tur.
+        if "<think>" in content or "</think>" in content:
+            return split_reasoning(content, prefilled)
+        return "", content
     prompt_ids = render(tokenizer, messages, think, prefill)
     return split_reasoning(clean_answer(complete(cfg, model, prompt_ids)), prefilled)
 
