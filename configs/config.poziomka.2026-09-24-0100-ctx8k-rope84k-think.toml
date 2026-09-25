@@ -1,0 +1,30 @@
+# Poziomka SFT 2026-09-24, checkpoint iter_0000100, wariant think.
+#   cpral/poziomka_sft_2026_09_24_hf
+#   lokalnie: poziomka_sft_run4_v12_16384_hf/iter_0000100
+#
+# Wariant serwera: okno 8192 i RoPE 84000, do porownania z pomiarem tego
+# samego checkpointu w oknie 16384 (config.poziomka.2026-09-24-0100-freqpen005).
+# Sampling identyczny, zeby roznica pochodzila wylacznie z konfiguracji RoPE
+# i dlugosci okna.
+[model]
+id = "poziomka_2026_09_24_iter_0000100_ctx8k_rope84k_think"
+
+[chat_template]
+enable_thinking = true
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run4_v12_16384_hf/iter_0000100"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+# max_tokens 3500 - tura 2 liczy budzet podwojnie: najdluzsza para pytan
+# (~584 tokeny) plus szablon (~40) plus dwie generacje musi zmiescic sie
+# w 8192, czyli max_tokens <= 3784.
+[generation]
+max_tokens = 3500
+temperature = 0.3
+top_p = 0.9
+frequency_penalty = 0.05
+stop = ["<|im_end|>"]

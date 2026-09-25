@@ -1,0 +1,31 @@
+# Poziomka SFT 2026-09-21, checkpoint iter_0000535, wariant nothink.
+#   cpral/poziomka_sft_2026_09_21_hf
+#   lokalnie: poziomka_sft_run3_v11_16384_hf/iter_0000535
+#
+# Pomiar po poprawce szablonu: przy enable_thinking = false model już nie
+# rozumuje (0 z 16 tur w sondzie), w odróżnieniu od pierwszego pomiaru tego
+# checkpointu, gdzie rozumował w 63 ze 160 tur.
+#
+# Sampling jak w pozostałych checkpointach setnej iteracji, uzasadnienie
+# w config.poziomka.2026-09-24-0100-freqpen005.toml.
+[model]
+id = "poziomka_2026_09_21_iter_0000535_ctx16k"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run3_v11_16384_hf/iter_0000535"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+# max_tokens 7800 - najwyzsza wartosc, przy ktorej KAZDA tura miesci sie
+# w oknie 16384. Serwer przestawiony na pelne okno i nowe RoPE.
+[generation]
+max_tokens = 7800
+temperature = 0.3
+top_p = 0.9
+frequency_penalty = 0.05
+stop = ["<|im_end|>"]
