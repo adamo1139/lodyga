@@ -24,6 +24,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | Qra-13B-chat | chat | brak | 3 | **3,30** | 3,12–3,40 | 0 | 90% | 3,90 | 4,03 | 3,87 | 2,05 | 1,53 | 3,32 | 3,57 | 4,12 |
 | poziomka sft 2026-09-24/iter_0000100 (8k/84k) | chat | nie | 3 | **1,48** | 1,39–1,60 | 0 | 94% | 2,02 | 2,07 | 1,17 | 1,58 | 0,30 | 0,98 | 1,92 | 1,82 |
 | poziomka sft 2026-09-24/iter_0000498 (8k/84k) | chat | nie | 3 | **1,45** | 1,40–1,49 | 0 | 95% | 2,55 | 2,33 | 1,53 | 1,08 | 0,38 | 0,51 | 1,27 | 1,91 |
+| poziomka sft 2026-09-24/iter_0000498 (8k/84k, t0,8) | chat | nie | 3 | **1,44** | 1,36–1,54 | 0 | 94% | 2,55 | 2,25 | 1,10 | 1,49 | 0,28 | 0,55 | 1,22 | 2,10 |
 | poziomka sft 2026-09-24/iter_0000498 | chat | nie | 3 | **1,42** | 1,30–1,50 | 0 | 95% | 2,32 | 2,33 | 1,13 | 1,24 | 0,22 | 0,77 | 1,73 | 1,62 |
 | poziomka sft 2026-09-14/iter_0001718 | chat | nie | 3 | **1,40** | 1,31–1,51 | 0 | 93% | 2,28 | 2,09 | 1,75 | 0,95 | 0,05 | 0,77 | 1,25 | 2,12 |
 | poziomka sft 2026-09-24/iter_0000100 | chat | nie | 3 | **1,40** | 1,27–1,49 | 0 | 94% | 2,05 | 1,84 | 1,72 | 1,00 | 0,43 | 0,92 | 1,38 | 1,85 |
@@ -63,10 +64,11 @@ Lingu: model rozumuje w każdej turze (480/480), ale dostawca nie wystawia
 i tak rozumuje w większości tur — ta wersja serii jeszcze nie respektuje
 przełącznika.
 
-**Okno kontekstu i RoPE.** Wiersze Poziomki bez adnotacji zmierzono w oknie
-16384 z `max_tokens = 7800`. Dopisek `(8k/84k)` oznacza serwer postawiony
-z oknem 8192 i RoPE 84000; tam `max_tokens = 3500`, bo tura 2 liczy budżet
-podwójnie i więcej nie mieści się w oknie. Ta sama liczba kroków treningu
+**Okno kontekstu, RoPE i temperatura.** Wiersze Poziomki bez adnotacji
+zmierzono w oknie 16384 z `max_tokens = 7800`. Dopisek `(8k/84k)` oznacza serwer
+postawiony z oknem 8192 i RoPE 84000; tam `max_tokens = 3500`, bo tura 2 liczy
+budżet podwójnie i więcej nie mieści się w oknie. Dopisek `t0,8` oznacza
+`temperature = 0,8` zamiast 0,3 — reszta samplingu bez zmian. Ta sama liczba kroków treningu
 w dwóch konfiguracjach serwera daje więc dwa osobne wiersze — nie są to dwa
 modele.
 
@@ -79,6 +81,14 @@ budżecie tokenów, czyli da się go serwować taniej bez straty jakości. Krót
 budżet zmniejsza za to zapętlenia (9% wobec 13% w wariancie `nie`), bo model ma
 mniej miejsca na dryf w powtórzenia; w wariancie `tak` kosztuje jednak więcej
 pustych tur (42 wobec 23), bo ślad rozumowania częściej nie zdąża się domknąć.
+
+**Temperatura 0,8 zamiast 0,3 nie zmienia wyniku, ale czterokrotnie zmniejsza
+zapętlenia** — z 9% do 2% tur, bez kosztu w polszczyźnie (94% wobec 95%) ani
+w pustych turach (0 w obu). Wartość 0,3 dobrano na wczesnym checkpoincie, gdzie
+przy wyższej temperaturze model tracił spójność; po pełnej epoce na wyczyszczonym
+korpusie ten kompromis przestał być potrzebny. Dla tej serii wyższa temperatura
+jest więc lepszym wyborem, choć w samym wyniku tego nie widać (1,44 wobec 1,45
+przy rozrzucie do 0,18).
 
 Inaczej wypada seria `2026-09-21`: `iter_0000535` przy przejściu na okno 16384
 traci połowę wyniku (0,53 → 0,24), i to na krótkich promptach, gdzie długość
