@@ -34,5 +34,21 @@ options:
                         default 1
 ```
 
+## Zanim puścisz pomiar
+
+```
+python3 sonda.py
+```
+
+Kilkadziesiąt zapytań w kilkanaście sekund. Sprawdza, czy model nie jest
+zepsuty (zepsuty merge zwraca same znaki zastępcze - wykrywamy to przy
+`temperature = 0`, bo greedy nie ma losowości), czy szablon respektuje
+`enable_thinking`, jaki `max_tokens` mieści się w oknie serwera i która
+temperatura daje mniej urwanych oraz zapętlonych tur.
+
+Sonda odsiewa katastrofy i dobiera parametry. Liczb do tabeli z niej nie bierz:
+przy 16 pytaniach wychodziło 0 zapętlonych tur tam, gdzie pełny przebieg
+pokazał 13% z 480.
+
 Cały protokół opisuje [`custom_scoring.md`](custom_scoring.md), a wyniki
 zmierzonych modeli zbiera [`leaderboard.md`](leaderboard.md).
