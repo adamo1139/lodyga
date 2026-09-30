@@ -23,12 +23,14 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | Bielik-1.5B-v3-Instruct | chat | brak | 3 | **3,83** | 3,72–3,96 | 0 | 93% | 3,95 | 4,00 | 2,77 | 6,02 | 2,87 | 4,15 | 3,38 | 3,65 |
 | Qra-13B-chat | chat | brak | 3 | **3,30** | 3,12–3,40 | 0 | 90% | 3,90 | 4,03 | 3,87 | 2,05 | 1,53 | 3,32 | 3,57 | 4,12 |
 | poziomka sft 2026-09-24/iter_0000100 (8k/84k) | chat | nie | 3 | **1,48** | 1,39–1,60 | 0 | 94% | 2,02 | 2,07 | 1,17 | 1,58 | 0,30 | 0,98 | 1,92 | 1,82 |
+| poziomka sft 2026-09-24/iter_0000498 (8k/84k) | chat | nie | 3 | **1,45** | 1,40–1,49 | 0 | 95% | 2,55 | 2,33 | 1,53 | 1,08 | 0,38 | 0,51 | 1,27 | 1,91 |
 | poziomka sft 2026-09-24/iter_0000498 | chat | nie | 3 | **1,42** | 1,30–1,50 | 0 | 95% | 2,32 | 2,33 | 1,13 | 1,24 | 0,22 | 0,77 | 1,73 | 1,62 |
 | poziomka sft 2026-09-14/iter_0001718 | chat | nie | 3 | **1,40** | 1,31–1,51 | 0 | 93% | 2,28 | 2,09 | 1,75 | 0,95 | 0,05 | 0,77 | 1,25 | 2,12 |
 | poziomka sft 2026-09-24/iter_0000100 | chat | nie | 3 | **1,40** | 1,27–1,49 | 0 | 94% | 2,05 | 1,84 | 1,72 | 1,00 | 0,43 | 0,92 | 1,38 | 1,85 |
 | poziomka sft 2026-09-14/iter_0001200 | chat | nie | 3 | **1,40** | 1,30–1,46 | 0 | 90% | 2,50 | 2,01 | 1,62 | 1,25 | 0,17 | 0,57 | 0,83 | 2,27 |
 | poziomka sft 2026-09-24/iter_0000100 (8k/84k) | chat | tak | 3 | **1,24** | 1,11–1,44 | 51 | 83% | 2,27 | 2,35 | 0,90 | 0,87 | 0,07 | 0,95 | 0,98 | 1,53 |
 | poziomka sft 2026-09-24/iter_0000498 | chat | tak | 3 | **1,21** | 1,10–1,27 | 23 | 86% | 2,65 | 1,93 | 0,68 | 1,22 | 0,15 | 0,67 | 1,12 | 1,23 |
+| poziomka sft 2026-09-24/iter_0000498 (8k/84k) | chat | tak | 3 | **1,17** | 1,08–1,25 | 42 | 85% | 2,38 | 1,85 | 0,67 | 1,15 | 0,19 | 0,70 | 0,97 | 1,43 |
 | poziomka sft 2026-09-14/iter_0000800 | chat | nie | 3 | **1,12** | 1,08–1,15 | 0 | 94% | 2,24 | 1,88 | 0,82 | 0,50 | 0,18 | 0,28 | 0,81 | 2,22 |
 | poziomka sft 2026-09-24/iter_0000100 | chat | tak | 3 | **1,10** | 0,97–1,21 | 33 | 86% | 2,02 | 1,53 | 0,82 | 1,10 | 0,42 | 0,77 | 1,05 | 1,12 |
 | poziomka sft 2026-09-14/iter_0001718 | compl. | tak | 3 | **1,06** | 0,92–1,16 | 12 | 87% | 2,07 | 1,86 | 0,97 | 1,22 | 0,05 | 0,58 | 0,55 | 1,22 |
@@ -68,14 +70,22 @@ podwójnie i więcej nie mieści się w oknie. Ta sama liczba kroków treningu
 w dwóch konfiguracjach serwera daje więc dwa osobne wiersze — nie są to dwa
 modele.
 
-Zmiana konfiguracji wypada różnie w różnych seriach, co samo w sobie jest
-wynikiem. `2026-09-24/iter_0000100` przenosi się bez szkody (1,40 → 1,48 mimo
-o połowę mniejszego budżetu tokenów), natomiast `2026-09-21/iter_0000535` przy
-przejściu na okno 16384 traci połowę wyniku (0,53 → 0,24), i to na krótkich
-promptach, gdzie długość okna nie powinna mieć znaczenia. To wskazuje na błędną
-konfigurację RoPE w tym checkpoincie, a nie na wadę samego mechanizmu; wyniki
-`2026-09-21/iter_0000535` z obu konfiguracji zostały do czasu wyjaśnienia poza
-tabelą.
+**Dla serii `2026-09-24` okno 8192 z RoPE 84000 jest neutralne.** Cztery pomiary
+na dwóch checkpointach dają +0,08 i +0,14 przy `iter_0000100`, ale +0,03 i −0,04
+przy `iter_0000498` — a rozrzut między przebiegami tego samego ustawienia sięga
+0,09. Pozorny przyrost przy setnej iteracji był więc szumem. Wniosek praktyczny:
+model działa tak samo przy o połowę mniejszym oknie i o połowę mniejszym
+budżecie tokenów, czyli da się go serwować taniej bez straty jakości. Krótszy
+budżet zmniejsza za to zapętlenia (9% wobec 13% w wariancie `nie`), bo model ma
+mniej miejsca na dryf w powtórzenia; w wariancie `tak` kosztuje jednak więcej
+pustych tur (42 wobec 23), bo ślad rozumowania częściej nie zdąża się domknąć.
+
+Inaczej wypada seria `2026-09-21`: `iter_0000535` przy przejściu na okno 16384
+traci połowę wyniku (0,53 → 0,24), i to na krótkich promptach, gdzie długość
+okna nie powinna mieć znaczenia. Skoro `2026-09-24` przenosi się między tymi
+konfiguracjami bez szkody, wskazuje to na błędną konfigurację RoPE w tamtym
+checkpoincie, a nie na wadę samego mechanizmu; wyniki `2026-09-21/iter_0000535`
+z obu konfiguracji zostały do czasu wyjaśnienia poza tabelą.
 
 Serie Poziomki nazwane są datą publikacji repozytorium:
 `sft 2026-09-14` to [`cpral/poziomka_sft_2026_09_14_hf`](https://huggingface.co/cpral/poziomka_sft_2026_09_14_hf),
