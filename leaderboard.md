@@ -34,6 +34,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka sft 2026-09-24/iter_0000498 (8k/84k) | chat | tak | 3 | **1,17** | 1,08–1,25 | 42 | 85% | 2,38 | 1,85 | 0,67 | 1,15 | 0,19 | 0,70 | 0,97 | 1,43 |
 | poziomka sft 2026-09-14/iter_0000800 | chat | nie | 3 | **1,12** | 1,08–1,15 | 0 | 94% | 2,24 | 1,88 | 0,82 | 0,50 | 0,18 | 0,28 | 0,81 | 2,22 |
 | poziomka sft 2026-09-24/iter_0000100 | chat | tak | 3 | **1,10** | 0,97–1,21 | 33 | 86% | 2,02 | 1,53 | 0,82 | 1,10 | 0,42 | 0,77 | 1,05 | 1,12 |
+| poziomka sft 2026-09-24/iter_0000498 (8k/84k, t0,8) | chat | tak | 3 | **1,08** | 0,96–1,22 | 45 | 85% | 2,23 | 1,87 | 0,37 | 1,05 | 0,47 | 0,73 | 0,67 | 1,28 |
 | poziomka sft 2026-09-14/iter_0001718 | compl. | tak | 3 | **1,06** | 0,92–1,16 | 12 | 87% | 2,07 | 1,86 | 0,97 | 1,22 | 0,05 | 0,58 | 0,55 | 1,22 |
 | poziomka sft 2026-09-14/iter_0000400 | chat | nie | 3 | **1,04** | 0,95–1,13 | 0 | 90% | 2,12 | 1,62 | 0,95 | 0,60 | 0,05 | 0,53 | 0,80 | 1,60 |
 | polanka-3.7B-exp | compl. | tak | 3 | **0,97** | 0,81–1,19 | 0 | 88% | 1,60 | 1,53 | 1,07 | 1,10 | 0,45 | 0,57 | 0,40 | 1,08 |
@@ -82,13 +83,25 @@ budżet zmniejsza za to zapętlenia (9% wobec 13% w wariancie `nie`), bo model m
 mniej miejsca na dryf w powtórzenia; w wariancie `tak` kosztuje jednak więcej
 pustych tur (42 wobec 23), bo ślad rozumowania częściej nie zdąża się domknąć.
 
-**Temperatura 0,8 zamiast 0,3 nie zmienia wyniku, ale czterokrotnie zmniejsza
-zapętlenia** — z 9% do 2% tur, bez kosztu w polszczyźnie (94% wobec 95%) ani
-w pustych turach (0 w obu). Wartość 0,3 dobrano na wczesnym checkpoincie, gdzie
-przy wyższej temperaturze model tracił spójność; po pełnej epoce na wyczyszczonym
-korpusie ten kompromis przestał być potrzebny. Dla tej serii wyższa temperatura
-jest więc lepszym wyborem, choć w samym wyniku tego nie widać (1,44 wobec 1,45
-przy rozrzucie do 0,18).
+**Temperatura działa przeciwnie w obu wariantach.** Wartość 0,3 dobrano na
+wczesnym checkpoincie, gdzie przy wyższej temperaturze model tracił spójność;
+po pełnej epoce na wyczyszczonym korpusie ten kompromis przestał być potrzebny —
+ale tylko bez rozumowania:
+
+| `iter_0000498` (8k/84k) | t0,3 | t0,8 |
+|---|---|---|
+| `nie` | 1,45 | 1,44 |
+| `tak` | 1,17 | 1,08 |
+
+Bez rozumowania 0,8 jest darmowe: wynik ten sam, a zapętlenia spadają z 9% do
+2% tur, bez kosztu w polszczyźnie (94% wobec 95%) ani w pustych turach (0
+w obu). Z rozumowaniem zapętlenia też spadają (11% → 4%), lecz wynik traci 0,09,
+i to w kategoriach, w których rozumowanie ma pomagać: wnioskowanie 0,67 → 0,37,
+nauki ścisłe 0,97 → 0,67. Liczba pustych tur prawie się nie zmienia (42 → 45),
+więc nie chodzi o to, że ślad przestaje się domykać — wyższa temperatura
+rozprasza samo rozumowanie. Zalecenie dla tej serii: 0,8 dla `nie`, 0,3 dla
+`tak`. W obu przypadkach różnice mieszczą się w rozrzucie między przebiegami,
+więc mocniejszy jest argument z zapętleń niż z samego wyniku.
 
 Inaczej wypada seria `2026-09-21`: `iter_0000535` przy przejściu na okno 16384
 traci połowę wyniku (0,53 → 0,24), i to na krótkich promptach, gdzie długość
