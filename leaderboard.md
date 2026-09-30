@@ -25,21 +25,25 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka-instruct-2026-09-30-1 (8k/84k, t0,8) | chat | nie | 3 | **1,65** | 1,52–1,85 | 0 | 95% | 2,52 | 2,66 | 1,72 | 1,43 | 0,32 | 0,83 | 1,38 | 2,42 |
 | poziomka-instruct-2026-09-30-1 (8k/84k) | chat | nie | 3 | **1,51** | 1,41–1,67 | 0 | 92% | 2,22 | 2,38 | 1,52 | 1,50 | 0,47 | 0,93 | 1,53 | 1,52 |
 | poziomka sft 2026-09-24/iter_0000100 (8k/84k) | chat | nie | 3 | **1,48** | 1,39–1,60 | 0 | 94% | 2,02 | 2,07 | 1,17 | 1,58 | 0,30 | 0,98 | 1,92 | 1,82 |
+| poziomka-instruct-2026-09-30-1 (16k/640k, t0,8) | chat | nie | 3 | **1,47** | 1,42–1,52 | 0 | 95% | 2,62 | 2,47 | 1,18 | 0,84 | 0,22 | 0,87 | 1,34 | 2,25 |
 | poziomka sft 2026-09-24/iter_0000498 (8k/84k) | chat | nie | 3 | **1,45** | 1,40–1,49 | 0 | 95% | 2,55 | 2,33 | 1,53 | 1,08 | 0,38 | 0,51 | 1,27 | 1,91 |
 | poziomka sft 2026-09-24/iter_0000498 (8k/84k, t0,8) | chat | nie | 3 | **1,44** | 1,36–1,54 | 0 | 94% | 2,55 | 2,25 | 1,10 | 1,49 | 0,28 | 0,55 | 1,22 | 2,10 |
 | poziomka sft 2026-09-24/iter_0000498 | chat | nie | 3 | **1,42** | 1,30–1,50 | 0 | 95% | 2,32 | 2,33 | 1,13 | 1,24 | 0,22 | 0,77 | 1,73 | 1,62 |
 | poziomka sft 2026-09-14/iter_0001718 | chat | nie | 3 | **1,40** | 1,31–1,51 | 0 | 93% | 2,28 | 2,09 | 1,75 | 0,95 | 0,05 | 0,77 | 1,25 | 2,12 |
 | poziomka sft 2026-09-24/iter_0000100 | chat | nie | 3 | **1,40** | 1,27–1,49 | 0 | 94% | 2,05 | 1,84 | 1,72 | 1,00 | 0,43 | 0,92 | 1,38 | 1,85 |
 | poziomka sft 2026-09-14/iter_0001200 | chat | nie | 3 | **1,40** | 1,30–1,46 | 0 | 90% | 2,50 | 2,01 | 1,62 | 1,25 | 0,17 | 0,57 | 0,83 | 2,27 |
+| poziomka-instruct-2026-09-30-1 (16k/640k) | chat | nie | 3 | **1,37** | 1,36–1,41 | 0 | 95% | 2,27 | 2,20 | 1,50 | 1,31 | 0,37 | 0,85 | 1,22 | 1,28 |
 | poziomka sft 2026-09-24/iter_0000100 (8k/84k) | chat | tak | 3 | **1,24** | 1,11–1,44 | 51 | 83% | 2,27 | 2,35 | 0,90 | 0,87 | 0,07 | 0,95 | 0,98 | 1,53 |
 | poziomka-instruct-2026-09-30-1 (8k/84k) | chat | tak | 3 | **1,21** | 1,16–1,27 | 51 | 82% | 2,23 | 1,92 | 0,92 | 1,05 | 0,48 | 0,85 | 0,98 | 1,28 |
 | poziomka sft 2026-09-24/iter_0000498 | chat | tak | 3 | **1,21** | 1,10–1,27 | 23 | 86% | 2,65 | 1,93 | 0,68 | 1,22 | 0,15 | 0,67 | 1,12 | 1,23 |
 | poziomka sft 2026-09-24/iter_0000498 (8k/84k) | chat | tak | 3 | **1,17** | 1,08–1,25 | 42 | 85% | 2,38 | 1,85 | 0,67 | 1,15 | 0,19 | 0,70 | 0,97 | 1,43 |
 | poziomka sft 2026-09-14/iter_0000800 | chat | nie | 3 | **1,12** | 1,08–1,15 | 0 | 94% | 2,24 | 1,88 | 0,82 | 0,50 | 0,18 | 0,28 | 0,81 | 2,22 |
+| poziomka-instruct-2026-09-30-1 (16k/640k, t0,8) | chat | tak | 3 | **1,11** | 1,03–1,15 | 39 | 88% | 2,52 | 1,85 | 0,52 | 0,84 | 0,45 | 0,48 | 0,65 | 1,52 |
 | poziomka sft 2026-09-24/iter_0000100 | chat | tak | 3 | **1,10** | 0,97–1,21 | 33 | 86% | 2,02 | 1,53 | 0,82 | 1,10 | 0,42 | 0,77 | 1,05 | 1,12 |
 | poziomka-instruct-2026-09-30-1 (8k/84k, t0,8) | chat | tak | 3 | **1,08** | 1,06–1,10 | 33 | 86% | 2,80 | 1,65 | 0,47 | 0,43 | 0,28 | 0,73 | 0,80 | 1,42 |
 | poziomka sft 2026-09-24/iter_0000498 (8k/84k, t0,8) | chat | tak | 3 | **1,08** | 0,96–1,22 | 45 | 85% | 2,23 | 1,87 | 0,37 | 1,05 | 0,47 | 0,73 | 0,67 | 1,28 |
 | poziomka sft 2026-09-14/iter_0001718 | compl. | tak | 3 | **1,06** | 0,92–1,16 | 12 | 87% | 2,07 | 1,86 | 0,97 | 1,22 | 0,05 | 0,58 | 0,55 | 1,22 |
+| poziomka-instruct-2026-09-30-1 (16k/640k) | chat | tak | 3 | **1,04** | 0,87–1,16 | 34 | 85% | 1,73 | 1,83 | 0,60 | 1,43 | 0,28 | 0,68 | 0,48 | 1,25 |
 | poziomka sft 2026-09-14/iter_0000400 | chat | nie | 3 | **1,04** | 0,95–1,13 | 0 | 90% | 2,12 | 1,62 | 0,95 | 0,60 | 0,05 | 0,53 | 0,80 | 1,60 |
 | polanka-3.7B-exp | compl. | tak | 3 | **0,97** | 0,81–1,19 | 0 | 88% | 1,60 | 1,53 | 1,07 | 1,10 | 0,45 | 0,57 | 0,40 | 1,08 |
 | polanka-3.7B-exp | chat | brak | 3 | **0,95** | 0,87–1,00 | 8 | 87% | 1,50 | 1,27 | 1,02 | 1,29 | 0,47 | 0,55 | 0,37 | 1,13 |
@@ -73,7 +77,10 @@ przełącznika.
 zmierzono w oknie 16384 z `max_tokens = 7800`. Dopisek `(8k/84k)` oznacza serwer
 postawiony z oknem 8192 i RoPE 84000; tam `max_tokens = 3500`, bo tura 2 liczy
 budżet podwójnie i więcej nie mieści się w oknie. Dopisek `t0,8` oznacza
-`temperature = 0,8` zamiast 0,3 — reszta samplingu bez zmian. Ta sama liczba kroków treningu
+`temperature = 0,8` zamiast 0,3 — reszta samplingu bez zmian. Dopisek
+`(16k/640k)` przy `poziomka-instruct-2026-09-30-1` to okno 16384 i RoPE 640000
+z `max_tokens = 7800`; ten model zmierzono w obu konfiguracjach, więc obie są
+oznaczone jawnie. Ta sama liczba kroków treningu
 w dwóch konfiguracjach serwera daje więc dwa osobne wiersze — nie są to dwa
 modele.
 
@@ -117,12 +124,28 @@ z obu konfiguracji zostały do czasu wyjaśnienia poza tabelą.
 **`poziomka-instruct-2026-09-30-1` to merge kilku checkpointów**, nie pojedynczy
 krok treningu — stąd nazwa bez numeru iteracji. Jest to najwyżej oceniona
 Poziomka w tabeli (1,65 wobec 1,48 poprzedniego lidera), przy zerze pustych tur
-i 95% polszczyzny. Zalecenie temperaturowe z serii `2026-09-24` przenosi się
-i tutaj: 0,8 bez rozumowania (1,65 wobec 1,51, przy dwukrotnie mniejszej liczbie
-zapętleń), 0,3 z rozumowaniem (1,21 wobec 1,08). Z rozumowaniem wyższa
-temperatura znów psuje kategorie analityczne — matematyka 1,05 → 0,43,
-wnioskowanie 0,92 → 0,47 — choć zmniejsza zapętlenia z 16% do 5% i puste tury
-z 51 do 33.
+i 95% polszczyzny. Zmierzono go w obu konfiguracjach serwera i przy obu
+temperaturach, osiem wierszy łącznie:
+
+| `poziomka-instruct-2026-09-30-1` | 8k/84k | 16k/640k |
+|---|---|---|
+| `nie`, t0,3 | 1,51 | 1,37 |
+| `nie`, t0,8 | **1,65** | 1,47 |
+| `tak`, t0,3 | 1,21 | 1,04 |
+| `tak`, t0,8 | 1,08 | 1,11 |
+
+**Dla tego modelu okno 8192 z RoPE 84000 jest wyraźnie lepsze** — o 0,14 do 0,18
+w trzech z czterech kombinacji, a przy `nie`/t0,8 przedziały rozrzutu nawet się
+nie dotykają (1,52–1,85 wobec 1,42–1,52). Reakcja na konfigurację RoPE okazuje
+się więc zależna od modelu: seria `2026-09-24` jest na tę zmianę obojętna,
+`2026-09-21/iter_0000535` traci połowę wyniku, a merge traci spójnie, ale
+umiarkowanie. Każdy model trzeba zmierzyć osobno.
+
+Zalecenie temperaturowe przenosi się z serii `2026-09-24`: 0,8 bez rozumowania
+(1,65 wobec 1,51 na 8k, przy zapętleniach 7% wobec 14%), 0,3 z rozumowaniem.
+Z rozumowaniem wyższa temperatura znów psuje kategorie analityczne — na 8k
+matematyka 1,05 → 0,43 i wnioskowanie 0,92 → 0,47 — choć zmniejsza zapętlenia
+z 16% do 5% i puste tury z 51 do 33.
 
 Serie Poziomki nazwane są datą publikacji repozytorium:
 `sft 2026-09-14` to [`cpral/poziomka_sft_2026_09_14_hf`](https://huggingface.co/cpral/poziomka_sft_2026_09_14_hf),
