@@ -22,6 +22,8 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | Bielik-4.5B-v3-Instruct | chat | brak | 3 | **5,69** | 5,60–5,86 | 0 | 97% | 4,77 | 5,73 | 5,35 | 8,54 | 4,87 | 5,85 | 5,03 | 5,55 |
 | Bielik-1.5B-v3-Instruct | chat | brak | 3 | **3,83** | 3,72–3,96 | 0 | 93% | 3,95 | 4,00 | 2,77 | 6,02 | 2,87 | 4,15 | 3,38 | 3,65 |
 | Qra-13B-chat | chat | brak | 3 | **3,30** | 3,12–3,40 | 0 | 90% | 3,90 | 4,03 | 3,87 | 2,05 | 1,53 | 3,32 | 3,57 | 4,12 |
+| poziomka-instruct-2026-09-30-1 (8k/84k, t0,8) | chat | nie | 3 | **1,65** | 1,52–1,85 | 0 | 95% | 2,52 | 2,66 | 1,72 | 1,43 | 0,32 | 0,83 | 1,38 | 2,42 |
+| poziomka-instruct-2026-09-30-1 (8k/84k) | chat | nie | 3 | **1,51** | 1,41–1,67 | 0 | 92% | 2,22 | 2,38 | 1,52 | 1,50 | 0,47 | 0,93 | 1,53 | 1,52 |
 | poziomka sft 2026-09-24/iter_0000100 (8k/84k) | chat | nie | 3 | **1,48** | 1,39–1,60 | 0 | 94% | 2,02 | 2,07 | 1,17 | 1,58 | 0,30 | 0,98 | 1,92 | 1,82 |
 | poziomka sft 2026-09-24/iter_0000498 (8k/84k) | chat | nie | 3 | **1,45** | 1,40–1,49 | 0 | 95% | 2,55 | 2,33 | 1,53 | 1,08 | 0,38 | 0,51 | 1,27 | 1,91 |
 | poziomka sft 2026-09-24/iter_0000498 (8k/84k, t0,8) | chat | nie | 3 | **1,44** | 1,36–1,54 | 0 | 94% | 2,55 | 2,25 | 1,10 | 1,49 | 0,28 | 0,55 | 1,22 | 2,10 |
@@ -30,10 +32,12 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka sft 2026-09-24/iter_0000100 | chat | nie | 3 | **1,40** | 1,27–1,49 | 0 | 94% | 2,05 | 1,84 | 1,72 | 1,00 | 0,43 | 0,92 | 1,38 | 1,85 |
 | poziomka sft 2026-09-14/iter_0001200 | chat | nie | 3 | **1,40** | 1,30–1,46 | 0 | 90% | 2,50 | 2,01 | 1,62 | 1,25 | 0,17 | 0,57 | 0,83 | 2,27 |
 | poziomka sft 2026-09-24/iter_0000100 (8k/84k) | chat | tak | 3 | **1,24** | 1,11–1,44 | 51 | 83% | 2,27 | 2,35 | 0,90 | 0,87 | 0,07 | 0,95 | 0,98 | 1,53 |
+| poziomka-instruct-2026-09-30-1 (8k/84k) | chat | tak | 3 | **1,21** | 1,16–1,27 | 51 | 82% | 2,23 | 1,92 | 0,92 | 1,05 | 0,48 | 0,85 | 0,98 | 1,28 |
 | poziomka sft 2026-09-24/iter_0000498 | chat | tak | 3 | **1,21** | 1,10–1,27 | 23 | 86% | 2,65 | 1,93 | 0,68 | 1,22 | 0,15 | 0,67 | 1,12 | 1,23 |
 | poziomka sft 2026-09-24/iter_0000498 (8k/84k) | chat | tak | 3 | **1,17** | 1,08–1,25 | 42 | 85% | 2,38 | 1,85 | 0,67 | 1,15 | 0,19 | 0,70 | 0,97 | 1,43 |
 | poziomka sft 2026-09-14/iter_0000800 | chat | nie | 3 | **1,12** | 1,08–1,15 | 0 | 94% | 2,24 | 1,88 | 0,82 | 0,50 | 0,18 | 0,28 | 0,81 | 2,22 |
 | poziomka sft 2026-09-24/iter_0000100 | chat | tak | 3 | **1,10** | 0,97–1,21 | 33 | 86% | 2,02 | 1,53 | 0,82 | 1,10 | 0,42 | 0,77 | 1,05 | 1,12 |
+| poziomka-instruct-2026-09-30-1 (8k/84k, t0,8) | chat | tak | 3 | **1,08** | 1,06–1,10 | 33 | 86% | 2,80 | 1,65 | 0,47 | 0,43 | 0,28 | 0,73 | 0,80 | 1,42 |
 | poziomka sft 2026-09-24/iter_0000498 (8k/84k, t0,8) | chat | tak | 3 | **1,08** | 0,96–1,22 | 45 | 85% | 2,23 | 1,87 | 0,37 | 1,05 | 0,47 | 0,73 | 0,67 | 1,28 |
 | poziomka sft 2026-09-14/iter_0001718 | compl. | tak | 3 | **1,06** | 0,92–1,16 | 12 | 87% | 2,07 | 1,86 | 0,97 | 1,22 | 0,05 | 0,58 | 0,55 | 1,22 |
 | poziomka sft 2026-09-14/iter_0000400 | chat | nie | 3 | **1,04** | 0,95–1,13 | 0 | 90% | 2,12 | 1,62 | 0,95 | 0,60 | 0,05 | 0,53 | 0,80 | 1,60 |
@@ -109,6 +113,16 @@ okna nie powinna mieć znaczenia. Skoro `2026-09-24` przenosi się między tymi
 konfiguracjami bez szkody, wskazuje to na błędną konfigurację RoPE w tamtym
 checkpoincie, a nie na wadę samego mechanizmu; wyniki `2026-09-21/iter_0000535`
 z obu konfiguracji zostały do czasu wyjaśnienia poza tabelą.
+
+**`poziomka-instruct-2026-09-30-1` to merge kilku checkpointów**, nie pojedynczy
+krok treningu — stąd nazwa bez numeru iteracji. Jest to najwyżej oceniona
+Poziomka w tabeli (1,65 wobec 1,48 poprzedniego lidera), przy zerze pustych tur
+i 95% polszczyzny. Zalecenie temperaturowe z serii `2026-09-24` przenosi się
+i tutaj: 0,8 bez rozumowania (1,65 wobec 1,51, przy dwukrotnie mniejszej liczbie
+zapętleń), 0,3 z rozumowaniem (1,21 wobec 1,08). Z rozumowaniem wyższa
+temperatura znów psuje kategorie analityczne — matematyka 1,05 → 0,43,
+wnioskowanie 0,92 → 0,47 — choć zmniejsza zapętlenia z 16% do 5% i puste tury
+z 51 do 33.
 
 Serie Poziomki nazwane są datą publikacji repozytorium:
 `sft 2026-09-14` to [`cpral/poziomka_sft_2026_09_14_hf`](https://huggingface.co/cpral/poziomka_sft_2026_09_14_hf),

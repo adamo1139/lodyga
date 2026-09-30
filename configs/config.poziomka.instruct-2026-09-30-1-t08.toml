@@ -1,0 +1,33 @@
+# Poziomka instruct 2026-09-30-1, wariant nothink, temperature 0.8.
+#   lokalnie: /media/nvme_2tb/maked/poziomka_train/poziomka-instruct-2026-09-30-1
+#
+# To merge kilku checkpointow, nie pojedynczy krok treningu.
+#
+# Sonda (16 pytan, oba tryby, obie temperatury) przed pomiarem:
+#   nothink t0,3: 0 urwanych, 0 pustych, 2/16 zapetlonych, 0/16 rozumuje
+#   nothink t0,8: 0 urwanych, 0 pustych, 0/16 zapetlonych, 0/16 rozumuje
+#   think   t0,3: 5 urwanych, 2 puste,   3/16 zapetlonych, 12/16 rozumuje
+#   think   t0,8: 1 urwany,   1 pusta,   2/16 zapetlonych, 11/16 rozumuje
+# Szablon respektuje enable_thinking: przy false zero tur rozumuje.
+[model]
+id = "poziomka_instruct_2026_09_30_1_t08"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka-instruct-2026-09-30-1"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+# max_tokens 3500 - serwer wystawia okno 8192, a tura 2 liczy budzet podwojnie:
+# najdluzsza para pytan (~584 tokeny) plus szablon (~40) plus dwie generacje
+# musi zmiescic sie w 8192, czyli max_tokens <= 3784.
+[generation]
+max_tokens = 3500
+temperature = 0.8
+top_p = 0.9
+frequency_penalty = 0.05
+stop = ["<|im_end|>"]
