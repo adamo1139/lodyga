@@ -59,8 +59,14 @@ KATEGORIE = [
 # dopuszczalne wyłącznie z drugim nośnikiem tożsamości - stąd podpis przy
 # każdej gwiazdce, a nie sama legenda).
 KRZYWA_KOLOR = "#2a78d6"
-# Kolory nagłówka wariantu: niebieski jak krzywa dla trybu bez rozumowania,
-# pomarańczowy dla trybu z rozumowaniem. Oba ze zwalidowanej palety.
+# Kolor wariantu: niebieski bez rozumowania, pomaranczowy z rozumowaniem.
+# Maluje i naglowek, i krzywa, zeby plik dalo sie rozpoznac z daleka.
+#
+# UWAGA: w wariancie pomaranczowym krzywa (#eb6834) sasiaduje z czerwona
+# gwiazdka merge'u (#e34948) - to bliskie odcienie i przy protanopii moga sie
+# zlewac. Tozsamosc niesie tu wiec KSZTALT (kropka wobec gwiazdki), pozycja
+# (gwiazdka stoi sama na koncu osi) i podpis wartosci przy kazdym markerze,
+# a nie sam kolor.
 WARIANT_KOLOR = {"nie": "#2a78d6", "tak": "#eb6834"}
 TLO = "#fcfcfb"
 INK = "#1a1a19"
@@ -206,7 +212,7 @@ def gwiazdki(wiersze, config, myslenie, metryka, x_merge):
     return out
 
 
-def panel(ax, punkty, gwiazdy, tytul, x_zakres, y_max, pokaz_os_y):
+def panel(ax, punkty, gwiazdy, tytul, x_zakres, y_max, pokaz_os_y, kolor):
     """Jeden wykres w siatce. Wszystkie dzielą skalę, żeby dało się je porównać."""
     x = [p[0] for p in punkty]
     y = [p[1] * NA_PROCENT for p in punkty]
@@ -215,10 +221,10 @@ def panel(ax, punkty, gwiazdy, tytul, x_zakres, y_max, pokaz_os_y):
     prog = max(1.5, (x_zakres[1] - x_zakres[0]) * 0.25)
     for i in range(len(x) - 1):
         przerwa = x[i + 1] - x[i] > prog
-        ax.plot(x[i:i + 2], y[i:i + 2], color=KRZYWA_KOLOR, linewidth=1.6,
+        ax.plot(x[i:i + 2], y[i:i + 2], color=kolor, linewidth=1.6,
                 linestyle=(0, (4, 3)) if przerwa else "-",
                 alpha=0.5 if przerwa else 1.0, zorder=3)
-    ax.plot(x, y, color=KRZYWA_KOLOR, linewidth=0, marker="o", markersize=4,
+    ax.plot(x, y, color=kolor, linewidth=0, marker="o", markersize=4,
             markeredgecolor=TLO, markeredgewidth=1.0, label="Poziomka", zorder=4)
     # Wartość przy każdym checkpoincie. Bez tego odczytanie, czy dołek to 9%
     # czy 11%, wymagałoby mierzenia wzrokiem po siatce.
@@ -271,7 +277,7 @@ def panel(ax, punkty, gwiazdy, tytul, x_zakres, y_max, pokaz_os_y):
         ax.tick_params(labelleft=False)
 
 
-def rysuj_siatke(panele, tytul, naglowek, naglowek_kolor, podtytul, sciezka):
+def rysuj_siatke(panele, tytul, naglowek, kolor, podtytul, sciezka):
     """Jeden PNG: wynik ogólny jako wyróżniony panel plus osiem kategorii.
 
     Wynik ogólny dostaje własny, szerszy box u góry z jasnym tłem i ramką, bo
@@ -307,7 +313,7 @@ def rysuj_siatke(panele, tytul, naglowek, naglowek_kolor, podtytul, sciezka):
     fig.patch.set_facecolor(TLO)
     siatka = fig.add_gridspec(4, 3, height_ratios=[1.3, 1, 1, 1],
                               hspace=0.34, wspace=0.17,
-                              left=0.055, right=0.99, top=0.868, bottom=0.085)
+                              left=0.055, right=0.99, top=0.895, bottom=0.085)
 
     glowny = fig.add_subplot(siatka[0, :])
     glowny.set_facecolor("#f4f4f1")
@@ -315,7 +321,7 @@ def rysuj_siatke(panele, tytul, naglowek, naglowek_kolor, podtytul, sciezka):
         glowny.spines[bok].set_visible(True)
         glowny.spines[bok].set_color("#cfcfc9")
     panel(glowny, panele[0][1], panele[0][2], panele[0][0], x_zakres,
-          gorny_poziom(panele[0][1], panele[0][2]), pokaz_os_y=True)
+          gorny_poziom(panele[0][1], panele[0][2]), pokaz_os_y=True, kolor=kolor)
     glowny.set_title(panele[0][0], fontsize=11.5, color=INK, pad=8, loc="left",
                      fontweight="semibold")
     glowny.set_xticks(kroki)
@@ -325,7 +331,7 @@ def rysuj_siatke(panele, tytul, naglowek, naglowek_kolor, podtytul, sciezka):
         ax = fig.add_subplot(siatka[1 + i // 3, i % 3])
         ax.set_facecolor(TLO)
         panel(ax, punkty, gwiazdy, opis, x_zakres, gorny_poziom(punkty, gwiazdy),
-              pokaz_os_y=True)
+              pokaz_os_y=True, kolor=kolor)
         # Podziałka tokenów w KAŻDYM panelu: przy siatce odczytanie pozycji
         # dołka z górnego rzędu wymagałoby inaczej wodzenia wzrokiem niżej.
         ax.set_xticks(kroki)
@@ -333,9 +339,9 @@ def rysuj_siatke(panele, tytul, naglowek, naglowek_kolor, podtytul, sciezka):
 
     fig.suptitle(tytul, fontsize=13, color=INK, x=0.012, y=0.991,
                  ha="left", fontweight="semibold")
-    fig.text(0.012, 0.955, naglowek, fontsize=15, color=naglowek_kolor,
-             ha="left", va="top", fontweight="bold")
-    fig.text(0.012, 0.922, podtytul, fontsize=8.5, color=INK_SLABY,
+    fig.text(0.99, 0.986, naglowek, fontsize=16, color=kolor,
+             ha="right", va="top", fontweight="bold")
+    fig.text(0.012, 0.952, podtytul, fontsize=8.5, color=INK_SLABY,
              ha="left", va="top")
     fig.text(0.5, 0.014, "tokeny SFT (miliardy) · na lewo od linii przerywanej "
              "pasmo modeli o nieznanej liczbie tokenów SFT",
