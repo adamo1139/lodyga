@@ -64,6 +64,11 @@ INK = "#1a1a19"
 INK_SLABY = "#6b6b68"
 SIATKA = "#e6e6e2"
 
+# Łodyga punktuje w skali 0-10, ale na wykresie pokazujemy procent maksimum:
+# przy wynikach rzędu 1,5/10 oś procentowa czyta się łatwiej niż ułamki, bo
+# "15%" od razu mówi, jak daleko modelowi do pułapu.
+NA_PROCENT = 10.0
+
 # Pasmo "nieznana" po lewej stronie osi, we współrzędnych tokenów.
 PASMO_SRODEK = -0.95
 PASMO_ROZSTAW = 0.34
@@ -201,7 +206,7 @@ def gwiazdki(wiersze, config, myslenie, metryka, x_merge):
 def panel(ax, punkty, gwiazdy, tytul, x_zakres, y_max, pokaz_os_y):
     """Jeden wykres w siatce. Wszystkie dzielą skalę, żeby dało się je porównać."""
     x = [p[0] for p in punkty]
-    y = [p[1] for p in punkty]
+    y = [p[1] * NA_PROCENT for p in punkty]
     # Odcinek przez dużą dziurę w danych rysujemy przerywany - ciągła linia
     # sugerowałaby przebieg, którego nie zmierzyliśmy.
     prog = max(1.5, (x_zakres[1] - x_zakres[0]) * 0.25)
@@ -217,7 +222,8 @@ def panel(ax, punkty, gwiazdy, tytul, x_zakres, y_max, pokaz_os_y):
     # (kodowanie: 0,47 i 0,17). Podpis idzie domyślnie nad markerem; jeśli
     # koliduje z już postawionym, schodzi pod spód, a w ostateczności wyżej.
     postawione = []
-    for gx, gy, opis, kolor in gwiazdy:
+    for gx, gy_surowe, opis, kolor in gwiazdy:
+        gy = gy_surowe * NA_PROCENT
         ax.plot([gx], [gy], marker="*", markersize=13, color=kolor,
                 markeredgecolor=TLO, markeredgewidth=0.9, linestyle="none",
                 label=opis, zorder=6)
@@ -229,13 +235,14 @@ def panel(ax, punkty, gwiazdy, tytul, x_zakres, y_max, pokaz_os_y):
                        for px, py in postawione):
                 break
         postawione.append((gx, y_etykiety))
-        ax.annotate(f"{gy:.2f}".replace(".", ","), xy=(gx, gy),
+        ax.annotate(f"{gy:.0f}%", xy=(gx, gy),
                     xytext=(0, dy), textcoords="offset points",
                     ha="center", fontsize=6.5, color=kolor, zorder=6)
 
     ax.set_title(tytul, fontsize=9.5, color=INK, pad=6, loc="left")
     ax.set_xlim(*x_zakres)
     ax.set_ylim(0, y_max)
+    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
     ax.axvline(PASMO_GRANICA, color="#d8d8d4", linewidth=0.8,
                linestyle=(0, (3, 3)), zorder=1)
     ax.grid(True, axis="y", color=SIATKA, linewidth=0.6, zorder=0)
@@ -266,8 +273,8 @@ def rysuj_siatke(panele, tytul, podtytul, sciezka):
     import matplotlib.pyplot as plt
 
     x_wszystkie = [p[0] for _, punkty, _ in panele for p in punkty]
-    y_wszystkie = ([p[1] for _, punkty, _ in panele for p in punkty]
-                   + [g[1] for _, _, gwiazdy in panele for g in gwiazdy])
+    y_wszystkie = ([p[1] * NA_PROCENT for _, punkty, _ in panele for p in punkty]
+                   + [g[1] * NA_PROCENT for _, _, gwiazdy in panele for g in gwiazdy])
     x_zakres = (PASMO_SRODEK - PASMO_ROZSTAW - 0.3, max(x_wszystkie) + 0.6)
     y_max = max(y_wszystkie) * 1.22
     kroki = [t for t in (0, 2, 4, 6, 8) if t <= max(x_wszystkie) + 0.5]
@@ -305,7 +312,7 @@ def rysuj_siatke(panele, tytul, podtytul, sciezka):
     fig.text(0.5, 0.022, "tokeny SFT (miliardy) · na lewo od linii przerywanej "
              "pasmo modeli o nieznanej liczbie tokenów SFT",
              fontsize=8.5, color=INK_SLABY, ha="center")
-    fig.text(0.004, 0.5, "wynik Łodygi (0–10)", fontsize=9, color=INK_SLABY,
+    fig.text(0.004, 0.5, "wynik Łodygi (% maksimum)", fontsize=9, color=INK_SLABY,
              va="center", rotation="vertical")
 
     uchwyty, etykiety = glowny.get_legend_handles_labels()
