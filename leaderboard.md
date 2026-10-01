@@ -44,8 +44,10 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka sft 2026-09-14/iter_0001200 | chat | nie | 3 | **1,40** | 1,30–1,46 | 0 | 90% | 2,50 | 2,01 | 1,62 | 1,25 | 0,17 | 0,57 | 0,83 | 2,27 |
 | poziomka-instruct-2026-09-30-1 (16k/640k) | chat | nie | 3 | **1,37** | 1,36–1,41 | 0 | 95% | 2,27 | 2,20 | 1,50 | 1,31 | 0,37 | 0,85 | 1,22 | 1,28 |
 | poziomka-instruct-2026-09-30-4 (8k/84k) | chat | nie | 3 | **1,37** | 1,27–1,52 | 0 | 94% | 2,00 | 2,43 | 1,42 | 1,15 | 0,30 | 0,98 | 1,13 | 1,50 |
+| poziomka sft 2026-09-24/iter_0000400 (8k/84k) | chat | nie | 3 | **1,36** | 1,32–1,42 | 0 | 92% | 2,42 | 2,13 | 1,83 | 1,16 | 0,25 | 0,93 | 1,02 | 1,10 |
 | poziomka-instruct-2026-09-30-3 (8k/84k, t0,8) | chat | nie | 3 | **1,30** | 1,28–1,32 | 0 | 94% | 2,38 | 2,10 | 1,05 | 0,77 | 0,32 | 0,70 | 1,38 | 1,65 |
 | poziomka-instruct-2026-09-30-5 (8k/84k) | chat | tak | 3 | **1,28** | 1,24–1,34 | 49 | 82% | 2,50 | 2,11 | 0,72 | 1,37 | 0,34 | 0,77 | 1,23 | 1,23 |
+| poziomka sft 2026-09-24/iter_0000400 (8k/84k, t0,8) | chat | nie | 3 | **1,27** | 1,19–1,40 | 0 | 91% | 2,32 | 1,90 | 1,15 | 1,26 | 0,13 | 0,47 | 1,22 | 1,72 |
 | poziomka sft 2026-09-24/iter_0000100 (8k/84k) | chat | tak | 3 | **1,24** | 1,11–1,44 | 51 | 83% | 2,27 | 2,35 | 0,90 | 0,87 | 0,07 | 0,95 | 0,98 | 1,53 |
 | poziomka-instruct-2026-09-30-5 (8k/84k, t0,8) | chat | tak | 3 | **1,22** | 1,14–1,35 | 19 | 90% | 2,60 | 1,73 | 1,10 | 0,91 | 0,12 | 0,78 | 0,87 | 1,63 |
 | poziomka-instruct-2026-09-30-1 (8k/84k) | chat | tak | 3 | **1,21** | 1,16–1,27 | 51 | 82% | 2,23 | 1,92 | 0,92 | 1,05 | 0,48 | 0,85 | 0,98 | 1,28 |
@@ -62,8 +64,10 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka sft 2026-09-24/iter_0000498 (8k/84k, t0,8) | chat | tak | 3 | **1,08** | 0,96–1,22 | 45 | 85% | 2,23 | 1,87 | 0,37 | 1,05 | 0,47 | 0,73 | 0,67 | 1,28 |
 | poziomka sft 2026-09-24/iter_0000200 (8k/84k) | chat | nie | 3 | **1,07** | 1,02–1,12 | 0 | 93% | 2,08 | 1,35 | 1,40 | 1,22 | 0,20 | 0,65 | 0,72 | 0,97 |
 | poziomka sft 2026-09-14/iter_0001718 | compl. | tak | 3 | **1,06** | 0,92–1,16 | 12 | 87% | 2,07 | 1,86 | 0,97 | 1,22 | 0,05 | 0,58 | 0,55 | 1,22 |
+| poziomka sft 2026-09-24/iter_0000400 (8k/84k, t0,8) | chat | tak | 3 | **1,05** | 0,94–1,18 | 36 | 84% | 2,25 | 1,40 | 0,95 | 0,76 | 0,32 | 0,57 | 0,82 | 1,32 |
 | poziomka-instruct-2026-09-30-1 (16k/640k) | chat | tak | 3 | **1,04** | 0,87–1,16 | 34 | 85% | 1,73 | 1,83 | 0,60 | 1,43 | 0,28 | 0,68 | 0,48 | 1,25 |
 | poziomka sft 2026-09-14/iter_0000400 | chat | nie | 3 | **1,04** | 0,95–1,13 | 0 | 90% | 2,12 | 1,62 | 0,95 | 0,60 | 0,05 | 0,53 | 0,80 | 1,60 |
+| poziomka sft 2026-09-24/iter_0000400 (8k/84k) | chat | tak | 3 | **1,04** | 0,97–1,08 | 56 | 80% | 2,27 | 1,67 | 0,97 | 0,69 | 0,27 | 0,67 | 0,88 | 0,88 |
 | poziomka-instruct-2026-09-30-3 (8k/84k, t0,8) | chat | tak | 3 | **1,01** | 1,00–1,03 | 21 | 90% | 2,18 | 1,53 | 0,90 | 0,71 | 0,13 | 0,62 | 0,82 | 1,22 |
 | poziomka-instruct-2026-09-30-3 (8k/84k) | chat | tak | 3 | **1,00** | 0,87–1,09 | 55 | 81% | 1,97 | 1,50 | 0,75 | 1,11 | 0,08 | 0,53 | 0,69 | 1,42 |
 | poziomka sft 2026-09-24/iter_0000200 (8k/84k, t0,8) | chat | nie | 3 | **0,98** | 0,91–1,03 | 0 | 96% | 1,63 | 1,25 | 1,12 | 1,30 | 0,18 | 0,30 | 0,89 | 1,15 |
@@ -222,12 +226,15 @@ o cztery miliardy tokenów, między którymi krzywa wyglądała na płaską. Pom
 | `iter_0000100` | 3,90 mld | 1,48 | 1,24 |
 | `iter_0000200` | 4,89 mld | 1,07 | 0,81 |
 | `iter_0000300` | 5,88 mld | **0,87** | **0,84** |
+| `iter_0000400` | 6,88 mld | 1,36 | 1,04 |
 | `iter_0000498` | 7,85 mld | 1,45 | 1,17 |
 
-Zagłębienie jest szerokie i pogłębia się aż do trzysetki: bez rozumowania
-spadek sięga 0,61, czyli ponad 40% wyniku, i odbudowuje się dopiero na ostatnim
-odcinku. Wniosek: **nie wolno interpolować między odległymi checkpointami** —
-płaski odcinek na wykresie może ukrywać załamanie.
+To wyraźne **V z dnem przy trzysetce**, a nie plateau. Model traci 0,61 przez
+200 kroków, a potem odrabia 0,49 w ciągu samych stu — odcinek 300→400 odpowiada
+za 80% odbudowy, ostatnie 98 kroków dokłada już tylko 0,09. Wniosek:
+**nie wolno interpolować między odległymi checkpointami**; dwa punkty oddalone
+o cztery miliardy tokenów rysowały tu spokojne plateau, pod którym kryło się
+czterdziestoprocentowe załamanie.
 
 W kategoriach widać, co się psuje. Między `iter_0000100` a `iter_0000300` bez
 rozumowania nauki ścisłe spadają z 1,92 do 0,47, humanistyka z 1,82 do 0,53,
@@ -235,6 +242,11 @@ ekstrakcja z 0,98 do 0,42, a piśmiennictwo trzyma się najlepiej (2,02 → 1,80
 Model traci więc wiedzę i precyzję, zachowując płynność. Przy `iter_0000300`
 oba warianty prawie się zrównują (0,87 wobec 0,84), bo spada głównie ten bez
 rozumowania.
+
+Odbudowa jest nierównomierna. Do `iter_0000400` umiejętności konwersacyjne
+wracają w całości (odgrywanie ról 0,85 → 2,13, piśmiennictwo 1,80 → 2,42,
+wnioskowanie 1,35 → 1,83), ale wiedza tylko do połowy poziomu z setki: nauki
+ścisłe 0,47 → 1,02 wobec 1,92, humanistyka 0,53 → 1,10 wobec 1,82.
 
 Uwagi przy czytaniu: wiersz `iter_0000200`/`tak` ma szeroki rozrzut
 (0,70–1,04) i 66 pustych tur na 480 (14%). Warianty `tak` dla `iter_0000300`
