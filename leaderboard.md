@@ -24,8 +24,12 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | Qra-13B-chat | chat | brak | 3 | **3,30** | 3,12–3,40 | 0 | 90% | 3,90 | 4,03 | 3,87 | 2,05 | 1,53 | 3,32 | 3,57 | 4,12 |
 | poziomka-instruct-2026-09-30-1 (8k/84k, t0,8) | chat | nie | 3 | **1,65** | 1,52–1,85 | 0 | 95% | 2,52 | 2,66 | 1,72 | 1,43 | 0,32 | 0,83 | 1,38 | 2,42 |
 | poziomka-instruct-2026-09-30-5 (8k/84k, t0,8) | chat | nie | 3 | **1,64** | 1,58–1,70 | 0 | 94% | 2,72 | 2,24 | 1,53 | 1,13 | 0,45 | 0,67 | 1,83 | 2,55 |
+| poziomka-instruct-2026-09-30-6 (8k/84k) | chat | nie | 3 | **1,61** | 1,44–1,83 | 0 | 95% | 2,00 | 2,58 | 1,78 | 1,42 | 0,80 | 1,13 | 1,55 | 1,63 |
 | poziomka-instruct-2026-09-30-4 (8k/84k, t0,8) | chat | nie | 3 | **1,58** | 1,44–1,70 | 0 | 92% | 2,55 | 2,57 | 1,60 | 0,91 | 0,32 | 0,77 | 1,50 | 2,38 |
+| poziomka-instruct-2026-09-30-6 (8k/84k, t0,8) | chat | nie | 3 | **1,58** | 1,49–1,62 | 0 | 96% | 2,43 | 2,45 | 1,65 | 0,98 | 0,58 | 0,97 | 1,50 | 2,02 |
+| poziomka-instruct-2026-09-30-7 (8k/84k) | chat | nie | 3 | **1,57** | 1,28–1,88 | 0 | 93% | 2,33 | 2,23 | 1,77 | 1,35 | 0,38 | 0,97 | 1,48 | 2,05 |
 | poziomka-instruct-2026-09-30-5 (8k/84k) | chat | nie | 3 | **1,54** | 1,49–1,61 | 0 | 94% | 2,15 | 2,27 | 1,25 | 1,46 | 0,58 | 1,23 | 1,40 | 1,95 |
+| poziomka-instruct-2026-09-30-7 (8k/84k, t0,8) | chat | nie | 3 | **1,54** | 1,49–1,62 | 0 | 94% | 2,55 | 2,37 | 1,45 | 0,88 | 0,38 | 0,77 | 1,58 | 2,35 |
 | poziomka-instruct-2026-09-30-1 (8k/84k) | chat | nie | 3 | **1,51** | 1,41–1,67 | 0 | 92% | 2,22 | 2,38 | 1,52 | 1,50 | 0,47 | 0,93 | 1,53 | 1,52 |
 | poziomka-instruct-2026-09-30-3 (8k/84k) | chat | nie | 3 | **1,50** | 1,41–1,60 | 0 | 93% | 2,50 | 2,30 | 1,43 | 1,65 | 0,17 | 0,85 | 1,43 | 1,68 |
 | poziomka sft 2026-09-24/iter_0000100 (8k/84k) | chat | nie | 3 | **1,48** | 1,39–1,60 | 0 | 94% | 2,02 | 2,07 | 1,17 | 1,58 | 0,30 | 0,98 | 1,92 | 1,82 |
@@ -33,6 +37,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka sft 2026-09-24/iter_0000498 (8k/84k) | chat | nie | 3 | **1,45** | 1,40–1,49 | 0 | 95% | 2,55 | 2,33 | 1,53 | 1,08 | 0,38 | 0,51 | 1,27 | 1,91 |
 | poziomka sft 2026-09-24/iter_0000498 (8k/84k, t0,8) | chat | nie | 3 | **1,44** | 1,36–1,54 | 0 | 94% | 2,55 | 2,25 | 1,10 | 1,49 | 0,28 | 0,55 | 1,22 | 2,10 |
 | poziomka sft 2026-09-24/iter_0000498 | chat | nie | 3 | **1,42** | 1,30–1,50 | 0 | 95% | 2,32 | 2,33 | 1,13 | 1,24 | 0,22 | 0,77 | 1,73 | 1,62 |
+| poziomka-instruct-2026-09-30-7 (8k/84k) | chat | tak | 3 | **1,41** | 1,26–1,54 | 42 | 84% | 2,43 | 2,25 | 1,00 | 1,35 | 0,30 | 1,13 | 1,37 | 1,42 |
 | poziomka sft 2026-09-14/iter_0001718 | chat | nie | 3 | **1,40** | 1,31–1,51 | 0 | 93% | 2,28 | 2,09 | 1,75 | 0,95 | 0,05 | 0,77 | 1,25 | 2,12 |
 | poziomka sft 2026-09-24/iter_0000100 | chat | nie | 3 | **1,40** | 1,27–1,49 | 0 | 94% | 2,05 | 1,84 | 1,72 | 1,00 | 0,43 | 0,92 | 1,38 | 1,85 |
 | poziomka sft 2026-09-14/iter_0001200 | chat | nie | 3 | **1,40** | 1,30–1,46 | 0 | 90% | 2,50 | 2,01 | 1,62 | 1,25 | 0,17 | 0,57 | 0,83 | 2,27 |
@@ -44,6 +49,9 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka-instruct-2026-09-30-5 (8k/84k, t0,8) | chat | tak | 3 | **1,22** | 1,14–1,35 | 19 | 90% | 2,60 | 1,73 | 1,10 | 0,91 | 0,12 | 0,78 | 0,87 | 1,63 |
 | poziomka-instruct-2026-09-30-1 (8k/84k) | chat | tak | 3 | **1,21** | 1,16–1,27 | 51 | 82% | 2,23 | 1,92 | 0,92 | 1,05 | 0,48 | 0,85 | 0,98 | 1,28 |
 | poziomka sft 2026-09-24/iter_0000498 | chat | tak | 3 | **1,21** | 1,10–1,27 | 23 | 86% | 2,65 | 1,93 | 0,68 | 1,22 | 0,15 | 0,67 | 1,12 | 1,23 |
+| poziomka-instruct-2026-09-30-6 (8k/84k) | chat | tak | 3 | **1,21** | 1,11–1,29 | 47 | 80% | 2,32 | 1,90 | 0,75 | 1,22 | 0,28 | 0,75 | 1,23 | 1,25 |
+| poziomka-instruct-2026-09-30-7 (8k/84k, t0,8) | chat | tak | 3 | **1,20** | 1,11–1,28 | 30 | 88% | 2,72 | 1,80 | 1,15 | 0,85 | 0,12 | 0,65 | 0,83 | 1,47 |
+| poziomka-instruct-2026-09-30-6 (8k/84k, t0,8) | chat | tak | 3 | **1,18** | 1,10–1,25 | 27 | 88% | 2,63 | 1,94 | 0,55 | 1,00 | 0,15 | 0,78 | 0,75 | 1,65 |
 | poziomka sft 2026-09-24/iter_0000498 (8k/84k) | chat | tak | 3 | **1,17** | 1,08–1,25 | 42 | 85% | 2,38 | 1,85 | 0,67 | 1,15 | 0,19 | 0,70 | 0,97 | 1,43 |
 | poziomka sft 2026-09-14/iter_0000800 | chat | nie | 3 | **1,12** | 1,08–1,15 | 0 | 94% | 2,24 | 1,88 | 0,82 | 0,50 | 0,18 | 0,28 | 0,81 | 2,22 |
 | poziomka-instruct-2026-09-30-1 (16k/640k, t0,8) | chat | tak | 3 | **1,11** | 1,03–1,15 | 39 | 88% | 2,52 | 1,85 | 0,52 | 0,84 | 0,45 | 0,48 | 0,65 | 1,52 |
@@ -163,6 +171,8 @@ rozumowania:
 | `-3` | **1,50** | 1,30 | −0,20 | 1,65 |
 | `-4` | 1,37 | **1,58** | +0,21 | 1,15 |
 | `-5` | 1,54 | **1,64** | +0,10 | 1,46 |
+| `-6` | **1,61** | 1,58 | −0,03 | 1,42 |
+| `-7` | **1,57** | 1,54 | −0,03 | 1,35 |
 
 Wyższa temperatura pomaga modelom mocnym w tekstach otwartych, a szkodzi tym
 mocnym w matematyce: `-3` ma najlepszą matematykę wśród Poziomek (1,65)
@@ -174,6 +184,26 @@ Zapętlenia spadają przy wyższej temperaturze zawsze, we wszystkich merge'ach
 (14% → 6% u `-4`, 11% → 3% u `-3`), ale u `-3` ta poprawa nie kompensuje strat
 w treści. Wielkość zysku idzie w parze z tym, ile jest do ugaszenia: `-4` miał
 14% zapętleń przy t0,3 i zyskuje 0,21, a `-5` tylko 10% i zyskuje 0,10.
+
+**Udział wczesnych checkpointów w merge'u działa przeciwnie w obu wariantach.**
+`-5` i `-7` składają się z tych samych dziewięciu checkpointów i różnią się
+wyłącznie wagą grupy run2 (korpus v11, okno 8192): 25,5% wobec 9,6%.
+
+| | `-5` (run2 25,5%) | `-7` (run2 9,6%) |
+|---|---|---|
+| `nie`, t0,8 | **1,64** | 1,54 |
+| `tak`, t0,3 | 1,28 | **1,41** |
+
+Odchudzenie run2 kosztuje 0,10 bez rozumowania, a daje 0,13 z rozumowaniem.
+Wczesne checkpointy wnoszą więc coś, co pomaga w trybie bezpośrednim,
+a przeszkadza przy rozumowaniu. `-7` ma najlepszy wariant `tak` w całej tabeli
+(1,41), a także najwyższą ekstrakcję (1,13) i wnioskowanie (1,00) w tym
+wariancie.
+
+**Ostrożnie z wierszami `nie`/t0,3 u `-6` i `-7`.** Mają rozrzut 1,44–1,83
+i 1,28–1,88 (odchylenie 0,20 i 0,30) — najszersze w tabeli. Przy takich
+przedziałach różnice rzędu 0,05 między merge'ami nic nie znaczą i nie należy
+na nich budować rankingu.
 
 **`-5` jest najrówniejszym merge'em.** Wygrywa w trzech z czterech kombinacji,
 a w czwartej remisuje z `-1` (1,64 wobec 1,65, przedziały 1,58–1,70 i 1,52–1,85
