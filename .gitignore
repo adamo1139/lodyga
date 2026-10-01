@@ -29,3 +29,6 @@
 
 # Python
 __pycache__/
+
+# Jednorazowa tabela porównawcza, nie element harnessu (zostaje lokalnie).
+/tabela.py
