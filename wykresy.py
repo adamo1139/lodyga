@@ -26,8 +26,11 @@ najlepszym ustawieniu, a nie średnia po konfiguracjach serwera.
 Warianty rozumowania mają osobne wykresy, bo rozumowanie zmienia wynik
 o kilkadziesiąt setnych i wspólny wykres mieszałby dwa różne zjawiska.
 
-    python3 wykresy.py                  # 18 plików PNG do katalogu wykresy/
-    python3 wykresy.py --tylko-ogolny   # sam wynik ogólny, bez kategorii
+Powstają dwa pliki: `wykresy/nie.png` i `wykresy/tak.png`. Każdy to siatka 3x3
+- wynik ogólny plus osiem kategorii - we wspólnej skali, żeby dało się je
+porównywać między sobą.
+
+    python3 wykresy.py
 """
 
 import argparse
@@ -195,78 +198,97 @@ def gwiazdki(wiersze, config, myslenie, metryka, x_merge):
     return out
 
 
-def rysuj(punkty, gwiazdy, tytul, podtytul, sciezka):
-    import matplotlib
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-
-    fig, ax = plt.subplots(figsize=(9.5, 5.6), dpi=140)
-    fig.patch.set_facecolor(TLO)
-    ax.set_facecolor(TLO)
-
+def panel(ax, punkty, gwiazdy, tytul, x_zakres, y_max, pokaz_os_y):
+    """Jeden wykres w siatce. Wszystkie dzielą skalę, żeby dało się je porównać."""
     x = [p[0] for p in punkty]
     y = [p[1] for p in punkty]
-    # Odcinek przez dużą dziurę w danych rysujemy przerywany. Między 3,9 a 7,9
-    # mld tokenów nie zmierzyliśmy żadnego checkpointu run4, a ciągła linia
-    # sugerowałaby tam przebieg, którego nie znamy.
-    luka = max((x[i + 1] - x[i]) for i in range(len(x) - 1)) if len(x) > 1 else 0
-    prog = max(1.5, (max(x) - min(x)) * 0.25)
+    # Odcinek przez dużą dziurę w danych rysujemy przerywany - ciągła linia
+    # sugerowałaby przebieg, którego nie zmierzyliśmy.
+    prog = max(1.5, (x_zakres[1] - x_zakres[0]) * 0.25)
     for i in range(len(x) - 1):
         przerwa = x[i + 1] - x[i] > prog
-        ax.plot(x[i:i + 2], y[i:i + 2], color=KRZYWA_KOLOR, linewidth=2.0,
-                linestyle=(0, (5, 3)) if przerwa else "-", zorder=3,
-                alpha=0.55 if przerwa else 1.0)
-    ax.plot(x, y, color=KRZYWA_KOLOR, linewidth=0, marker="o", markersize=6,
-            markeredgecolor=TLO, markeredgewidth=1.5, label="Poziomka", zorder=4)
-    if luka > prog:
-        i = max(range(len(x) - 1), key=lambda j: x[j + 1] - x[j])
-        ax.annotate("brak pomiarów", xy=((x[i] + x[i + 1]) / 2, (y[i] + y[i + 1]) / 2),
-                    xytext=(0, -15), textcoords="offset points", ha="center",
-                    fontsize=7.5, color=INK_SLABY, style="italic", zorder=5)
-    ax.annotate("Poziomka", xy=(x[-1], y[-1]), xytext=(0, -16),
-                textcoords="offset points", ha="center",
-                fontsize=9, color=KRZYWA_KOLOR, fontweight="medium", zorder=5)
+        ax.plot(x[i:i + 2], y[i:i + 2], color=KRZYWA_KOLOR, linewidth=1.6,
+                linestyle=(0, (4, 3)) if przerwa else "-",
+                alpha=0.5 if przerwa else 1.0, zorder=3)
+    ax.plot(x, y, color=KRZYWA_KOLOR, linewidth=0, marker="o", markersize=4,
+            markeredgecolor=TLO, markeredgewidth=1.0, label="Poziomka", zorder=4)
 
-    for gx, gy, opis, kolor in gwiazdy:
-        ax.plot([gx], [gy], marker="*", markersize=17, color=kolor,
-                markeredgecolor=TLO, markeredgewidth=1.2, zorder=6,
-                linestyle="none", label=opis)
-        ax.annotate(f"{opis}\n{gy:.2f}".replace(".", ","), xy=(gx, gy),
-                    xytext=(0, 13), textcoords="offset points", ha="center",
-                    fontsize=8, color=kolor, fontweight="medium", zorder=6)
+    # Gwiazdki w paśmie leżą blisko siebie, więc ich podpisy rozsuwamy: pierwszą
+    # podpisujemy nad, drugą pod markerem. Inaczej przy niskich wartościach
+    # (kodowanie, ekstrakcja) etykiety nachodzą na siebie.
+    for i, (gx, gy, opis, kolor) in enumerate(gwiazdy):
+        ax.plot([gx], [gy], marker="*", markersize=13, color=kolor,
+                markeredgecolor=TLO, markeredgewidth=0.9, linestyle="none",
+                label=opis, zorder=6)
+        # Wartość przy gwiazdce: paleta ma zieleń i czerwień blisko siebie przy
+        # protanopii, więc identyfikacja nie może opierać się na samym kolorze.
+        nad = (i % 2 == 0)
+        ax.annotate(f"{gy:.2f}".replace(".", ","), xy=(gx, gy),
+                    xytext=(0, 8 if nad else -13), textcoords="offset points",
+                    ha="center", fontsize=6.5, color=kolor, zorder=6)
 
-    wszystkie_y = y + [g[1] for g in gwiazdy]
-    ax.set_ylim(0, max(wszystkie_y) * 1.35)
-    ax.set_xlim(PASMO_SRODEK - PASMO_ROZSTAW - 0.3, max(x) + 0.75)
-
-    # Granica pasma "nieznana": na lewo od niej pozycja na osi nic nie znaczy.
-    ax.axvline(PASMO_GRANICA, color="#d8d8d4", linewidth=1.0,
+    ax.set_title(tytul, fontsize=9.5, color=INK, pad=6, loc="left")
+    ax.set_xlim(*x_zakres)
+    ax.set_ylim(0, y_max)
+    ax.axvline(PASMO_GRANICA, color="#d8d8d4", linewidth=0.8,
                linestyle=(0, (3, 3)), zorder=1)
-    ax.annotate("nieznana\nliczba tokenów", xy=(PASMO_SRODEK, 0),
-                xytext=(0, -34), textcoords="offset points", ha="center",
-                fontsize=8, color=INK_SLABY, annotation_clip=False)
-
-    kroki = [t for t in (0, 2, 4, 6, 8, 10) if t <= max(x) + 0.5]
-    ax.set_xticks(kroki)
-    ax.set_xlabel("tokeny SFT (mld)", fontsize=9, color=INK_SLABY, labelpad=26)
-    ax.set_ylabel("wynik Łodygi (0–10)", fontsize=9, color=INK_SLABY)
-    ax.set_title(tytul, fontsize=12.5, color=INK, pad=16, loc="left",
-                 fontweight="semibold")
-    if podtytul:
-        ax.text(0, 1.02, podtytul, transform=ax.transAxes, fontsize=8.5,
-                color=INK_SLABY, va="bottom")
-
-    ax.grid(True, axis="y", color=SIATKA, linewidth=0.8, zorder=0)
+    ax.grid(True, axis="y", color=SIATKA, linewidth=0.6, zorder=0)
     ax.set_axisbelow(True)
     for bok in ("top", "right"):
         ax.spines[bok].set_visible(False)
     for bok in ("left", "bottom"):
         ax.spines[bok].set_color("#d8d8d4")
-    ax.tick_params(colors=INK_SLABY, labelsize=8.5)
-    ax.legend(frameon=False, fontsize=8.5, labelcolor=INK_SLABY,
-              loc="upper left", handletextpad=0.4)
+    ax.tick_params(colors=INK_SLABY, labelsize=7)
+    if not pokaz_os_y:
+        ax.tick_params(labelleft=False)
 
-    fig.subplots_adjust(left=0.085, right=0.975, top=0.86, bottom=0.2)
+
+def rysuj_siatke(panele, tytul, podtytul, sciezka):
+    """Jeden PNG: wynik ogólny i osiem kategorii jako małe wykresy 3x3.
+
+    Wszystkie panele dzielą oś X i Y. Wspólna skala jest tu ważniejsza niż
+    rozdzielczość pojedynczej kategorii: bez niej kodowanie (0,0-0,8) wyglądałoby
+    jak piśmiennictwo (0,8-2,9) i nie dałoby się zobaczyć, że to zupełnie różne
+    poziomy.
+    """
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    x_wszystkie = [p[0] for _, punkty, _ in panele for p in punkty]
+    y_wszystkie = ([p[1] for _, punkty, _ in panele for p in punkty]
+                   + [g[1] for _, _, gwiazdy in panele for g in gwiazdy])
+    x_zakres = (PASMO_SRODEK - PASMO_ROZSTAW - 0.3, max(x_wszystkie) + 0.6)
+    y_max = max(y_wszystkie) * 1.22
+
+    fig, axes = plt.subplots(3, 3, figsize=(10.5, 8.2), dpi=135, sharex=True, sharey=True)
+    fig.patch.set_facecolor(TLO)
+    for i, (opis, punkty, gwiazdy) in enumerate(panele):
+        ax = axes[i // 3][i % 3]
+        ax.set_facecolor(TLO)
+        panel(ax, punkty, gwiazdy, opis, x_zakres, y_max, pokaz_os_y=(i % 3 == 0))
+    for i in range(len(panele), 9):
+        axes[i // 3][i % 3].set_visible(False)
+
+    for kolumna in range(3):
+        axes[2][kolumna].set_xticks(
+            [t for t in (0, 2, 4, 6, 8) if t <= max(x_wszystkie) + 0.5])
+
+    fig.suptitle(tytul, fontsize=13, color=INK, x=0.012, y=0.985,
+                 ha="left", fontweight="semibold")
+    fig.text(0.012, 0.952, podtytul, fontsize=8.5, color=INK_SLABY, ha="left")
+    fig.text(0.5, 0.028, "tokeny SFT (mld) · na lewo od linii przerywanej pasmo "
+             "modeli o nieznanej liczbie tokenów SFT",
+             fontsize=8.5, color=INK_SLABY, ha="center")
+    fig.text(0.004, 0.5, "wynik Łodygi (0–10)", fontsize=9, color=INK_SLABY,
+             va="center", rotation="vertical")
+
+    uchwyty, etykiety = axes[0][0].get_legend_handles_labels()
+    fig.legend(uchwyty, etykiety, frameon=False, fontsize=8.5, labelcolor=INK_SLABY,
+               ncol=len(etykiety), loc="lower center", bbox_to_anchor=(0.5, 0.055))
+
+    fig.subplots_adjust(left=0.062, right=0.985, top=0.90, bottom=0.115,
+                        hspace=0.32, wspace=0.08)
     sciezka.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(sciezka, facecolor=TLO)
     plt.close(fig)
@@ -274,35 +296,33 @@ def rysuj(punkty, gwiazdy, tytul, podtytul, sciezka):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--tylko-ogolny", action="store_true")
     parser.add_argument("--wyjscie", type=Path, default=WYKRESY)
     args = parser.parse_args(argv)
 
     config = tomllib.loads(TOKENY.read_text(encoding="utf-8"))
     wiersze = czytaj_leaderboard()
 
-    metryki = [("wynik", "wynik ogólny")]
-    if not args.tylko_ogolny:
-        metryki += KATEGORIE
-
-    zapisane = 0
+    metryki = [("wynik", "wynik ogólny")] + KATEGORIE
     for nazwa, dopuszczalne in [("nie", {"nie", "nie*", "brak"}), ("tak", {"tak"})]:
+        panele = []
         for klucz, opis in metryki:
             punkty = krzywa_poziomki(wiersze, config, dopuszczalne, klucz)
             if not punkty:
                 continue
             gwiazdy = gwiazdki(wiersze, config, dopuszczalne, klucz,
                                x_merge=max(p[0] for p in punkty))
-            sciezka = args.wyjscie / f"{nazwa}-{klucz}.png"
-            rysuj(
-                punkty, gwiazdy,
-                f"Poziomka: {opis} wobec tokenów SFT",
-                ("bez rozumowania" if nazwa == "nie" else "z rozumowaniem")
-                + " · najlepsza konfiguracja serwera i samplingu per checkpoint",
-                sciezka,
-            )
-            zapisane += 1
-    print(f"{zapisane} wykresów w {args.wyjscie}")
+            panele.append((opis, punkty, gwiazdy))
+        if not panele:
+            continue
+        sciezka = args.wyjscie / f"{nazwa}.png"
+        rysuj_siatke(
+            panele,
+            "Poziomka wobec tokenów SFT",
+            ("bez rozumowania" if nazwa == "nie" else "z rozumowaniem")
+            + " · najlepsza konfiguracja serwera i samplingu per checkpoint",
+            sciezka,
+        )
+        print(f"zapisano {sciezka}")
     return 0
 
 
