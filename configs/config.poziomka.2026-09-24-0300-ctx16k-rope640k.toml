@@ -1,0 +1,30 @@
+# Poziomka SFT 2026-09-24, checkpoint iter_0000300, wariant nothink.
+#   lokalnie: poziomka_sft_run4_v12_16384_hf/iter_0000300
+#
+# Serwer: okno 16384, RoPE 640000. Sampling jak w
+# config.poziomka.instruct-2026-09-30-7-ctx16k-rope640k*.toml - dobrany sonda
+# POD TA konfiguracje RoPE i nieprzenoszalny na 84000, gdzie kierunek
+# temperatury sie odwraca.
+#
+# Ten wiersz NIE jest porownywalny z "(8k/84k)" dla tego samego checkpointu:
+# rozni sie oknem, RoPE i trzema parametrami samplera naraz.
+[model]
+id = "poziomka_2026_09_24_iter_0000300_ctx16k_rope640k"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run4_v12_16384_hf/iter_0000300"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.6
+top_p = 0.9
+min_p = 0.05
+frequency_penalty = 0.15
+stop = ["<|im_end|>"]

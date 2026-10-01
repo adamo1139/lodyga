@@ -78,11 +78,13 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka sft 2026-09-24/iter_0000200 (8k/84k) | chat | tak | 3 | **0,81** | 0,70–1,04 | 66 | 78% | 1,72 | 1,30 | 0,75 | 0,90 | 0,18 | 0,42 | 0,67 | 0,58 |
 | poziomka sft 2026-09-24/iter_0000200 (8k/84k, t0,8) | chat | tak | 3 | **0,80** | 0,73–0,89 | 55 | 79% | 1,68 | 0,95 | 0,72 | 0,85 | 0,32 | 0,23 | 0,53 | 1,08 |
 | poziomka sft 2026-09-21/iter_0000100 | chat | nie* | 3 | **0,79** | 0,75–0,85 | 48 | 82% | 1,43 | 1,31 | 0,60 | 0,61 | 0,30 | 0,77 | 0,73 | 0,55 |
+| poziomka sft 2026-09-24/iter_0000300 (16k/640k, t0,6 min_p) | chat | nie | 3 | **0,71** | 0,61–0,81 | 2 | 92% | 1,62 | 0,97 | 1,02 | 0,73 | 0,12 | 0,43 | 0,38 | 0,44 |
 | poziomka sft 2026-09-24/iter_0000300 (8k/84k, t0,8) | chat | tak | 3 | **0,70** | 0,66–0,73 | 55 | 80% | 1,55 | 0,76 | 0,83 | 0,71 | 0,25 | 0,42 | 0,30 | 0,78 |
 | poziomka sft 2026-09-14/iter_0000800 | chat | tak | 3 | **0,68** | 0,62–0,71 | 42 | 70% | 1,17 | 0,51 | 0,37 | 0,99 | 0,23 | 0,33 | 0,38 | 1,42 |
 | poziomka sft 2026-09-09/iter_0000400 | compl. | mixed 53% | 3 | **0,66** | 0,62–0,72 | 0 | 94% | 1,35 | 0,85 | 0,68 | 0,63 | 0,15 | 0,22 | 0,53 | 0,92 |
 | poziomka sft 2026-09-09/iter_0000400 | compl. | tak | 3 | **0,66** | 0,61–0,71 | 22 | 80% | 1,33 | 0,98 | 0,85 | 0,46 | 0,07 | 0,27 | 0,28 | 1,03 |
 | poziomka sft 2026-09-14/iter_0001718 | chat | tak | 3 | **0,59** | 0,55–0,63 | 45 | 69% | 1,08 | 0,41 | 0,37 | 0,79 | 0,02 | 0,45 | 0,53 | 1,08 |
+| poziomka sft 2026-09-24/iter_0000300 (16k/640k, t0,6 min_p) | chat | tak | 3 | **0,52** | 0,51–0,54 | 82 | 75% | 1,38 | 0,88 | 0,32 | 0,59 | 0,18 | 0,33 | 0,18 | 0,32 |
 | poziomka sft 2026-09-14/iter_0000400 | chat | tak | 3 | **0,50** | 0,45–0,57 | 50 | 65% | 1,07 | 0,38 | 0,33 | 0,51 | 0,40 | 0,40 | 0,10 | 0,83 |
 | poziomka sft 2026-09-14/iter_0001200 | chat | tak | 3 | **0,41** | 0,29–0,47 | 62 | 57% | 0,75 | 0,52 | 0,17 | 0,48 | 0,02 | 0,25 | 0,30 | 0,77 |
 | APT3-1B-Instruct-v1 | compl. | brak | 3 | **0,38** | 0,34–0,44 | 0 | 94% | 0,53 | 0,53 | 0,45 | 0,48 | 0,17 | 0,30 | 0,13 | 0,47 |
@@ -239,6 +241,24 @@ Uwagi przy czytaniu: wiersz `iter_0000200`/`tak` ma szeroki rozrzut
 mierzono dwukrotnie — pierwszy pomiar unieważniła awaria GPU, która dała
 160/160 nieudanych zapytań w kilku przebiegach; w tabeli jest powtórka
 z zerem błędów.
+
+**Korzyść z 16k/640k należy do konkretnego modelu, nie do konfiguracji.**
+Ten sam serwer i ten sam sampler (`t0,6`, `min_p 0,05`, `fp 0,15`) dają
+przeciwne wyniki na merge'u i na zwykłym checkpoincie tej samej serii:
+
+| | 8k/84k | 16k/640k, t0,6 min_p | różnica |
+|---|---|---|---|
+| merge `-7`, `nie` | 1,57 | **1,66** | +0,09 |
+| merge `-7`, `tak` | **1,41** | 1,20 | −0,21 |
+| `iter_0000300`, `nie` | **0,87** | 0,71 | −0,16 |
+| `iter_0000300`, `tak` | **0,84** | 0,52 | −0,32 |
+
+U `iter_0000300` traci się w obu trybach, choć zapętlenia spadają do 4% i 2%.
+To kolejny przypadek, w którym **czystsza generacja idzie w parze z gorszym
+wynikiem**: straty są w treści (wnioskowanie 1,35 → 1,02, matematyka
+1,22 → 0,73), a w wariancie `tak` dochodzi 82 pustych tur wobec 53. Razem
+z serią `2026-09-21` i merge'ami `-1`/`-5` to czwarty model o innej reakcji na
+tę zmianę — konfiguracji RoPE nie da się więc ustalić raz dla rodziny.
 
 **Sampler trzeba dobierać pod konfigurację RoPE, bo kierunek się odwraca.**
 Wiersz `-7 (16k/640k, t0,6 min_p)` to `temperature = 0,6`, `top_p = 0,9`,
