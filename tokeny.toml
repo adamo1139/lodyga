@@ -1,0 +1,76 @@
+# Oś X wykresów: tokeny SFT Poziomki, w miliardach.
+#
+# Liczymy WYŁĄCZNIE tokeny dostrajania. Pretrening (~80 mld) jest wspólny dla
+# całej linii i nie wchodzi na wykres, bo interesuje nas przyrost z samego SFT.
+#
+# Tokeny na krok = batch * tokeny_na_probke. Numer checkpointu bierzemy
+# z etykiety w leaderboard.md (iter_XXXXXXX), więc wystarczy opisać tu przebieg.
+
+# `seria` skleja przebiegi w jedną krzywą. run4 wystartował z wag run2 @ 1718
+# i widział wszystko, co run2, więc na osi tokenów to jest jeden ciągły trening
+# i nie rozdzielamy go na dwie linie.
+
+[[przebieg]]
+id = "run2"
+etykieta = "poziomka sft 2026-09-14"
+seria = "Poziomka"
+batch = 768
+tokeny_na_probke = 2200        # okno 8192, korpus v11
+
+[[przebieg]]
+id = "run4"
+etykieta = "poziomka sft 2026-09-24"
+seria = "Poziomka"
+batch = 768
+tokeny_na_probke = 12943       # okno 16384, korpus v12 (po wycieciu petli)
+start_przebieg = "run2"
+start_krok = 1718
+
+# Seria 2026-09-21 (run3) NIE trafia na wykres. Trenowana na korpusie v11
+# z pętlami, degenerowała się z czasem treningu i jest ślepą uliczką - na
+# wspólnej osi sugerowałaby, że więcej tokenów szkodzi.
+[[przebieg]]
+id = "run3"
+etykieta = "poziomka sft 2026-09-21"
+seria = ""                     # pusta seria => pomijamy
+batch = 768
+tokeny_na_probke = 12943
+
+
+# Merge Poziomki powstaje ze złożenia WSZYSTKICH checkpointów, w tym
+# ostatniego, więc widział cały budżet tokenów - stąd gwiazdka na końcu osi.
+#
+# Na wykresach pokazujemy JEDEN wybrany merge, nie najlepszy z danej metryki.
+# Inaczej gwiazdka skakałaby między modelami zależnie od kategorii i nie dałoby
+# się czytać wykresów jako opisu jednego modelu. Wyborem jest -7: ma najlepszy
+# wariant z rozumowaniem w całej tabeli (1,41) i wygrywa tam w siedmiu
+# kategoriach na osiem.
+[merge]
+etykieta = "poziomka-instruct-2026-09-30-7"
+# Tylko konfiguracje UNIWERSALNE, czyli te same, ktorymi mierzylismy pozostale
+# modele: okno 8192, RoPE 84000, frequency_penalty 0,05, temperatura 0,3 lub
+# 0,8. Pomijamy "16k/640k, t0,6 min_p" - sampler dobrany sonda pod ten jeden
+# model i te jedna konfiguracje RoPE. Na wykresie postepu gwiazdka ma byc
+# porownywalna z krzywa, a nie pokazywac, ile da sie wycisnac strojeniem.
+konfiguracje = ["8k/84k", "8k/84k, t0,8"]
+kolor = "#e34948"
+opis = "merge 7"
+
+
+# Modele trenowane od zera przez polskie zespoły, z nieznaną liczbą tokenów
+# SFT. Lądują w paśmie "nieznana" po lewej stronie osi - wedle wszelkiego
+# prawdopodobieństwa widziały mniej danych SFT niż Poziomka, ale nie zmyślamy
+# im pozycji.
+#
+# Nie dopisuj tu modeli dostrajanych z cudzej bazy (Bielik, Qra, polka) - to
+# inna kategoria i psułoby to porównanie.
+
+[[odniesienie]]
+etykieta = "polanka-3.7B-exp"
+opis = "Polanka"
+kolor = "#008300"
+
+[[odniesienie]]
+etykieta = "APT3-1B-Instruct-v1"
+opis = "APT3 Instruct"
+kolor = "#4a3aa7"

@@ -22,6 +22,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | Bielik-4.5B-v3-Instruct | chat | brak | 3 | **5,69** | 5,60–5,86 | 0 | 97% | 4,77 | 5,73 | 5,35 | 8,54 | 4,87 | 5,85 | 5,03 | 5,55 |
 | Bielik-1.5B-v3-Instruct | chat | brak | 3 | **3,83** | 3,72–3,96 | 0 | 93% | 3,95 | 4,00 | 2,77 | 6,02 | 2,87 | 4,15 | 3,38 | 3,65 |
 | Qra-13B-chat | chat | brak | 3 | **3,30** | 3,12–3,40 | 0 | 90% | 3,90 | 4,03 | 3,87 | 2,05 | 1,53 | 3,32 | 3,57 | 4,12 |
+| poziomka-instruct-2026-09-30-7 (16k/640k, t0,6 min_p) | chat | nie | 3 | **1,66** | 1,56–1,78 | 0 | 94% | 2,85 | 2,72 | 1,43 | 0,89 | 0,25 | 0,97 | 1,72 | 2,38 |
 | poziomka-instruct-2026-09-30-1 (8k/84k, t0,8) | chat | nie | 3 | **1,65** | 1,52–1,85 | 0 | 95% | 2,52 | 2,66 | 1,72 | 1,43 | 0,32 | 0,83 | 1,38 | 2,42 |
 | poziomka-instruct-2026-09-30-5 (8k/84k, t0,8) | chat | nie | 3 | **1,64** | 1,58–1,70 | 0 | 94% | 2,72 | 2,24 | 1,53 | 1,13 | 0,45 | 0,67 | 1,83 | 2,55 |
 | poziomka-instruct-2026-09-30-6 (8k/84k) | chat | nie | 3 | **1,61** | 1,44–1,83 | 0 | 95% | 2,00 | 2,58 | 1,78 | 1,42 | 0,80 | 1,13 | 1,55 | 1,63 |
@@ -51,6 +52,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka sft 2026-09-24/iter_0000498 | chat | tak | 3 | **1,21** | 1,10–1,27 | 23 | 86% | 2,65 | 1,93 | 0,68 | 1,22 | 0,15 | 0,67 | 1,12 | 1,23 |
 | poziomka-instruct-2026-09-30-6 (8k/84k) | chat | tak | 3 | **1,21** | 1,11–1,29 | 47 | 80% | 2,32 | 1,90 | 0,75 | 1,22 | 0,28 | 0,75 | 1,23 | 1,25 |
 | poziomka-instruct-2026-09-30-7 (8k/84k, t0,8) | chat | tak | 3 | **1,20** | 1,11–1,28 | 30 | 88% | 2,72 | 1,80 | 1,15 | 0,85 | 0,12 | 0,65 | 0,83 | 1,47 |
+| poziomka-instruct-2026-09-30-7 (16k/640k, t0,6 min_p) | chat | tak | 3 | **1,20** | 1,16–1,22 | 32 | 87% | 2,55 | 1,78 | 0,82 | 0,85 | 0,40 | 0,70 | 1,13 | 1,32 |
 | poziomka-instruct-2026-09-30-6 (8k/84k, t0,8) | chat | tak | 3 | **1,18** | 1,10–1,25 | 27 | 88% | 2,63 | 1,94 | 0,55 | 1,00 | 0,15 | 0,78 | 0,75 | 1,65 |
 | poziomka sft 2026-09-24/iter_0000498 (8k/84k) | chat | tak | 3 | **1,17** | 1,08–1,25 | 42 | 85% | 2,38 | 1,85 | 0,67 | 1,15 | 0,19 | 0,70 | 0,97 | 1,43 |
 | poziomka sft 2026-09-14/iter_0000800 | chat | nie | 3 | **1,12** | 1,08–1,15 | 0 | 94% | 2,24 | 1,88 | 0,82 | 0,50 | 0,18 | 0,28 | 0,81 | 2,22 |
@@ -58,16 +60,20 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka sft 2026-09-24/iter_0000100 | chat | tak | 3 | **1,10** | 0,97–1,21 | 33 | 86% | 2,02 | 1,53 | 0,82 | 1,10 | 0,42 | 0,77 | 1,05 | 1,12 |
 | poziomka-instruct-2026-09-30-1 (8k/84k, t0,8) | chat | tak | 3 | **1,08** | 1,06–1,10 | 33 | 86% | 2,80 | 1,65 | 0,47 | 0,43 | 0,28 | 0,73 | 0,80 | 1,42 |
 | poziomka sft 2026-09-24/iter_0000498 (8k/84k, t0,8) | chat | tak | 3 | **1,08** | 0,96–1,22 | 45 | 85% | 2,23 | 1,87 | 0,37 | 1,05 | 0,47 | 0,73 | 0,67 | 1,28 |
+| poziomka sft 2026-09-24/iter_0000200 (8k/84k) | chat | nie | 3 | **1,07** | 1,02–1,12 | 0 | 93% | 2,08 | 1,35 | 1,40 | 1,22 | 0,20 | 0,65 | 0,72 | 0,97 |
 | poziomka sft 2026-09-14/iter_0001718 | compl. | tak | 3 | **1,06** | 0,92–1,16 | 12 | 87% | 2,07 | 1,86 | 0,97 | 1,22 | 0,05 | 0,58 | 0,55 | 1,22 |
 | poziomka-instruct-2026-09-30-1 (16k/640k) | chat | tak | 3 | **1,04** | 0,87–1,16 | 34 | 85% | 1,73 | 1,83 | 0,60 | 1,43 | 0,28 | 0,68 | 0,48 | 1,25 |
 | poziomka sft 2026-09-14/iter_0000400 | chat | nie | 3 | **1,04** | 0,95–1,13 | 0 | 90% | 2,12 | 1,62 | 0,95 | 0,60 | 0,05 | 0,53 | 0,80 | 1,60 |
 | poziomka-instruct-2026-09-30-3 (8k/84k, t0,8) | chat | tak | 3 | **1,01** | 1,00–1,03 | 21 | 90% | 2,18 | 1,53 | 0,90 | 0,71 | 0,13 | 0,62 | 0,82 | 1,22 |
 | poziomka-instruct-2026-09-30-3 (8k/84k) | chat | tak | 3 | **1,00** | 0,87–1,09 | 55 | 81% | 1,97 | 1,50 | 0,75 | 1,11 | 0,08 | 0,53 | 0,69 | 1,42 |
+| poziomka sft 2026-09-24/iter_0000200 (8k/84k, t0,8) | chat | nie | 3 | **0,98** | 0,91–1,03 | 0 | 96% | 1,63 | 1,25 | 1,12 | 1,30 | 0,18 | 0,30 | 0,89 | 1,15 |
 | polanka-3.7B-exp | compl. | tak | 3 | **0,97** | 0,81–1,19 | 0 | 88% | 1,60 | 1,53 | 1,07 | 1,10 | 0,45 | 0,57 | 0,40 | 1,08 |
 | poziomka-instruct-2026-09-30-4 (8k/84k, t0,8) | chat | tak | 3 | **0,97** | 0,91–1,02 | 39 | 86% | 2,27 | 1,28 | 0,40 | 1,12 | 0,08 | 0,52 | 0,62 | 1,45 |
 | polanka-3.7B-exp | chat | brak | 3 | **0,95** | 0,87–1,00 | 8 | 87% | 1,50 | 1,27 | 1,02 | 1,29 | 0,47 | 0,55 | 0,37 | 1,13 |
 | poziomka-instruct-2026-09-30-4 (8k/84k) | chat | tak | 3 | **0,94** | 0,89–0,99 | 70 | 79% | 2,05 | 1,73 | 0,55 | 0,80 | 0,22 | 0,63 | 0,58 | 0,93 |
 | polka-1.1b-chat | chat | brak | 3 | **0,88** | 0,80–1,01 | 0 | 97% | 1,28 | 1,63 | 0,81 | 0,57 | 0,45 | 0,38 | 0,47 | 1,45 |
+| poziomka sft 2026-09-24/iter_0000200 (8k/84k) | chat | tak | 3 | **0,81** | 0,70–1,04 | 66 | 78% | 1,72 | 1,30 | 0,75 | 0,90 | 0,18 | 0,42 | 0,67 | 0,58 |
+| poziomka sft 2026-09-24/iter_0000200 (8k/84k, t0,8) | chat | tak | 3 | **0,80** | 0,73–0,89 | 55 | 79% | 1,68 | 0,95 | 0,72 | 0,85 | 0,32 | 0,23 | 0,53 | 1,08 |
 | poziomka sft 2026-09-21/iter_0000100 | chat | nie* | 3 | **0,79** | 0,75–0,85 | 48 | 82% | 1,43 | 1,31 | 0,60 | 0,61 | 0,30 | 0,77 | 0,73 | 0,55 |
 | poziomka sft 2026-09-14/iter_0000800 | chat | tak | 3 | **0,68** | 0,62–0,71 | 42 | 70% | 1,17 | 0,51 | 0,37 | 0,99 | 0,23 | 0,33 | 0,38 | 1,42 |
 | poziomka sft 2026-09-09/iter_0000400 | compl. | mixed 53% | 3 | **0,66** | 0,62–0,72 | 0 | 94% | 1,35 | 0,85 | 0,68 | 0,63 | 0,15 | 0,22 | 0,53 | 0,92 |
@@ -199,6 +205,44 @@ Wczesne checkpointy wnoszą więc coś, co pomaga w trybie bezpośrednim,
 a przeszkadza przy rozumowaniu. `-7` ma najlepszy wariant `tak` w całej tabeli
 (1,41), a także najwyższą ekstrakcję (1,13) i wnioskowanie (1,00) w tym
 wariancie.
+
+**Seria `2026-09-24` ma dołek w środku treningu, nie plateau.** Przez długi czas
+mieliśmy z run4 tylko `iter_0000100` i `iter_0000498` — dwa punkty oddalone
+o cztery miliardy tokenów, między którymi krzywa wyglądała na płaską. Pomiar
+`iter_0000200` pokazuje co innego:
+
+| checkpoint | tokeny SFT | `nie` | `tak` |
+|---|---|---|---|
+| `iter_0000100` | 3,90 mld | 1,48 | 1,24 |
+| `iter_0000200` | 4,89 mld | **1,07** | **0,81** |
+| `iter_0000498` | 7,85 mld | 1,45 | 1,17 |
+
+Spadek o 0,41 bez rozumowania i 0,43 z rozumowaniem, a potem powrót do punktu
+wyjścia. Wniosek: **nie wolno interpolować między odległymi checkpointami** —
+płaski odcinek na wykresie może ukrywać załamanie. `iter_0000300`
+i `iter_0000400` pokażą, czy to pojedynczy dołek, czy szersze zagłębienie.
+
+Uwaga przy czytaniu wiersza `iter_0000200`/`tak`: rozrzut 0,70–1,04 jest tu
+szeroki, a 66 pustych tur na 480 (14%) oznacza, że sporo tur w ogóle nie
+weszło do średniej.
+
+**Sampler trzeba dobierać pod konfigurację RoPE, bo kierunek się odwraca.**
+Wiersz `-7 (16k/640k, t0,6 min_p)` to `temperature = 0,6`, `top_p = 0,9`,
+`min_p = 0,05`, `frequency_penalty = 0,15`. Na RoPE 84000 najlepsza dla
+rozumowania była temperatura 0,9 (1 pusta tura na 48 prób), a 0,3 najgorsza
+(5/48); na RoPE 640000 jest odwrotnie — przy 0,9 wychodzi 4–9/48, a najlepiej
+wypada 0,5–0,6. Odrzucone na tej konfiguracji: `top_k` 20/40 i
+`repetition_penalty` z zakresem dawały więcej pustych i urwanych tur, samo
+`min_p` bez obniżenia temperatury schodziło tylko do 6/48.
+
+Ten wiersz pokazuje też, że **czystsza generacja nie znaczy lepszy wynik**.
+Wobec `-7 (8k/84k)` puste tury spadły z 42 do 32, a zapętlone z 11% do 1%, ale
+wariant z rozumowaniem stracił 0,21 (1,41 → 1,20) — na wnioskowaniu, ekstrakcji
+i naukach ścisłych. Bez rozumowania ta sama zmiana dała najwyższy wynik Poziomki
+w tabeli (1,66). RoPE 640000 psuje więc samo rozumowanie, a sampler sprząta
+wyłącznie objawy. Budżet nie jest tu winny: zero urwanych zapytań na 480 tur,
+a w sondzie `max_tokens` 12000 i brak limitu dawały tyle samo pustych tur co
+7800.
 
 **Ostrożnie z wierszami `nie`/t0,3 u `-6` i `-7`.** Mają rozrzut 1,44–1,83
 i 1,28–1,88 (odchylenie 0,20 i 0,30) — najszersze w tabeli. Przy takich

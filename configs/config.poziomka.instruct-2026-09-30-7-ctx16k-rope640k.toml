@@ -1,0 +1,42 @@
+# Poziomka instruct 2026-09-30-7, wariant nothink.
+#   lokalnie: /media/nvme_2tb/maked/poziomka_train/poziomka-instruct-2026-09-30-7
+#
+# Serwer: okno 16384, RoPE 640000.
+#
+# Sampling dobrany sonda POD TA KONFIGURACJE i nie przenosi sie na inne.
+# Na RoPE 84000 najlepsza byla temperatura 0,9 (1/48 pustych tur), a 0,3
+# najgorsza (5/48). Na RoPE 640000 kierunek sie ODWRACA: przy 0,9 jest 4-9/48
+# pustych, a najlepiej wypada 0,5-0,6. RoPE 640000 rozwleka rozumowanie -
+# mediana sladu rosnie z 874 do ~2500 znakow i model nie domyka <think>.
+#
+# Co sprawdzone i odrzucone na tej konfiguracji (think, t0,9, 48 prob):
+#   top_k 40 / 20          8-10/48 pustych, WIECEJ urwanych (8/48)
+#   rep 1,05 range 512     12/48 pustych
+#   rep 1,10 range 256     11/48 pustych
+#   min_p 0,05 sam          6/48 pustych
+#   min_p 0,05 + t0,6       1/48 pustych, zero urwanych  <- wybrane
+#
+# Budzet NIE jest ograniczeniem: przy max_tokens 12000 i bez limitu pustych tur
+# bylo tyle samo albo wiecej (2 / 3 / 5 z 48). 7800 zostawia zapas na dluga
+# odpowiedz z tury 1, ktora wchodzi do promptu tury 2 (slad rozumowania nie
+# wchodzi - odcinamy go).
+[model]
+id = "poziomka_instruct_2026_09_30_7_ctx16k_rope640k"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka-instruct-2026-09-30-7"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.6
+top_p = 0.9
+min_p = 0.05
+frequency_penalty = 0.15
+stop = ["<|im_end|>"]

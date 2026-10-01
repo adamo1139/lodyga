@@ -80,9 +80,16 @@ def budget(window, questions):
 
 
 def junk_ratio(text):
-    """Udział znaków świadczących o rozjeżdżonym dekodowaniu tokenów."""
+    """Udział znaków świadczących o rozjeżdżonym dekodowaniu tokenów.
+
+    Pusta odpowiedź zwraca None, a NIE 1.0. Pustka i śmieci to dwie różne
+    awarie: śmieci znaczą rozjazd wag z tokenizerem, a pustka zwykle to, że
+    model rozumował i parser zabrał całą treść do `reasoning_content`. Zlanie
+    ich w jedno dawało "MODEL ZEPSUTY" na zdrowym modelu, ktoremu nie dzialal
+    przelacznik enable_thinking.
+    """
     if not text.strip():
-        return 1.0
+        return None
     bad = sum(
         1 for c in text
         if c == "�" or c in "\t\r" or unicodedata.category(c) in ("Co", "Cn")
@@ -140,17 +147,33 @@ def check_garbage(base_url, model, questions, workers):
                               frequency_penalty=0.0),
                 questions,
             ))
-        ratios = sorted(junk_ratio(r["answer"]) for r in rows)
-        median = ratios[len(ratios) // 2]
-        broken = sum(1 for r in ratios if r > 0.05)
-        print(f"   temp={temperature}: mediana śmieci {median:.0%}, "
-              f"powyżej 5%: {broken}/{len(rows)}")
-        print(f"      {rows[0]['answer'][:110]!r}")
-        if broken > len(rows) // 4:
+        ratios = sorted(r for r in (junk_ratio(x["answer"]) for x in rows)
+                        if r is not None)
+        puste = len(rows) - len(ratios)
+        rozumuje = sum(1 for r in rows if r["reasoning"] > 0)
+        if ratios:
+            median = ratios[len(ratios) // 2]
+            broken = sum(1 for r in ratios if r > 0.05)
+            print(f"   temp={temperature}: mediana śmieci {median:.0%}, "
+                  f"powyżej 5%: {broken}/{len(ratios)}, pustych {puste}/{len(rows)}"
+                  + (f", rozumuje {rozumuje}" if rozumuje else ""))
+            if broken > len(ratios) // 4:
+                verdict = False
+        else:
+            print(f"   temp={temperature}: WSZYSTKIE odpowiedzi puste "
+                  f"({puste}/{len(rows)}), rozumuje {rozumuje}")
             verdict = False
+        tresc = next((x["answer"] for x in rows if x["answer"].strip()), "")
+        print(f"      {tresc[:110]!r}")
+        if puste and rozumuje >= puste:
+            print(f"      UWAGA: przy enable_thinking=false {rozumuje} z {len(rows)} tur "
+                  "rozumowało - to najpewniej przyczyna pustych odpowiedzi,")
+            print("      a nie zepsute wagi. Sprawdź chat_template.jinja checkpointu.")
     if not verdict:
-        print("\n   MODEL ZEPSUTY - nie mierz go. Sprawdź vocab_size w config.json,")
-        print("   md5 tokenizer.json oraz rope_theta (także pod rope_parameters).")
+        print("\n   MODEL PODEJRZANY - nie mierz go, zanim nie sprawdzisz. Śmieci")
+        print("   (U+FFFD, znaki sterujące) wskazują na rozjazd wag z tokenizerem:")
+        print("   vocab_size w config.json, md5 tokenizer.json, rope_theta (także")
+        print("   pod rope_parameters). Same puste odpowiedzi to zwykle szablon.")
     return verdict
 
 
