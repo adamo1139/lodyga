@@ -250,7 +250,11 @@ def panel(ax, punkty, gwiazdy, tytul, x_zakres, y_max, pokaz_os_y):
 
 
 def rysuj_siatke(panele, tytul, podtytul, sciezka):
-    """Jeden PNG: wynik ogólny i osiem kategorii jako małe wykresy 3x3.
+    """Jeden PNG: wynik ogólny jako wyróżniony panel plus osiem kategorii.
+
+    Wynik ogólny dostaje własny, szerszy box u góry z jasnym tłem i ramką, bo
+    jest liczbą, którą się cytuje; kategorie to rozbicie, które się czyta po
+    nim. W równej siatce 3x3 ginął wśród ośmiu paneli o tej samej wadze.
 
     Wszystkie panele dzielą oś X i Y. Wspólna skala jest tu ważniejsza niż
     rozdzielczość pojedynczej kategorii: bez niej kodowanie (0,0-0,8) wyglądałoby
@@ -266,40 +270,48 @@ def rysuj_siatke(panele, tytul, podtytul, sciezka):
                    + [g[1] for _, _, gwiazdy in panele for g in gwiazdy])
     x_zakres = (PASMO_SRODEK - PASMO_ROZSTAW - 0.3, max(x_wszystkie) + 0.6)
     y_max = max(y_wszystkie) * 1.22
+    kroki = [t for t in (0, 2, 4, 6, 8) if t <= max(x_wszystkie) + 0.5]
 
-    fig, axes = plt.subplots(3, 3, figsize=(10.5, 8.6), dpi=135, sharex=True, sharey=True)
+    fig = plt.figure(figsize=(10.5, 10.2), dpi=135)
     fig.patch.set_facecolor(TLO)
-    for i, (opis, punkty, gwiazdy) in enumerate(panele):
-        ax = axes[i // 3][i % 3]
+    siatka = fig.add_gridspec(4, 3, height_ratios=[1.5, 1, 1, 1],
+                              hspace=0.46, wspace=0.08,
+                              left=0.062, right=0.985, top=0.90, bottom=0.10)
+
+    glowny = fig.add_subplot(siatka[0, :])
+    glowny.set_facecolor("#f4f4f1")
+    for bok in ("top", "right", "left", "bottom"):
+        glowny.spines[bok].set_visible(True)
+        glowny.spines[bok].set_color("#cfcfc9")
+    panel(glowny, panele[0][1], panele[0][2], panele[0][0], x_zakres, y_max,
+          pokaz_os_y=True)
+    glowny.set_title(panele[0][0], fontsize=11.5, color=INK, pad=8, loc="left",
+                     fontweight="semibold")
+    glowny.set_xticks(kroki)
+
+    osie = [glowny]
+    for i, (opis, punkty, gwiazdy) in enumerate(panele[1:]):
+        ax = fig.add_subplot(siatka[1 + i // 3, i % 3])
         ax.set_facecolor(TLO)
         panel(ax, punkty, gwiazdy, opis, x_zakres, y_max, pokaz_os_y=(i % 3 == 0))
-    for i in range(len(panele), 9):
-        axes[i // 3][i % 3].set_visible(False)
-
-    # Podziałka tokenów w KAŻDYM panelu, nie tylko w dolnym rzędzie: przy siatce
-    # 3x3 odczytanie pozycji dołka z panelu w górnym rzędzie wymagałoby wodzenia
-    # wzrokiem przez dwa wykresy niżej.
-    kroki = [t for t in (0, 2, 4, 6, 8) if t <= max(x_wszystkie) + 0.5]
-    for rzad in axes:
-        for ax in rzad:
-            ax.set_xticks(kroki)
-            ax.tick_params(labelbottom=True)
+        # Podziałka tokenów w KAŻDYM panelu: przy siatce odczytanie pozycji
+        # dołka z górnego rzędu wymagałoby inaczej wodzenia wzrokiem niżej.
+        ax.set_xticks(kroki)
+        osie.append(ax)
 
     fig.suptitle(tytul, fontsize=13, color=INK, x=0.012, y=0.985,
                  ha="left", fontweight="semibold")
-    fig.text(0.012, 0.952, podtytul, fontsize=8.5, color=INK_SLABY, ha="left")
-    fig.text(0.5, 0.026, "tokeny SFT (miliardy) · na lewo od linii przerywanej "
+    fig.text(0.012, 0.958, podtytul, fontsize=8.5, color=INK_SLABY, ha="left")
+    fig.text(0.5, 0.022, "tokeny SFT (miliardy) · na lewo od linii przerywanej "
              "pasmo modeli o nieznanej liczbie tokenów SFT",
              fontsize=8.5, color=INK_SLABY, ha="center")
     fig.text(0.004, 0.5, "wynik Łodygi (0–10)", fontsize=9, color=INK_SLABY,
              va="center", rotation="vertical")
 
-    uchwyty, etykiety = axes[0][0].get_legend_handles_labels()
+    uchwyty, etykiety = glowny.get_legend_handles_labels()
     fig.legend(uchwyty, etykiety, frameon=False, fontsize=8.5, labelcolor=INK_SLABY,
-               ncol=len(etykiety), loc="lower center", bbox_to_anchor=(0.5, 0.055))
+               ncol=len(etykiety), loc="lower center", bbox_to_anchor=(0.5, 0.045))
 
-    fig.subplots_adjust(left=0.062, right=0.985, top=0.905, bottom=0.115,
-                        hspace=0.42, wspace=0.08)
     sciezka.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(sciezka, facecolor=TLO)
     plt.close(fig)
