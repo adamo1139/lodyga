@@ -72,9 +72,13 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | polanka-3.7B-exp | chat | brak | 3 | **0,95** | 0,87–1,00 | 8 | 87% | 1,50 | 1,27 | 1,02 | 1,29 | 0,47 | 0,55 | 0,37 | 1,13 |
 | poziomka-instruct-2026-09-30-4 (8k/84k) | chat | tak | 3 | **0,94** | 0,89–0,99 | 70 | 79% | 2,05 | 1,73 | 0,55 | 0,80 | 0,22 | 0,63 | 0,58 | 0,93 |
 | polka-1.1b-chat | chat | brak | 3 | **0,88** | 0,80–1,01 | 0 | 97% | 1,28 | 1,63 | 0,81 | 0,57 | 0,45 | 0,38 | 0,47 | 1,45 |
+| poziomka sft 2026-09-24/iter_0000300 (8k/84k) | chat | nie | 3 | **0,87** | 0,83–0,89 | 0 | 91% | 1,80 | 0,85 | 1,35 | 1,22 | 0,30 | 0,42 | 0,47 | 0,53 |
+| poziomka sft 2026-09-24/iter_0000300 (8k/84k) | chat | tak | 3 | **0,84** | 0,76–0,92 | 53 | 80% | 1,77 | 1,17 | 0,98 | 0,64 | 0,43 | 0,75 | 0,43 | 0,57 |
+| poziomka sft 2026-09-24/iter_0000300 (8k/84k, t0,8) | chat | nie | 3 | **0,82** | 0,76–0,87 | 0 | 95% | 1,85 | 0,90 | 1,32 | 0,58 | 0,13 | 0,33 | 0,62 | 0,82 |
 | poziomka sft 2026-09-24/iter_0000200 (8k/84k) | chat | tak | 3 | **0,81** | 0,70–1,04 | 66 | 78% | 1,72 | 1,30 | 0,75 | 0,90 | 0,18 | 0,42 | 0,67 | 0,58 |
 | poziomka sft 2026-09-24/iter_0000200 (8k/84k, t0,8) | chat | tak | 3 | **0,80** | 0,73–0,89 | 55 | 79% | 1,68 | 0,95 | 0,72 | 0,85 | 0,32 | 0,23 | 0,53 | 1,08 |
 | poziomka sft 2026-09-21/iter_0000100 | chat | nie* | 3 | **0,79** | 0,75–0,85 | 48 | 82% | 1,43 | 1,31 | 0,60 | 0,61 | 0,30 | 0,77 | 0,73 | 0,55 |
+| poziomka sft 2026-09-24/iter_0000300 (8k/84k, t0,8) | chat | tak | 3 | **0,70** | 0,66–0,73 | 55 | 80% | 1,55 | 0,76 | 0,83 | 0,71 | 0,25 | 0,42 | 0,30 | 0,78 |
 | poziomka sft 2026-09-14/iter_0000800 | chat | tak | 3 | **0,68** | 0,62–0,71 | 42 | 70% | 1,17 | 0,51 | 0,37 | 0,99 | 0,23 | 0,33 | 0,38 | 1,42 |
 | poziomka sft 2026-09-09/iter_0000400 | compl. | mixed 53% | 3 | **0,66** | 0,62–0,72 | 0 | 94% | 1,35 | 0,85 | 0,68 | 0,63 | 0,15 | 0,22 | 0,53 | 0,92 |
 | poziomka sft 2026-09-09/iter_0000400 | compl. | tak | 3 | **0,66** | 0,61–0,71 | 22 | 80% | 1,33 | 0,98 | 0,85 | 0,46 | 0,07 | 0,27 | 0,28 | 1,03 |
@@ -214,17 +218,27 @@ o cztery miliardy tokenów, między którymi krzywa wyglądała na płaską. Pom
 | checkpoint | tokeny SFT | `nie` | `tak` |
 |---|---|---|---|
 | `iter_0000100` | 3,90 mld | 1,48 | 1,24 |
-| `iter_0000200` | 4,89 mld | **1,07** | **0,81** |
+| `iter_0000200` | 4,89 mld | 1,07 | 0,81 |
+| `iter_0000300` | 5,88 mld | **0,87** | **0,84** |
 | `iter_0000498` | 7,85 mld | 1,45 | 1,17 |
 
-Spadek o 0,41 bez rozumowania i 0,43 z rozumowaniem, a potem powrót do punktu
-wyjścia. Wniosek: **nie wolno interpolować między odległymi checkpointami** —
-płaski odcinek na wykresie może ukrywać załamanie. `iter_0000300`
-i `iter_0000400` pokażą, czy to pojedynczy dołek, czy szersze zagłębienie.
+Zagłębienie jest szerokie i pogłębia się aż do trzysetki: bez rozumowania
+spadek sięga 0,61, czyli ponad 40% wyniku, i odbudowuje się dopiero na ostatnim
+odcinku. Wniosek: **nie wolno interpolować między odległymi checkpointami** —
+płaski odcinek na wykresie może ukrywać załamanie.
 
-Uwaga przy czytaniu wiersza `iter_0000200`/`tak`: rozrzut 0,70–1,04 jest tu
-szeroki, a 66 pustych tur na 480 (14%) oznacza, że sporo tur w ogóle nie
-weszło do średniej.
+W kategoriach widać, co się psuje. Między `iter_0000100` a `iter_0000300` bez
+rozumowania nauki ścisłe spadają z 1,92 do 0,47, humanistyka z 1,82 do 0,53,
+ekstrakcja z 0,98 do 0,42, a piśmiennictwo trzyma się najlepiej (2,02 → 1,80).
+Model traci więc wiedzę i precyzję, zachowując płynność. Przy `iter_0000300`
+oba warianty prawie się zrównują (0,87 wobec 0,84), bo spada głównie ten bez
+rozumowania.
+
+Uwagi przy czytaniu: wiersz `iter_0000200`/`tak` ma szeroki rozrzut
+(0,70–1,04) i 66 pustych tur na 480 (14%). Warianty `tak` dla `iter_0000300`
+mierzono dwukrotnie — pierwszy pomiar unieważniła awaria GPU, która dała
+160/160 nieudanych zapytań w kilku przebiegach; w tabeli jest powtórka
+z zerem błędów.
 
 **Sampler trzeba dobierać pod konfigurację RoPE, bo kierunek się odwraca.**
 Wiersz `-7 (16k/640k, t0,6 min_p)` to `temperature = 0,6`, `top_p = 0,9`,
