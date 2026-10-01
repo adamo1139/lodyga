@@ -54,7 +54,7 @@ etykieta = "poziomka-instruct-2026-09-30-7"
 # porownywalna z krzywa, a nie pokazywac, ile da sie wycisnac strojeniem.
 konfiguracje = ["8k/84k", "8k/84k, t0,8"]
 kolor = "#e34948"
-opis = "merge 7"
+opis = "wybrany merge Poziomki"
 
 
 # Modele trenowane od zera przez polskie zespoły, z nieznaną liczbą tokenów

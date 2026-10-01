@@ -213,18 +213,24 @@ def panel(ax, punkty, gwiazdy, tytul, x_zakres, y_max, pokaz_os_y):
     ax.plot(x, y, color=KRZYWA_KOLOR, linewidth=0, marker="o", markersize=4,
             markeredgecolor=TLO, markeredgewidth=1.0, label="Poziomka", zorder=4)
 
-    # Gwiazdki w paśmie leżą blisko siebie, więc ich podpisy rozsuwamy: pierwszą
-    # podpisujemy nad, drugą pod markerem. Inaczej przy niskich wartościach
-    # (kodowanie, ekstrakcja) etykiety nachodzą na siebie.
-    for i, (gx, gy, opis, kolor) in enumerate(gwiazdy):
+    # Gwiazdki w paśmie stoją blisko siebie w poziomie, a bywa, że i w pionie
+    # (kodowanie: 0,47 i 0,17). Podpis idzie domyślnie nad markerem; jeśli
+    # koliduje z już postawionym, schodzi pod spód, a w ostateczności wyżej.
+    postawione = []
+    for gx, gy, opis, kolor in gwiazdy:
         ax.plot([gx], [gy], marker="*", markersize=13, color=kolor,
                 markeredgecolor=TLO, markeredgewidth=0.9, linestyle="none",
                 label=opis, zorder=6)
         # Wartość przy gwiazdce: paleta ma zieleń i czerwień blisko siebie przy
         # protanopii, więc identyfikacja nie może opierać się na samym kolorze.
-        nad = (i % 2 == 0)
+        for dy in (9, -15, 21):
+            y_etykiety = gy + dy * (y_max / 320)
+            if not any(abs(gx - px) < 0.75 and abs(y_etykiety - py) < y_max * 0.085
+                       for px, py in postawione):
+                break
+        postawione.append((gx, y_etykiety))
         ax.annotate(f"{gy:.2f}".replace(".", ","), xy=(gx, gy),
-                    xytext=(0, 8 if nad else -13), textcoords="offset points",
+                    xytext=(0, dy), textcoords="offset points",
                     ha="center", fontsize=6.5, color=kolor, zorder=6)
 
     ax.set_title(tytul, fontsize=9.5, color=INK, pad=6, loc="left")
@@ -261,7 +267,7 @@ def rysuj_siatke(panele, tytul, podtytul, sciezka):
     x_zakres = (PASMO_SRODEK - PASMO_ROZSTAW - 0.3, max(x_wszystkie) + 0.6)
     y_max = max(y_wszystkie) * 1.22
 
-    fig, axes = plt.subplots(3, 3, figsize=(10.5, 8.2), dpi=135, sharex=True, sharey=True)
+    fig, axes = plt.subplots(3, 3, figsize=(10.5, 8.6), dpi=135, sharex=True, sharey=True)
     fig.patch.set_facecolor(TLO)
     for i, (opis, punkty, gwiazdy) in enumerate(panele):
         ax = axes[i // 3][i % 3]
@@ -270,15 +276,20 @@ def rysuj_siatke(panele, tytul, podtytul, sciezka):
     for i in range(len(panele), 9):
         axes[i // 3][i % 3].set_visible(False)
 
-    for kolumna in range(3):
-        axes[2][kolumna].set_xticks(
-            [t for t in (0, 2, 4, 6, 8) if t <= max(x_wszystkie) + 0.5])
+    # Podziałka tokenów w KAŻDYM panelu, nie tylko w dolnym rzędzie: przy siatce
+    # 3x3 odczytanie pozycji dołka z panelu w górnym rzędzie wymagałoby wodzenia
+    # wzrokiem przez dwa wykresy niżej.
+    kroki = [t for t in (0, 2, 4, 6, 8) if t <= max(x_wszystkie) + 0.5]
+    for rzad in axes:
+        for ax in rzad:
+            ax.set_xticks(kroki)
+            ax.tick_params(labelbottom=True)
 
     fig.suptitle(tytul, fontsize=13, color=INK, x=0.012, y=0.985,
                  ha="left", fontweight="semibold")
     fig.text(0.012, 0.952, podtytul, fontsize=8.5, color=INK_SLABY, ha="left")
-    fig.text(0.5, 0.028, "tokeny SFT (mld) · na lewo od linii przerywanej pasmo "
-             "modeli o nieznanej liczbie tokenów SFT",
+    fig.text(0.5, 0.026, "tokeny SFT (miliardy) · na lewo od linii przerywanej "
+             "pasmo modeli o nieznanej liczbie tokenów SFT",
              fontsize=8.5, color=INK_SLABY, ha="center")
     fig.text(0.004, 0.5, "wynik Łodygi (0–10)", fontsize=9, color=INK_SLABY,
              va="center", rotation="vertical")
@@ -287,8 +298,8 @@ def rysuj_siatke(panele, tytul, podtytul, sciezka):
     fig.legend(uchwyty, etykiety, frameon=False, fontsize=8.5, labelcolor=INK_SLABY,
                ncol=len(etykiety), loc="lower center", bbox_to_anchor=(0.5, 0.055))
 
-    fig.subplots_adjust(left=0.062, right=0.985, top=0.90, bottom=0.115,
-                        hspace=0.32, wspace=0.08)
+    fig.subplots_adjust(left=0.062, right=0.985, top=0.905, bottom=0.115,
+                        hspace=0.42, wspace=0.08)
     sciezka.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(sciezka, facecolor=TLO)
     plt.close(fig)
