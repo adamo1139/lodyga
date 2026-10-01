@@ -59,6 +59,9 @@ KATEGORIE = [
 # dopuszczalne wyłącznie z drugim nośnikiem tożsamości - stąd podpis przy
 # każdej gwiazdce, a nie sama legenda).
 KRZYWA_KOLOR = "#2a78d6"
+# Kolory nagłówka wariantu: niebieski jak krzywa dla trybu bez rozumowania,
+# pomarańczowy dla trybu z rozumowaniem. Oba ze zwalidowanej palety.
+WARIANT_KOLOR = {"nie": "#2a78d6", "tak": "#eb6834"}
 TLO = "#fcfcfb"
 INK = "#1a1a19"
 INK_SLABY = "#6b6b68"
@@ -268,7 +271,7 @@ def panel(ax, punkty, gwiazdy, tytul, x_zakres, y_max, pokaz_os_y):
         ax.tick_params(labelleft=False)
 
 
-def rysuj_siatke(panele, tytul, podtytul, sciezka):
+def rysuj_siatke(panele, tytul, naglowek, naglowek_kolor, podtytul, sciezka):
     """Jeden PNG: wynik ogólny jako wyróżniony panel plus osiem kategorii.
 
     Wynik ogólny dostaje własny, szerszy box u góry z jasnym tłem i ramką, bo
@@ -304,7 +307,7 @@ def rysuj_siatke(panele, tytul, podtytul, sciezka):
     fig.patch.set_facecolor(TLO)
     siatka = fig.add_gridspec(4, 3, height_ratios=[1.3, 1, 1, 1],
                               hspace=0.34, wspace=0.17,
-                              left=0.055, right=0.99, top=0.912, bottom=0.085)
+                              left=0.055, right=0.99, top=0.868, bottom=0.085)
 
     glowny = fig.add_subplot(siatka[0, :])
     glowny.set_facecolor("#f4f4f1")
@@ -328,9 +331,12 @@ def rysuj_siatke(panele, tytul, podtytul, sciezka):
         ax.set_xticks(kroki)
         osie.append(ax)
 
-    fig.suptitle(tytul, fontsize=13, color=INK, x=0.012, y=0.988,
+    fig.suptitle(tytul, fontsize=13, color=INK, x=0.012, y=0.991,
                  ha="left", fontweight="semibold")
-    fig.text(0.012, 0.952, podtytul, fontsize=8.5, color=INK_SLABY, ha="left")
+    fig.text(0.012, 0.955, naglowek, fontsize=15, color=naglowek_kolor,
+             ha="left", va="top", fontweight="bold")
+    fig.text(0.012, 0.922, podtytul, fontsize=8.5, color=INK_SLABY,
+             ha="left", va="top")
     fig.text(0.5, 0.014, "tokeny SFT (miliardy) · na lewo od linii przerywanej "
              "pasmo modeli o nieznanej liczbie tokenów SFT",
              fontsize=8.5, color=INK_SLABY, ha="center")
@@ -370,8 +376,9 @@ def main(argv=None):
         rysuj_siatke(
             panele,
             "Poziomka wobec tokenów SFT",
-            ("bez rozumowania" if nazwa == "nie" else "z rozumowaniem")
-            + " · najlepsza konfiguracja serwera i samplingu per checkpoint",
+            "wyłączone rozumowanie" if nazwa == "nie" else "włączone rozumowanie",
+            WARIANT_KOLOR[nazwa],
+            "najlepsza konfiguracja serwera i samplingu per checkpoint",
             sciezka,
         )
         print(f"zapisano {sciezka}")
