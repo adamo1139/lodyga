@@ -224,7 +224,7 @@ def panel(ax, punkty, gwiazdy, tytul, x_zakres, y_max, pokaz_os_y):
         # etykiety skaczące nad i pod krzywą. Ostatni checkpoint leży pod
         # gwiazdką merge'u, więc jego podpis odsuwamy w lewo, wciąż u góry.
         w_lewo = (i == len(x) - 1)
-        ax.annotate(f"{py:.0f}%", xy=(px, py),
+        ax.annotate(f"{py:.0f}", xy=(px, py),
                     xytext=(-11 if w_lewo else 0, 7),
                     textcoords="offset points",
                     ha="right" if w_lewo else "center",
@@ -247,14 +247,14 @@ def panel(ax, punkty, gwiazdy, tytul, x_zakres, y_max, pokaz_os_y):
                        for px, py in postawione):
                 break
         postawione.append((gx, y_etykiety))
-        ax.annotate(f"{gy:.0f}%", xy=(gx, gy),
+        ax.annotate(f"{gy:.0f}", xy=(gx, gy),
                     xytext=(0, dy), textcoords="offset points",
                     ha="center", fontsize=6.5, color=kolor, zorder=6)
 
     ax.set_title(tytul, fontsize=9.5, color=INK, pad=6, loc="left")
     ax.set_xlim(*x_zakres)
     ax.set_ylim(0, y_max)
-    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}%")
+    ax.yaxis.set_major_formatter(lambda v, _: f"{v:.0f}")
     ax.axvline(PASMO_GRANICA, color="#d8d8d4", linewidth=0.8,
                linestyle=(0, (3, 3)), zorder=1)
     ax.grid(True, axis="y", color=SIATKA, linewidth=0.6, zorder=0)
@@ -334,7 +334,7 @@ def rysuj_siatke(panele, tytul, podtytul, sciezka):
     fig.text(0.5, 0.014, "tokeny SFT (miliardy) · na lewo od linii przerywanej "
              "pasmo modeli o nieznanej liczbie tokenów SFT",
              fontsize=8.5, color=INK_SLABY, ha="center")
-    fig.text(0.002, 0.5, "wynik Łodygi (% maksimum)", fontsize=9, color=INK_SLABY,
+    fig.text(0.002, 0.5, "wynik Łodygi (% maksimum rubryki)", fontsize=9, color=INK_SLABY,
              va="center", rotation="vertical")
 
     uchwyty, etykiety = glowny.get_legend_handles_labels()
