@@ -11,10 +11,12 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | DeepSeek-V4.1-Flash (:nitro) | chat | low | 3 | **9,29** | 9,22–9,34 | 0 | 91% | 8,65 | 9,50 | 9,27 | 9,93 | 9,82 | 9,23 | 8,80 | 9,15 |
 | GLM-5.3-Flash (OpenRouter) | chat | tak | 3 | **8,71** | 8,58–8,79 | 1 | 96% | 7,68 | 8,32 | 8,85 | 10,00 | 9,49 | 8,98 | 8,22 | 8,19 |
 | Muse-Glimmer-30B | chat | low | 3 | **8,18** | 8,11–8,29 | 0 | 91% | 7,13 | 7,87 | 8,50 | 9,65 | 8,77 | 8,88 | 7,20 | 7,47 |
+| Mistral-Small-4-2603 | chat | high | 3 | **7,94** | 7,86–8,06 | 5 | 92% | 6,93 | 7,33 | 8,47 | 9,73 | 8,50 | 8,97 | 6,58 | 6,95 |
 | Ling-3.0-Flash | chat | tak* | 3 | **7,73** | 7,70–7,78 | 0 | 91% | 5,82 | 6,57 | 8,62 | 9,70 | 8,68 | 9,18 | 7,20 | 6,05 |
 | gpt-oss-120b | chat | high | 3 | **7,64** | 7,54–7,75 | 0 | 89% | 7,02 | 6,42 | 7,60 | 9,90 | 8,47 | 8,68 | 6,30 | 6,75 |
 | MiMo-v2.5 | chat | low | 3 | **7,56** | 7,48–7,71 | 2 | 88% | 5,79 | 6,59 | 8,48 | 9,89 | 8,14 | 8,85 | 6,67 | 6,07 |
 | Bielik-11B-v3-Instruct | chat | brak | 3 | **7,53** | 7,30–7,74 | 0 | 94% | 6,83 | 7,45 | 7,35 | 9,06 | 6,55 | 8,25 | 7,00 | 7,78 |
+| Mistral-Small-4-2603 | chat | nie | 3 | **7,43** | 7,30–7,58 | 2 | 93% | 6,90 | 6,50 | 7,25 | 8,88 | 7,87 | 9,00 | 6,35 | 6,75 |
 | Nemotron-3.5-Lightning | chat | low | 3 | **7,36** | 7,27–7,42 | 0 | 62% | 5,77 | 6,10 | 7,62 | 9,72 | 8,93 | 8,37 | 6,23 | 6,13 |
 | Bielik-PL-11B-v3.0-Instruct | chat | brak | 3 | **7,27** | 7,15–7,46 | 0 | 94% | 6,78 | 6,88 | 7,76 | 8,79 | 6,27 | 7,98 | 6,87 | 6,92 |
 | gpt-oss-20b | chat | high | 3 | **7,26** | 7,21–7,33 | 1 | 89% | 6,20 | 5,32 | 8,00 | 9,86 | 9,05 | 8,47 | 5,75 | 5,50 |
@@ -354,6 +356,22 @@ Sampling protokolarny to `temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
   repetition penalty, `reasoning_effort = low`. Nemotron nie obsługuje `top_k`
   ani repetition penalty, więc idzie tylko na `temperature` i `top_p`. DeepSeek
   używa wariantu `:nitro`, który sortuje endpointy po przepustowości.
+- **Mistral Small 4 (2603)**: sampling protokolarny bez repetition penalty;
+  dostawca nie obsługuje ani `top_k`, ani kary za powtórzenia, więc idzie tylko
+  na `temperature` i `top_p`, jak Nemotron. Siły rozumowania są tylko dwie,
+  `none` i `high` — nie ma `low`, na którym chodzą DeepSeek, MiMo i Nemotron,
+  więc wiersz `high` nie jest z nimi porównywalny pod względem kosztu śladu.
+  Oba wiersze opisują ten sam model: rozumowanie jest tu opcjonalne i domyślnie
+  wyłączone, a przypinamy je jawnie, bo inaczej zmiana domyślnej wartości
+  u dostawcy przesunęłaby wynik po cichu.
+
+  Wariant `high` wymagał dwóch odstępstw. `max_tokens = 120000` zamiast 40000,
+  bo przy 40000 pojawiały się puste tury, i współbieżność 32 zamiast 80, bo przy
+  80 dostawca zwracał pustą wiadomość — bez treści i bez śladu — w 42 z 480 tur,
+  prawie wyłącznie w turze 2. Te same zapytania powtórzone pojedynczo wracały
+  poprawne, więc nie była to cecha modelu. Po obu zmianach zostało 5 pustych tur
+  z 480, a wynik wzrósł z 7,37 do 7,94. Ten pierwszy pomiar NIE jest w tabeli —
+  mierzył limit i dławienie, nie model.
 - **gpt-oss 20B i 120B**: sampling protokolarny, ale bez repetition penalty —
   kara za powtórzenia jest nie na miejscu przy modelu, który powtarza wątki
   w śladzie rozumowania.

@@ -1,0 +1,32 @@
+# mistralai/mistral-small-2603 (Mistral Small 4, 119B) przez OpenRouter.
+#
+# Rozumowanie jest w tym modelu opcjonalne i domyślnie WYŁĄCZONE, a dostawca
+# wystawia tylko dwie siły: "none" i "high". Nie ma więc "low", którym chodzą
+# DeepSeek, MiMo i Nemotron - wariant z rozumowaniem siedzi w osobnym configu
+# (`-think`), a ten mierzy model bez rozumowania.
+[model]
+id = "mistral_small_4_2603"
+
+[api]
+base_url = "https://openrouter.ai/api/v1"
+model = "mistralai/mistral-small-2603"
+mode = "chat"
+api_key_env = "OPENROUTER_API_KEY"
+concurrency = 80
+timeout = 300
+
+# Sampling protokolarny bez repetition penalty - jak przy gpt-oss. Ten model
+# nie obsługuje top_k ani repetition_penalty, więc idzie tylko na temperature
+# i top_p, tak samo jak Nemotron.
+#
+# Siłę rozumowania przypinamy jawnie na "none", bo domyślna wartość u dostawcy
+# to "high" i wystarczyłaby zmiana flagi `default_enabled`, żeby ten wiersz po
+# cichu przestał opisywać model bez rozumowania.
+#
+# Okno to 262144 tokenów, więc max_tokens nie zbliża się do reguły podwójnego
+# budżetu z żadnej strony.
+[generation]
+max_tokens = 40000
+temperature = 0.9
+top_p = 0.9
+reasoning_effort = "none"

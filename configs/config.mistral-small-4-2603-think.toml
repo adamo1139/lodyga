@@ -1,0 +1,32 @@
+# mistralai/mistral-small-2603 (Mistral Small 4, 119B) przez OpenRouter,
+# wariant z rozumowaniem.
+#
+# Dostawca wystawia tylko dwie siły rozumowania: "none" i "high". Reszta tabeli
+# chodzi na "low", żeby nie płacić czasem za ślad - tutaj takiego wyboru nie ma,
+# więc wiersz w tabeli ma "high" i nie jest wprost porównywalny z wierszami
+# DeepSeeka, MiMo czy Nemotrona pod względem kosztu rozumowania.
+[model]
+id = "mistral_small_4_2603_think"
+
+[api]
+base_url = "https://openrouter.ai/api/v1"
+model = "mistralai/mistral-small-2603"
+mode = "chat"
+api_key_env = "OPENROUTER_API_KEY"
+# 32, nie 80 jak w pozostałych configach: przy 80 dostawca zwracał pustą
+# wiadomość, bez treści i bez śladu, prawie wyłącznie w turze 2.
+concurrency = 32
+timeout = 300
+
+# Sampling jak w wariancie bez rozumowania: protokolarny, bez repetition
+# penalty, bez top_k (dostawca go nie obsługuje).
+#
+# Ślad rozumowania wchodzi do tego samego budżetu co odpowiedź, stąd wysoki
+# max_tokens. Przy 40000 pojawiały się puste tury, więc limit ma tu duży zapas:
+# okno to 262144 tokenów, a dostawca dopuszcza 209715 tokenów odpowiedzi, więc
+# 120000 nie zbliża się do żadnej granicy.
+[generation]
+max_tokens = 120000
+temperature = 0.9
+top_p = 0.9
+reasoning_effort = "high"
