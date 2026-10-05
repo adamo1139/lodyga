@@ -70,6 +70,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka sft 2026-09-24/iter_0000400 (8k/84k) | chat | tak | 3 | **1,04** | 0,97–1,08 | 56 | 80% | 2,27 | 1,67 | 0,97 | 0,69 | 0,27 | 0,67 | 0,88 | 0,88 |
 | poziomka-instruct-2026-09-30-3 (8k/84k, t0,8) | chat | tak | 3 | **1,01** | 1,00–1,03 | 21 | 90% | 2,18 | 1,53 | 0,90 | 0,71 | 0,13 | 0,62 | 0,82 | 1,22 |
 | poziomka-instruct-2026-09-30-3 (8k/84k) | chat | tak | 3 | **1,00** | 0,87–1,09 | 55 | 81% | 1,97 | 1,50 | 0,75 | 1,11 | 0,08 | 0,53 | 0,69 | 1,42 |
+| GoLLeM-v6-250M-Instruct-v1 | chat | brak | 3 | **1,00** | 0,87–1,09 | 0 | 90% | 1,52 | 0,87 | 1,22 | 0,75 | 0,83 | 0,66 | 0,92 | 1,27 |
 | poziomka sft 2026-09-24/iter_0000200 (8k/84k, t0,8) | chat | nie | 3 | **0,98** | 0,91–1,03 | 0 | 96% | 1,63 | 1,25 | 1,12 | 1,30 | 0,18 | 0,30 | 0,89 | 1,15 |
 | polanka-3.7B-exp | compl. | tak | 3 | **0,97** | 0,81–1,19 | 0 | 88% | 1,60 | 1,53 | 1,07 | 1,10 | 0,45 | 0,57 | 0,40 | 1,08 |
 | poziomka-instruct-2026-09-30-4 (8k/84k, t0,8) | chat | tak | 3 | **0,97** | 0,91–1,02 | 39 | 86% | 2,27 | 1,28 | 0,40 | 1,12 | 0,08 | 0,52 | 0,62 | 1,45 |
@@ -302,6 +303,21 @@ oraz najlepsze kodowanie (0,58) i ekstrakcję (1,23). Jest też najstabilniejszy
 rozrzut 0,06 w trzech kombinacjach, wobec 0,13–0,18 u `-1` i `-4`. Z rozumowaniem wyższa temperatura psuje kategorie analityczne
 u wszystkich trzech — u `-1` matematyka 1,05 → 0,43 i wnioskowanie 0,92 → 0,47 —
 choć zmniejsza puste tury (u `-4` z 70 do 39).
+
+**`GoLLeM-v6-250M-Instruct-v1`** ([SlayerLab](https://huggingface.co/SlayerLab/GoLLeM-v6-250M-Instruct-v1),
+Fabryka AI) nie jest modelem w formacie transformers: `config.json` nie ma pól
+`architectures`, `model_type` ani `auto_map`, a warstwy siedzą we własnym
+`modeling_gollem_v6.py`. Do tego architektura ma residual na wartościach
+(`v + λ·v₀` z pierwszej warstwy), którego nie ma żadna architektura HF — i nie
+jest to ozdobnik, bo λ w warstwach 14, 17 i 18 wynosi −1,44, −1,08 i −2,73.
+Dlatego nie wstanie ani na vLLM, ani na SGLangu; mierzyliśmy go przez własny
+serwer zgodny z OpenAI (`serwer_gollem.py` poza tym repozytorium).
+
+Jego `max_tokens = 400` łamie regułę podwójnego budżetu świadomie: okno modelu
+to 1024 tokeny, więc ścisłe jej trzymanie dawałoby 200 i ucinało turę 1
+w połowie zdania. Ceną jest to, że przy długiej odpowiedzi prompt tury 2 bywa
+obcinany od lewej. Nie zaszkodziło: zero pustych tur, zero zapętleń i 90%
+polszczyzny na 480 tur.
 
 Serie Poziomki nazwane są datą publikacji repozytorium:
 `sft 2026-09-14` to [`cpral/poziomka_sft_2026_09_14_hf`](https://huggingface.co/cpral/poziomka_sft_2026_09_14_hf),

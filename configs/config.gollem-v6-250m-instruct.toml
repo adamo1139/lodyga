@@ -1,0 +1,37 @@
+# GoLLeM v6 250M Instruct v1 (SlayerLab/Fabryka AI).
+#   https://huggingface.co/SlayerLab/GoLLeM-v6-250M-Instruct-v1
+#
+# Model nie jest w formacie transformers (config.json bez `architectures`,
+# `model_type` i `auto_map`, warstwy we wlasnym modeling_gollem_v6.py), wiec nie
+# wstanie ani na vLLM, ani na SGLangu. Mierzymy go przez wlasny serwer zgodny
+# z OpenAI: serwer_gollem.py w korzeniu pretain_pol.
+#
+#   python3 serwer_gollem.py --port 2300 --batch 24
+#
+# Wariantu z rozumowaniem nie ma - model go nie generuje (0 z 16 tur w sondzie
+# przy obu ustawieniach), wiec sekcji [chat_template] nie ma w ogole.
+[model]
+id = "gollem_v6_250m_instruct"
+
+[api]
+base_url = "http://127.0.0.1:2300/v1"
+model = "SlayerLab/GoLLeM-v6-250M-Instruct-v1"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+# max_tokens 400, czyli SWIADOMIE wiecej niz reguly podwojnego budzetu.
+# Okno modelu to tylko 1024 tokeny. Scisle trzymanie sie reguly dawaloby 200
+# ((1024 - 584 najdluzszej pary pytan - 40 szablonu) / 2), co ucinaloby tura 1
+# w polowie zdania i mierzylo nie model, lecz limit.
+#
+# Cena: przy dlugiej odpowiedzi z tury 1 prompt tury 2 moze nie zmiescic sie
+# w oknie. Serwer obcina go wtedy OD LEWEJ, czyli gubi poczatek rozmowy,
+# zamiast zwracac blad. Dotyczy to tylko najdluzszych par pytan - przy medianie
+# (~200 tokenow) prompt z odpowiedzia i generacja mieszcza sie z zapasem.
+[generation]
+max_tokens = 400
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
