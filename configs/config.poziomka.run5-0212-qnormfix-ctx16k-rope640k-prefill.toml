@@ -1,0 +1,46 @@
+# Poziomka run 5 (SFT polskie-sprawy-v3), iter 212 z latka qnorm, rozumowanie
+# wymuszone prefillem.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka_sft_run5_polskie_sprawy_v3_16384_hf/iter_0000212_qnorm_fix
+#
+# Po co: `enable_thinking = true` na tym checkpointcie nic nie daje. Szablon
+# poprawnie zostawia otwarty `<think>\n`, ale model przy temperaturze 0 wstawia
+# `</think>` jako pierwszy token i odpowiada tak samo jak w wariancie nothink.
+# Przyczyna jest w zbiorze: `polskie-sprawy-v3` to w 93,4% rozmowy
+# `thinking: off` (399 689 wobec 28 281), a kazda taka odpowiedz dostala jawny
+# `<think>\n</think>\n`, nie 10% jak w v11/v12.
+#
+# Prefill zasiewa poczatek sladu pierwszym slowem, zeby model nie mial pustego
+# bloku do domkniecia. To mierzy, czy rozumowanie odziedziczone po merge'u -7
+# zostalo wygaszone, czy tylko przestalo sie samo wlaczac.
+#
+# Wymaga mode = "completions": prompt renderujemy sami, bo tylko tak da sie
+# dokleic prefill. Tokenizer i szablon brane sa z lokalnej kopii `iter_0000212`
+# (bez latki) - latka ruszyla wylacznie `query_layernorm`, a szablon w tym
+# katalogu jest bajtowo tym, ktorym renderowano dane treningowe
+# (sha256 085f20db..., zgodny z manifestem cache'u). Generuje serwer, czyli wagi
+# z latka.
+#
+# `enable_thinking` NIE jest ustawione celowo: szablon doklejilby wtedy wlasny
+# `<think>\n` przed prefillem i blok byby otwarty dwa razy.
+[model]
+id = "poziomka_run5_0212_qnormfix_ctx16k_rope640k_prefill"
+tokenizer = "/home/adamo/projects/pretain_pol/Ling-V2/chat/poziomka_sft_run5_polskie_sprawy_v3_16384_hf/iter_0000212"
+trust_remote_code = true
+
+[chat_template]
+prefill = "<think>\nUżytkownik"
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run5_polskie_sprawy_v3_16384_hf/iter_0000212_qnorm_fix"
+mode = "completions"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.6
+top_p = 0.9
+min_p = 0.05
+frequency_penalty = 0.15
+stop = ["<|im_end|>"]

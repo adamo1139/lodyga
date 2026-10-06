@@ -320,7 +320,17 @@ def main(argv=None):
     # so only an explicit true leaves an open <think> for the model to finish.
     # Prefill decyduje o tym samym, jeśli jest ustawiony: liczy się to, czy
     # prompt kończy się otwartym blokiem rozumowania.
-    prefilled = prefill.rstrip().endswith("<think>") if prefill else think is True
+    #
+    # Blok jest otwarty także wtedy, gdy prefill zasiewa początek śladu, na
+    # przykład "<think>\nUżytkownik" - stąd test na obecność znacznika, a nie na
+    # końcówkę tekstu. Wcześniejsze `endswith("<think>")` dawało tu False, więc
+    # split_reasoning() przy niedomkniętym bloku promował cały ślad do
+    # odpowiedzi: na run5 z prefillem dotyczyło to 223 z 480 tur i sędzia oceniał
+    # rozumowanie zamiast odpowiedzi.
+    prefilled = (
+        ("<think>" in prefill and "</think>" not in prefill)
+        if prefill else think is True
+    )
     # Niektóre modele sterują rozumowaniem przez wiadomość systemową, a nie przez
     # `enable_thinking` czy prefill - np. Muse-Glimmer oczekuje linii
     # "Reasoning strength: high". Treść wpisuje się w `chat_template.system`.

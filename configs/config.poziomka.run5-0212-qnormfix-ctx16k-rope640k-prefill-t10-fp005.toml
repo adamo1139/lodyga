@@ -1,0 +1,59 @@
+# Poziomka run 5 (SFT polskie-sprawy-v3), iter 212 z latka qnorm, rozumowanie
+# wymuszone prefillem, sampler dobrany POD DOMYKANIE BLOKU.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka_sft_run5_polskie_sprawy_v3_16384_hf/iter_0000212_qnorm_fix
+#
+# To samo co `-prefill`, ale z t1,0 i frequency_penalty 0,05 zamiast t0,6 i 0,15.
+# Przeniesiony z merge'a -7 zestaw t0,6/fp0,15 domykal `</think>` tylko w 19 z 32
+# prob; ten w 30 z 32.
+#
+# Sonda, 16 pytan x 2 proby, udzial tur z domknietym blokiem i odpowiedzia:
+#   t1,0 fp0,05   30/32   slad 2645 zn.   <- wybrane
+#   t0,9 fp0,05   28/32   slad 3032
+#   t0,9 fp0,15   21/32   slad 2215
+#   t0,6 fp0,15   19/32   slad 3552       <- odniesienie, zestaw z merge'a -7
+#   t1,0 fp0,15   19/32   slad 7082, 5/32 urwanych
+#   t1,0 fp0,25   16/32   slad 9229
+#   t0,9 bez kary  8/16   slad 9132, 8/16 urwanych
+#
+# Decyduje kara, nie temperatura: przy fp0,15 temperatura 0,6 i 1,0 daja
+# identyczne 19/32. Zaleznosc od kary jest niemonotoniczna - zero jest zle (model
+# kreci sie w sladzie i wyczerpuje budzet), 0,05 najlepsze, od 0,15 w gore coraz
+# gorzej. `</think>` to piec zwyklych tokenow APT4, nie znacznik specjalny, wiec
+# kara za powtorzenia tlumi je jak kazdy inny powtorzony token; z tego samego
+# powodu serwer wymaga `--grammar-backend none`.
+#
+# UWAGA: sonda mierzy domykanie, nie jakosc. Na 16 pytaniach ten sam zestaw
+# dawal raz 15/16, raz 11/16 - stad 32 proby na wariant. Mniejszej probce nie
+# wierz.
+#
+# Wymaga mode = "completions": prompt renderujemy sami, bo tylko tak da sie
+# dokleic prefill. Tokenizer i szablon brane sa z lokalnej kopii `iter_0000212`
+# (bez latki) - latka ruszyla wylacznie `query_layernorm`, a szablon w tym
+# katalogu jest bajtowo tym, ktorym renderowano dane treningowe
+# (sha256 085f20db..., zgodny z manifestem cache'u). Generuje serwer, czyli wagi
+# z latka.
+#
+# `enable_thinking` NIE jest ustawione celowo: szablon doklejilby wtedy wlasny
+# `<think>\n` przed prefillem i blok bylby otwarty dwa razy.
+[model]
+id = "poziomka_run5_0212_qnormfix_prefill_t10_fp005"
+tokenizer = "/home/adamo/projects/pretain_pol/Ling-V2/chat/poziomka_sft_run5_polskie_sprawy_v3_16384_hf/iter_0000212"
+trust_remote_code = true
+
+[chat_template]
+prefill = "<think>\nUżytkownik"
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run5_polskie_sprawy_v3_16384_hf/iter_0000212_qnorm_fix"
+mode = "completions"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 1.0
+top_p = 0.9
+min_p = 0.05
+frequency_penalty = 0.05
+stop = ["<|im_end|>"]

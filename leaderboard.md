@@ -11,13 +11,13 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | DeepSeek-V4.1-Flash (:nitro) | chat | low | 3 | **9,29** | 9,22–9,34 | 0 | 91% | 8,65 | 9,50 | 9,27 | 9,93 | 9,82 | 9,23 | 8,80 | 9,15 |
 | GLM-5.3-Flash (OpenRouter) | chat | tak | 3 | **8,71** | 8,58–8,79 | 1 | 96% | 7,68 | 8,32 | 8,85 | 10,00 | 9,49 | 8,98 | 8,22 | 8,19 |
 | Muse-Glimmer-30B | chat | low | 3 | **8,18** | 8,11–8,29 | 0 | 91% | 7,13 | 7,87 | 8,50 | 9,65 | 8,77 | 8,88 | 7,20 | 7,47 |
-| Mistral-Small-4-2603 | chat | high | 3 | **7,94** | 7,86–8,06 | 5 | 92% | 6,93 | 7,33 | 8,47 | 9,73 | 8,50 | 8,97 | 6,58 | 6,95 |
+| Mistral-Small-4-2603 | chat | high | 3 | **7,94** | 7,86–8,06 | 5 | 91% | 6,93 | 7,33 | 8,47 | 9,73 | 8,50 | 8,97 | 6,58 | 6,95 |
 | Mistral-Small-4-2603 (prompt: rozumuj po polsku) | chat | high | 3 | **7,88** | 7,81–7,95 | 0 | 93% | 7,12 | 7,10 | 8,13 | 9,75 | 8,15 | 8,93 | 6,90 | 6,97 |
 | Ling-3.0-Flash | chat | tak* | 3 | **7,73** | 7,70–7,78 | 0 | 91% | 5,82 | 6,57 | 8,62 | 9,70 | 8,68 | 9,18 | 7,20 | 6,05 |
 | gpt-oss-120b | chat | high | 3 | **7,64** | 7,54–7,75 | 0 | 89% | 7,02 | 6,42 | 7,60 | 9,90 | 8,47 | 8,68 | 6,30 | 6,75 |
 | MiMo-v2.5 | chat | low | 3 | **7,56** | 7,48–7,71 | 2 | 88% | 5,79 | 6,59 | 8,48 | 9,89 | 8,14 | 8,85 | 6,67 | 6,07 |
 | Bielik-11B-v3-Instruct | chat | brak | 3 | **7,53** | 7,30–7,74 | 0 | 94% | 6,83 | 7,45 | 7,35 | 9,06 | 6,55 | 8,25 | 7,00 | 7,78 |
-| Mistral-Small-4-2603 | chat | nie | 3 | **7,43** | 7,30–7,58 | 2 | 93% | 6,90 | 6,50 | 7,25 | 8,88 | 7,87 | 9,00 | 6,35 | 6,75 |
+| Mistral-Small-4-2603 | chat | nie | 3 | **7,43** | 7,30–7,58 | 2 | 91% | 6,90 | 6,50 | 7,25 | 8,88 | 7,87 | 9,00 | 6,35 | 6,75 |
 | Nemotron-3.5-Lightning | chat | low | 3 | **7,36** | 7,27–7,42 | 0 | 62% | 5,77 | 6,10 | 7,62 | 9,72 | 8,93 | 8,37 | 6,23 | 6,13 |
 | Bielik-PL-11B-v3.0-Instruct | chat | brak | 3 | **7,27** | 7,15–7,46 | 0 | 94% | 6,78 | 6,88 | 7,76 | 8,79 | 6,27 | 7,98 | 6,87 | 6,92 |
 | gpt-oss-20b | chat | high | 3 | **7,26** | 7,21–7,33 | 1 | 89% | 6,20 | 5,32 | 8,00 | 9,86 | 9,05 | 8,47 | 5,75 | 5,50 |
@@ -25,7 +25,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | Bielik-4.5B-v3-Instruct | chat | brak | 3 | **5,69** | 5,60–5,86 | 0 | 97% | 4,77 | 5,73 | 5,35 | 8,54 | 4,87 | 5,85 | 5,03 | 5,55 |
 | Bielik-1.5B-v3-Instruct | chat | brak | 3 | **3,83** | 3,72–3,96 | 0 | 93% | 3,95 | 4,00 | 2,77 | 6,02 | 2,87 | 4,15 | 3,38 | 3,65 |
 | Qra-13B-chat | chat | brak | 3 | **3,30** | 3,12–3,40 | 0 | 90% | 3,90 | 4,03 | 3,87 | 2,05 | 1,53 | 3,32 | 3,57 | 4,12 |
-| poziomka sft run5/iter_0000212 (16k/640k) | chat | nie | 3 | **1,73** | 1,65–1,89 | 0 | 98% | 2,92 | 2,66 | 1,93 | 0,63 | 0,23 | 0,98 | 1,92 | 2,60 |
+| poziomka sft run5/iter_0000212 (16k/640k) | chat | nie | 3 | **1,73** | 1,65–1,89 | 0 | 97% | 2,92 | 2,66 | 1,93 | 0,63 | 0,23 | 0,98 | 1,92 | 2,60 |
 | poziomka-instruct-2026-09-30-7 (16k/640k, t0,6 min_p) | chat | nie | 3 | **1,66** | 1,56–1,78 | 0 | 94% | 2,85 | 2,72 | 1,43 | 0,89 | 0,25 | 0,97 | 1,72 | 2,38 |
 | poziomka-instruct-2026-09-30-1 (8k/84k, t0,8) | chat | nie | 3 | **1,65** | 1,52–1,85 | 0 | 95% | 2,52 | 2,66 | 1,72 | 1,43 | 0,32 | 0,83 | 1,38 | 2,42 |
 | poziomka-instruct-2026-09-30-5 (8k/84k, t0,8) | chat | nie | 3 | **1,64** | 1,58–1,70 | 0 | 94% | 2,72 | 2,24 | 1,53 | 1,13 | 0,45 | 0,67 | 1,83 | 2,55 |
@@ -80,6 +80,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka-instruct-2026-09-30-4 (8k/84k, t0,8) | chat | tak | 3 | **0,97** | 0,91–1,02 | 39 | 86% | 2,27 | 1,28 | 0,40 | 1,12 | 0,08 | 0,52 | 0,62 | 1,45 |
 | polanka-3.7B-exp | chat | brak | 3 | **0,95** | 0,87–1,00 | 8 | 87% | 1,50 | 1,27 | 1,02 | 1,29 | 0,47 | 0,55 | 0,37 | 1,13 |
 | poziomka-instruct-2026-09-30-4 (8k/84k) | chat | tak | 3 | **0,94** | 0,89–0,99 | 70 | 79% | 2,05 | 1,73 | 0,55 | 0,80 | 0,22 | 0,63 | 0,58 | 0,93 |
+| poziomka sft run5/iter_0000212 (16k/640k, prefill, t1,0 fp0,05) | chat | prefill | 1 | **0,90** | — | 32 | 79% | 2,10 | 1,40 | 0,65 | 1,05 | 0,05 | 0,50 | 0,45 | 1,00 |
 | polka-1.1b-chat | chat | brak | 3 | **0,88** | 0,80–1,01 | 0 | 97% | 1,28 | 1,63 | 0,81 | 0,57 | 0,45 | 0,38 | 0,47 | 1,45 |
 | poziomka sft 2026-09-24/iter_0000300 (8k/84k) | chat | nie | 3 | **0,87** | 0,83–0,89 | 0 | 91% | 1,80 | 0,85 | 1,35 | 1,22 | 0,30 | 0,42 | 0,47 | 0,53 |
 | poziomka sft 2026-09-24/iter_0000300 (8k/84k) | chat | tak | 3 | **0,84** | 0,76–0,92 | 53 | 80% | 1,77 | 1,17 | 0,98 | 0,64 | 0,43 | 0,75 | 0,43 | 0,57 |
@@ -399,6 +400,35 @@ Sampling protokolarny to `temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
   jest `</think>`, więc oba warianty dają tę samą odpowiedź. Szablon jest
   bajtowo tym, którym renderowano dane treningowe, i reaguje na przełącznik
   poprawnie — to model przestał rozumować.
+
+  Wiersz `prefill, t1,0 fp0,05` wymusza rozumowanie prefillem
+  `"<think>\\nUżytkownik"`, który zasiewa początek śladu, więc model nie ma
+  pustego bloku do domknięcia. Wymaga `mode = "completions"`. Kolumna `myślenie`
+  ma tu wartość `prefill`, bo rozumowania nie włącza ani szablon, ani
+  `reasoning_effort`. **Jeden przebieg, nie trzy** — kolumna rozrzutu jest więc
+  pusta i wiersza nie porównuj na dziesiąte części z wierszami 3-przebiegowymi.
+
+  Sampler dobrany pod domykanie bloku, bo przeniesiony z merge'a -7 zestaw
+  `t0,6 fp0,15` domykał `</think>` tylko w 19 z 32 prób, a `t1,0 fp0,05` w 30
+  z 32. Decyduje kara, nie temperatura: przy `fp0,15` temperatury 0,6 i 1,0 dają
+  identyczne 19/32. Zależność od kary jest niemonotoniczna — bez kary model
+  kręci się w śladzie i wyczerpuje budżet (8/16 domkniętych, 8/16 urwanych),
+  przy 0,05 jest najlepiej, a od 0,15 w górę coraz gorzej (0,25 → 16/32, ślad
+  9,2 tys. znaków). `</think>` to pięć zwykłych tokenów APT4, nie znacznik
+  specjalny, więc kara za powtórzenia tłumi je jak każdy inny powtórzony token;
+  z tego samego powodu serwer wymaga `--grammar-backend none`.
+
+  Sonda zapowiadała 6% tur bez odpowiedzi, wyszło 20% (32 z 160), bo mierzyła
+  **tylko turę 1**. W pełnym przebiegu puste dzielą się 11 w turze 1 i 21
+  w turze 2: prompt tury 2 zawiera odpowiedź z tury 1, więc na ślad i odpowiedź
+  zostaje mniej z 7800 tokenów. Przy medianie śladu 4075 znaków i odpowiedzi
+  1919 znaków budżet jest tu realnym ograniczeniem. Sondę dla wariantów
+  z prefillem licz na turze 2.
+
+  Wniosek: rozumowanie na tym checkpointcie szkodzi. 0,90 z najlepszym z siedmiu
+  sprawdzonych samplerów to wciąż o połowę mniej niż 1,73 bez rozumowania, a
+  najgorzej wypadają kodowanie (0,05), nauki ścisłe (0,45) i wnioskowanie
+  (0,65) — czyli to, w czym rozumowanie miałoby pomagać.
 - **gpt-oss 20B i 120B**: sampling protokolarny, ale bez repetition penalty —
   kara za powtórzenia jest nie na miejscu przy modelu, który powtarza wątki
   w śladzie rozumowania.
