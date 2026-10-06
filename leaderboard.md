@@ -12,6 +12,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | GLM-5.3-Flash (OpenRouter) | chat | tak | 3 | **8,71** | 8,58–8,79 | 1 | 96% | 7,68 | 8,32 | 8,85 | 10,00 | 9,49 | 8,98 | 8,22 | 8,19 |
 | Muse-Glimmer-30B | chat | low | 3 | **8,18** | 8,11–8,29 | 0 | 91% | 7,13 | 7,87 | 8,50 | 9,65 | 8,77 | 8,88 | 7,20 | 7,47 |
 | Mistral-Small-4-2603 | chat | high | 3 | **7,94** | 7,86–8,06 | 5 | 92% | 6,93 | 7,33 | 8,47 | 9,73 | 8,50 | 8,97 | 6,58 | 6,95 |
+| Mistral-Small-4-2603 (prompt: rozumuj po polsku) | chat | high | 3 | **7,88** | 7,81–7,95 | 0 | 93% | 7,12 | 7,10 | 8,13 | 9,75 | 8,15 | 8,93 | 6,90 | 6,97 |
 | Ling-3.0-Flash | chat | tak* | 3 | **7,73** | 7,70–7,78 | 0 | 91% | 5,82 | 6,57 | 8,62 | 9,70 | 8,68 | 9,18 | 7,20 | 6,05 |
 | gpt-oss-120b | chat | high | 3 | **7,64** | 7,54–7,75 | 0 | 89% | 7,02 | 6,42 | 7,60 | 9,90 | 8,47 | 8,68 | 6,30 | 6,75 |
 | MiMo-v2.5 | chat | low | 3 | **7,56** | 7,48–7,71 | 2 | 88% | 5,79 | 6,59 | 8,48 | 9,89 | 8,14 | 8,85 | 6,67 | 6,07 |
@@ -24,6 +25,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | Bielik-4.5B-v3-Instruct | chat | brak | 3 | **5,69** | 5,60–5,86 | 0 | 97% | 4,77 | 5,73 | 5,35 | 8,54 | 4,87 | 5,85 | 5,03 | 5,55 |
 | Bielik-1.5B-v3-Instruct | chat | brak | 3 | **3,83** | 3,72–3,96 | 0 | 93% | 3,95 | 4,00 | 2,77 | 6,02 | 2,87 | 4,15 | 3,38 | 3,65 |
 | Qra-13B-chat | chat | brak | 3 | **3,30** | 3,12–3,40 | 0 | 90% | 3,90 | 4,03 | 3,87 | 2,05 | 1,53 | 3,32 | 3,57 | 4,12 |
+| poziomka sft run5/iter_0000212 (16k/640k) | chat | nie | 3 | **1,73** | 1,65–1,89 | 0 | 98% | 2,92 | 2,66 | 1,93 | 0,63 | 0,23 | 0,98 | 1,92 | 2,60 |
 | poziomka-instruct-2026-09-30-7 (16k/640k, t0,6 min_p) | chat | nie | 3 | **1,66** | 1,56–1,78 | 0 | 94% | 2,85 | 2,72 | 1,43 | 0,89 | 0,25 | 0,97 | 1,72 | 2,38 |
 | poziomka-instruct-2026-09-30-1 (8k/84k, t0,8) | chat | nie | 3 | **1,65** | 1,52–1,85 | 0 | 95% | 2,52 | 2,66 | 1,72 | 1,43 | 0,32 | 0,83 | 1,38 | 2,42 |
 | poziomka-instruct-2026-09-30-5 (8k/84k, t0,8) | chat | nie | 3 | **1,64** | 1,58–1,70 | 0 | 94% | 2,72 | 2,24 | 1,53 | 1,13 | 0,45 | 0,67 | 1,83 | 2,55 |
@@ -372,6 +374,31 @@ Sampling protokolarny to `temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
   poprawne, więc nie była to cecha modelu. Po obu zmianach zostało 5 pustych tur
   z 480, a wynik wzrósł z 7,37 do 7,94. Ten pierwszy pomiar NIE jest w tabeli —
   mierzył limit i dławienie, nie model.
+
+  Wiersz `prompt: rozumuj po polsku` to ten sam model i te same ustawienia, tylko
+  z wiadomością systemową: „Jesteś pomocnym asystentem. Zanim odpowiesz, przemyśl
+  problem krok po kroku. Całe rozumowanie prowadź wyłącznie po polsku, a
+  odpowiedź również napisz po polsku." Szczegóły niżej.
+- **Poziomka run 5 `iter_0000212`**: sampling skopiowany z
+  `instruct-2026-09-30-7 (16k/640k)`, żeby wiersz był porównywalny z modelem
+  startowym; sondą dla run 5 nie był dobierany. Mierzony jest folder
+  `iter_0000212_qnorm_fix`, nie `iter_0000212`: zapis DCP wyzerował
+  `query_layernorm` w warstwach 0, 2, 4, 6, 10, 12 i 14, a te siedem wektorów
+  wzięto ze startowego merge'a. Bez łatki strata walidacyjna to 4,46 wobec 0,958
+  w Megatronie, model mielił podsłowa nazw ról (`ssi`, `stant`, `ser`) przy
+  temperaturze 0, bez szablonu w prompcie, zarówno na sglangu, jak i na
+  transformersach — a `config.json`, md5 tokenizera, RMS wag i indeks
+  safetensors zgadzały się z działającym checkpointem. Po łatce 0,941.
+  Serwer wymaga `--grammar-backend none`, bo `</think>` to pięć tokenów APT4,
+  a `ReasonerGrammarBackend` wymaga jednego.
+
+  Wariantu think nie ma w tabeli, bo przełącznik nie ma na co działać:
+  `polskie-sprawy-v3` to w 93,4% rozmowy `thinking: off` (399 689 wobec 28 281),
+  a każda taka odpowiedź dostała jawny `<think>\n</think>\n` — nie 10% jak
+  w v11/v12. Przy prefillu `<think>\n` pierwszym tokenem przy temperaturze 0
+  jest `</think>`, więc oba warianty dają tę samą odpowiedź. Szablon jest
+  bajtowo tym, którym renderowano dane treningowe, i reaguje na przełącznik
+  poprawnie — to model przestał rozumować.
 - **gpt-oss 20B i 120B**: sampling protokolarny, ale bez repetition penalty —
   kara za powtórzenia jest nie na miejscu przy modelu, który powtarza wątki
   w śladzie rozumowania.

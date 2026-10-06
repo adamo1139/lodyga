@@ -1,0 +1,32 @@
+# Poziomka run 5 (SFT polskie-sprawy-v3, 16384 packed, GBS 64), iter 212, wariant think.
+#   HF: cpral/poziomka_sft_run5_polskie_sprawy_v3_16384_hf, folder iter_0000212_qnorm_fix
+#   lokalnie na riggu: /media/nvme_2tb/maked/poziomka_train/poziomka_sft_run5_polskie_sprawy_v3_16384_hf/iter_0000212_qnorm_fix
+#
+# Zapis DCP z run 5 wyzerowal query_layernorm w warstwach 0,2,4,6,10,12,14;
+# te 7 wektorow wzieto ze startowego merge'a (instruct-2026-09-30-7). Strata
+# walidacyjna po latce 0,941 (Megatron: 0,958), bez latki 4,46.
+#
+# Serwer: okno 16384, RoPE 640000, --grammar-backend none (</think> to 5 tokenow
+# APT4, a ReasonerGrammarBackend wymaga jednego).
+# Sampling skopiowany z instruct-2026-09-30-7-ctx16k-rope640k, zeby wynik byl
+# porownywalny z modelem startowym; nie byl dobierany sonda dla run 5.
+[model]
+id = "poziomka_run5_0212_qnormfix_ctx16k_rope640k_think"
+
+[chat_template]
+enable_thinking = true
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run5_polskie_sprawy_v3_16384_hf/iter_0000212_qnorm_fix"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.6
+top_p = 0.9
+min_p = 0.05
+frequency_penalty = 0.15
+stop = ["<|im_end|>"]

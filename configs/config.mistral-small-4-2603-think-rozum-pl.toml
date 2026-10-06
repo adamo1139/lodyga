@@ -1,0 +1,33 @@
+# mistralai/mistral-small-2603 z wiadomością systemową wymuszającą polskie
+# rozumowanie.
+#
+# Model zostawiony sam sobie rozumuje po polsku w 465 z 476 tur (98%). Jedenaście
+# wyjątków to prawie wyłącznie kodowanie i matematyka - kategorie, w których ma
+# najwyższe noty - i ślady dłuższe od mediany (5-22 tys. znaków wobec 2,3 tys.).
+# Ten wariant sprawdza, co się stanie, gdy te wyjątki zamknąć: czy polecenie
+# myślenia po polsku pomaga, czy zabiera modelowi język, w którym radzi sobie
+# z najtrudniejszymi zadaniami algorytmicznymi.
+#
+# Odpowiednikiem bez wiadomości systemowej jest `-think`; różni je wyłącznie ta
+# wiadomość, więc różnica wyniku jest jej skutkiem.
+[model]
+id = "mistral_small_4_2603_think_rozum_pl"
+
+[api]
+base_url = "https://openrouter.ai/api/v1"
+model = "mistralai/mistral-small-2603"
+mode = "chat"
+api_key_env = "OPENROUTER_API_KEY"
+# 32, nie 80 jak w pozostałych configach: przy 80 dostawca zwracał pustą
+# wiadomość, bez treści i bez śladu, prawie wyłącznie w turze 2.
+concurrency = 32
+timeout = 300
+
+[chat_template]
+system = "Jesteś pomocnym asystentem. Zanim odpowiesz, przemyśl problem krok po kroku. Całe rozumowanie prowadź wyłącznie po polsku, a odpowiedź również napisz po polsku."
+
+[generation]
+max_tokens = 120000
+temperature = 0.9
+top_p = 0.9
+reasoning_effort = "high"
