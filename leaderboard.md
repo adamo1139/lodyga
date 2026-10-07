@@ -51,6 +51,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka-instruct-2026-09-30-1 (16k/640k) | chat | nie | 3 | **1,37** | 1,36–1,41 | 0 | 95% | 2,27 | 2,20 | 1,50 | 1,31 | 0,37 | 0,85 | 1,22 | 1,28 |
 | poziomka-instruct-2026-09-30-4 (8k/84k) | chat | nie | 3 | **1,37** | 1,27–1,52 | 0 | 94% | 2,00 | 2,43 | 1,42 | 1,15 | 0,30 | 0,98 | 1,13 | 1,50 |
 | poziomka sft 2026-09-24/iter_0000400 (8k/84k) | chat | nie | 3 | **1,36** | 1,32–1,42 | 0 | 92% | 2,42 | 2,13 | 1,83 | 1,16 | 0,25 | 0,93 | 1,02 | 1,10 |
+| polanka-3.7B-exp-260922 (t0,8) | chat | nie | 3 | **1,34** | 1,26–1,45 | 3 | 90% | 1,50 | 2,21 | 1,67 | 1,20 | 0,68 | 0,75 | 1,00 | 1,70 |
 | poziomka-instruct-2026-09-30-3 (8k/84k, t0,8) | chat | nie | 3 | **1,30** | 1,28–1,32 | 0 | 94% | 2,38 | 2,10 | 1,05 | 0,77 | 0,32 | 0,70 | 1,38 | 1,65 |
 | poziomka-instruct-2026-09-30-5 (8k/84k) | chat | tak | 3 | **1,28** | 1,24–1,34 | 49 | 82% | 2,50 | 2,11 | 0,72 | 1,37 | 0,34 | 0,77 | 1,23 | 1,23 |
 | poziomka sft 2026-09-24/iter_0000400 (8k/84k, t0,8) | chat | nie | 3 | **1,27** | 1,19–1,40 | 0 | 91% | 2,32 | 1,90 | 1,15 | 1,26 | 0,13 | 0,47 | 1,22 | 1,72 |
@@ -74,6 +75,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka-instruct-2026-09-30-1 (16k/640k) | chat | tak | 3 | **1,04** | 0,87–1,16 | 34 | 85% | 1,73 | 1,83 | 0,60 | 1,43 | 0,28 | 0,68 | 0,48 | 1,25 |
 | poziomka sft 2026-09-14/iter_0000400 | chat | nie | 3 | **1,04** | 0,95–1,13 | 0 | 90% | 2,12 | 1,62 | 0,95 | 0,60 | 0,05 | 0,53 | 0,80 | 1,60 |
 | poziomka sft 2026-09-24/iter_0000400 (8k/84k) | chat | tak | 3 | **1,04** | 0,97–1,08 | 56 | 80% | 2,27 | 1,67 | 0,97 | 0,69 | 0,27 | 0,67 | 0,88 | 0,88 |
+| polanka-3.7B-exp-260922 (t0,8) | chat | tak | 3 | **1,01** | 0,89–1,13 | 4 | 85% | 1,58 | 1,68 | 0,87 | 1,56 | 0,02 | 0,65 | 0,38 | 1,43 |
 | poziomka-instruct-2026-09-30-3 (8k/84k, t0,8) | chat | tak | 3 | **1,01** | 1,00–1,03 | 21 | 90% | 2,18 | 1,53 | 0,90 | 0,71 | 0,13 | 0,62 | 0,82 | 1,22 |
 | poziomka-instruct-2026-09-30-3 (8k/84k) | chat | tak | 3 | **1,00** | 0,87–1,09 | 55 | 81% | 1,97 | 1,50 | 0,75 | 1,11 | 0,08 | 0,53 | 0,69 | 1,42 |
 | GoLLeM-v6-250M-Instruct-v1 | chat | brak | 3 | **1,00** | 0,87–1,09 | 0 | 90% | 1,52 | 0,87 | 1,22 | 0,75 | 0,83 | 0,66 | 0,92 | 1,27 |
@@ -525,6 +527,42 @@ Sampling protokolarny to `temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
   ma w tabeli, bo każdy pomiar to jeden przebieg; merge siedzi w środku swoich
   składników i nie przebija najlepszego z nich.
 
+- **Polanka `3.7b_exp_260922`** (`piotr-ai/polanka_3.7b_exp_260922`): to INNY
+  artefakt niż wiersze `polanka-3.7B-exp` wyżej — tam był lokalny katalog
+  z tokenizerem z `wip_260901`, tu repo z HF. Architektura `Qwen3MoeForCausalLM`,
+  30 warstw, 32 ekspertów, 4 na token, vocab 151936, okno 40960, RoPE 1000000.
+  `temperature 0,8` zamiast protokolarnej 0,9 (sonda: zero zapętlonych tur na 16
+  w obu trybach i krótsze odpowiedzi niż przy 0,3), reszta samplingu
+  protokolarna, `max_tokens 8192`. Te wiersze nie są więc wprost porównywalne
+  z wierszami `polanka-3.7B-exp`.
+
+  **Mierzone pod vLLM, NIE pod sglangiem.** Na sglangu ten model wypluwa same
+  wykrzykniki przy temperaturze 0, w każdym trybie — przez chat API, przez
+  `/completions` z ręcznie złożonym ChatML-em i na czystym tekście bez żadnych
+  znaczników (`"Stolicą Polski jest"` → `"!!!!!!!!"`). Przyczyną jest
+  `config.json` zapisany przez transformers 5.17, który używa nowych nazw pól:
+  `"dtype"` zamiast `"torch_dtype"` i `"rope_parameters": {"rope_theta": 1e6}`
+  zamiast `"rope_theta"` na górnym poziomie. Starszy czytnik nie znajduje tych
+  nazw i podkłada domyślne — przy RoPE 10000 zamiast miliona, czyli kodowanie
+  pozycyjne rozjechane całkowicie, stąd szum od pierwszego tokenu. vLLM rozumie
+  nowy styl. Naprawa dla sglanga: dopisać stare nazwy obok nowych albo przepisać
+  config przez `save_pretrained` na starszych transformersach. To NIE ta sama
+  awaria co „stop na `<|endoftext|>`" z wcześniejszych wierszy Polanki — tam
+  model kończył odpowiedź, ale generował dalej za jej końcem.
+
+  Przełącznik rozumowania działa, inaczej niż w starszej Polance: przy
+  `enable_thinking = false` odpowiada wprost. Model rozumuje **po polsku bez
+  żadnego promptu systemowego**, co czyni go kandydatem do generowania polskich
+  śladów rozumowania.
+
+  **UWAGA do wiersza `tak`: 65 z 480 tur (14%) nie domknęło `</think>`**, więc
+  sędzia ocenił w nich ślad rozumowania zamiast odpowiedzi. Widać to
+  w długościach: tury ze śladem mają mediany odpowiedzi 591 znaków, a te bez
+  śladu 2601 znaków, z czego 30 powyżej 3000. Serwer nie ma parsera rozumowania,
+  więc ślad wraca w `content`; szablon otwiera `<think>` w prompcie, więc przy
+  niedomkniętym bloku w treści nie ma żadnego znacznika i harness bierze ją za
+  odpowiedź. Wynik 1,01 jest przez to **zawyżony** — po poprawieniu harnessu te
+  tury będą pustymi turami i wiersz trzeba przemierzyć.
 - **gpt-oss 20B i 120B**: sampling protokolarny, ale bez repetition penalty —
   kara za powtórzenia jest nie na miejscu przy modelu, który powtarza wątki
   w śladzie rozumowania.

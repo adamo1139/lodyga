@@ -1,0 +1,73 @@
+# Polanka 3.7B exp 260922 (piotr-ai/polanka_3.7b_exp_260922), wariant nothink.
+#   vllm serve piotr-ai/polanka_3.7b_exp_260922 --port 8000 --host 0.0.0.0
+#
+# INNY ARTEFAKT niz wiersze `polanka-3.7B-exp` w tabeli: tam byl lokalny katalog
+# /media/nvme_2tb/maked/models/polanka (tokenizer z `wip_260901`), tu repo z HF.
+# Architektura to Qwen3MoeForCausalLM, 30 warstw, 32 ekspertow, 4 na token,
+# vocab 151936, okno 40960, RoPE 1000000. `--trust-remote-code` nie jest
+# potrzebne.
+#
+# !!! NIE STAWIAJ TEGO MODELU NA SGLANGU bez poprawy config.json. Na sglangu
+# model wypluwa same wykrzykniki przy temperaturze 0, i to w kazdym trybie:
+# przez chat API, przez /completions z recznie zlozonym ChatML-em i na czystym
+# tekscie bez zadnych znacznikow ("Stolica Polski jest" -> "!!!!!!!!"). Przyczyna
+# jest w config.json zapisanym przez transformers 5.17, ktory uzywa NOWYCH nazw
+# pol:
+#     "dtype": "bfloat16"                                 (nie "torch_dtype")
+#     "rope_parameters": {"rope_theta": 1000000.0, ...}   (nie "rope_theta")
+# Starszy czytnik nie znajduje tych nazw i podklada wartosci domyslne - przy RoPE
+# 10000 zamiast miliona, czyli kodowanie pozycyjne rozjechane calkowicie, stad
+# szum od pierwszego tokenu niezaleznie od promptu. vLLM rozumie nowy styl i na
+# tych samych wagach odpowiada poprawnie. Naprawa dla sglanga: dopisac do
+# config.json stare nazwy obok nowych albo przepisac plik przez save_pretrained
+# na starszych transformersach.
+#
+# To NIE jest ta sama awaria co commit 47e5288 ("stop na endoftext"): tam model
+# konczyl odpowiedz, ale generowal dalej za jej koncem. Tutaj stop nie zmienia
+# niczego, bo szum leci od pierwszego tokenu.
+#
+# Przelacznik rozumowania DZIALA, inaczej niz w starszej Polance: przy
+# enable_thinking=false model odpowiada wprost ("Stolica Polski jest Warszawa.",
+# 29 znakow, bez bloku), przy true i bez kwargs rozumuje (322 znaki z `</think>`).
+#
+# Model rozumuje PO POLSKU bez zadnego promptu systemowego ("Hmm, pytanie
+# uzytkownika jest dosc proste...").
+#
+# Slad rozumowania wraca w `content`, nie w `reasoning_content`, bo serwer nie ma
+# parsera rozumowania. Harness radzi sobie z tym sam: w tresci nie ma `<think>`
+# (szablon otwiera blok w prompcie), ale jest `</think>`, wiec split_reasoning()
+# dzieli poprawnie.
+[model]
+id = "polanka_3.7b_exp_260922_nothink"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:8000/v1"
+model = ""
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+# max_tokens 8192 zamiast 3500 z poprzednich wierszy Polanki: przy 3500 male
+# modele urywaja sie w polowie zapetlenia i nie widac, czy odpowiedz bylaby
+# skonczona. Regula podwojnego budzetu spelniona z duzym zapasem (najdluzsza
+# para pytan + 2 x 8192 << 40960).
+#
+# eos tej Polanki to <|im_end|> (id 151645, tokenizer Qwen), a NIE <|endoftext|>
+# jak w wersji wip_260901. Obie wartosci zostaja, zadna nie szkodzi.
+#
+# temperature 0,8 zamiast 0,9 z samplingu protokolarnego. Sonda: przy 0,8 zero
+# zapetlonych tur na 16 w obu trybach i krotsze odpowiedzi (1257 / 2270 znakow),
+# przy 0,3 bylo 2/16 i 1/16 zapetlonych przy 1955 / 2903 znakach. Reszta
+# samplingu protokolarna (top_p 0,9, top_k 40, repetition_penalty 1,05), wiec te
+# wiersze NIE sa wprost porownywalne z wierszami `polanka-3.7B-exp`, ktore szly
+# na 0,9.
+[generation]
+max_tokens = 8192
+temperature = 0.8
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+stop = ["<|endoftext|>", "<|im_end|>"]
