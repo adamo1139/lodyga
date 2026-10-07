@@ -26,6 +26,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | Bielik-1.5B-v3-Instruct | chat | brak | 3 | **3,83** | 3,72–3,96 | 0 | 93% | 3,95 | 4,00 | 2,77 | 6,02 | 2,87 | 4,15 | 3,38 | 3,65 |
 | Qra-13B-chat | chat | brak | 3 | **3,30** | 3,12–3,40 | 0 | 90% | 3,90 | 4,03 | 3,87 | 2,05 | 1,53 | 3,32 | 3,57 | 4,12 |
 | poziomka sft run7/iter_0000846 (v13, gbs16, 16k/640k) | chat | nie | 3 | **1,99** | 1,91–2,13 | 0 | 93% | 3,08 | 3,04 | 1,77 | 1,11 | 0,23 | 1,02 | 2,32 | 3,30 |
+| poziomka-instruct-2026-10-07-sce (v13, 16k/640k) | chat | nie | 3 | **1,95** | 1,79–2,15 | 0 | 96% | 3,08 | 3,29 | 1,78 | 0,99 | 0,37 | 1,12 | 2,32 | 2,65 |
 | poziomka sft run5/iter_0000212 (16k/640k) | chat | nie | 3 | **1,73** | 1,65–1,89 | 0 | 97% | 2,92 | 2,66 | 1,93 | 0,63 | 0,23 | 0,98 | 1,92 | 2,60 |
 | poziomka-instruct-2026-09-30-7 (16k/640k, t0,6 min_p) | chat | nie | 3 | **1,66** | 1,56–1,78 | 0 | 94% | 2,85 | 2,72 | 1,43 | 0,89 | 0,25 | 0,97 | 1,72 | 2,38 |
 | poziomka-instruct-2026-09-30-1 (8k/84k, t0,8) | chat | nie | 3 | **1,65** | 1,52–1,85 | 0 | 95% | 2,52 | 2,66 | 1,72 | 1,43 | 0,32 | 0,83 | 1,38 | 2,42 |
@@ -81,6 +82,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka-instruct-2026-09-30-4 (8k/84k, t0,8) | chat | tak | 3 | **0,97** | 0,91–1,02 | 39 | 86% | 2,27 | 1,28 | 0,40 | 1,12 | 0,08 | 0,52 | 0,62 | 1,45 |
 | polanka-3.7B-exp | chat | brak | 3 | **0,95** | 0,87–1,00 | 8 | 87% | 1,50 | 1,27 | 1,02 | 1,29 | 0,47 | 0,55 | 0,37 | 1,13 |
 | poziomka-instruct-2026-09-30-4 (8k/84k) | chat | tak | 3 | **0,94** | 0,89–0,99 | 70 | 79% | 2,05 | 1,73 | 0,55 | 0,80 | 0,22 | 0,63 | 0,58 | 0,93 |
+| poziomka-instruct-2026-10-07-sce (v13, 16k/640k, fp0,05) | chat | tak | 3 | **0,93** | 0,86–1,03 | 137 | 67% | 1,68 | 1,53 | 0,60 | 0,84 | 0,24 | 0,78 | 0,80 | 0,93 |
 | poziomka sft run5/iter_0000212 (16k/640k, prefill, t1,0 fp0,05) | chat | prefill | 1 | **0,90** | — | 32 | 79% | 2,10 | 1,40 | 0,65 | 1,05 | 0,05 | 0,50 | 0,45 | 1,00 |
 | polka-1.1b-chat | chat | brak | 3 | **0,88** | 0,80–1,01 | 0 | 97% | 1,28 | 1,63 | 0,81 | 0,57 | 0,45 | 0,38 | 0,47 | 1,45 |
 | poziomka sft 2026-09-24/iter_0000300 (8k/84k) | chat | nie | 3 | **0,87** | 0,83–0,89 | 0 | 91% | 1,80 | 0,85 | 1,35 | 1,22 | 0,30 | 0,42 | 0,47 | 0,53 |
@@ -474,6 +476,45 @@ Sampling protokolarny to `temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
   1,99 bez rozumowania. Wąskim gardłem nie jest jakość rozumowania, a wyjście
   z niego: mediana śladu 4119 znaków przy budżecie 7800 tokenów, a tura 2 wypada
   dwa razy gorzej od tury 1 w każdym z trzech niezależnych pomiarów.
+
+- **Merge `poziomka-instruct-2026-10-07-sce`** (SCE, składniki z serii v13):
+  wariant nothink na samplingu przeniesionym z `-7 (16k/640k)`, jak wszystkie
+  wiersze v13. Wariant think na `fp0,05`, **dobranym sondą na tym merge'u**, na
+  obu turach, 32 próby na wariant — udział tur z odpowiedzią (tura 1 / tura 2):
+
+  | sampler | tura 1 | tura 2 |
+  |---|---|---|
+  | t0,6 fp0,05 | 29/32 | 19/32 |
+  | t0,8 fp0,05 | 28/32 | 18/32 |
+  | t1,0 fp0,05 | 27/32 | 19/32 |
+  | t0,8 fp0,15 | 17/32 | 17/32 |
+  | t0,6 fp0,15 | 15/32 | 13/32 |
+
+  Decyduje kara, nie temperatura — trzeci niezależny pomiar z tym samym
+  wynikiem. Na `fp0,15` wariant think mierzyłby głównie limit, stąd odstępstwo;
+  temperatura została 0,6 jak w nothink, więc warianty różni wyłącznie kara
+  i rozumowanie. **Te dwa wiersze nie są więc czystym porównaniem samego
+  rozumowania.** Założenie, że to nie szkodzi porównaniu, opiera się na siatce
+  samplerów dla merge'a liniowego, gdzie w nothink cała piątka zmieściła się
+  w 1,63–1,86, czyli w rozrzucie między przebiegami — ale dla tego merge'a nie
+  zostało to zmierzone.
+
+  **Rozumowanie kosztuje połowę wyniku: 0,93 wobec 1,95**, przy 137 pustych
+  turach na 480 (29%) i rozrzucie 0,09, najniższym w całej serii. Traci nawet
+  tam, gdzie miałoby pomagać: wnioskowanie 1,78 → 0,60, nauki ścisłe 2,32 →
+  0,80, humanistyka 2,65 → 0,93. Najmniej traci matematyka (0,99 → 0,84).
+  Polszczyzna 67% nie oznacza odpowiedzi w innym języku — 29% tur jest pustych
+  i OpenLID nie ma czego rozpoznać.
+
+  Obraz jest niemal identyczny jak na run7, gdzie ten sam sampler dał 0,92 przy
+  29% pustych i polszczyźnie 66%. To własność całej rodziny po SFT na v13, nie
+  cecha scalania.
+
+  **SCE nie dał nic ponad najlepszy składnik**: 1,95 wobec 1,99 dla run7, przy
+  rozrzutach 0,18 i 0,13 i niemal pokrywających się zakresach przebiegów
+  (1,79–2,15 wobec 1,91–2,13). Pierwszy przebieg SCE dał 2,15 i wyglądał na
+  rekord, drugi 1,92, trzeci 1,79 — pojedynczy przebieg w tej rodzinie nie
+  rozstrzyga niczego.
 
 - **Merge `poziomka-instruct-2026-10-07`**: zmierzony pięcioma samplerami po
   jednym przebiegu — `t0,8 fp0,05` 1,86, `t0,6 fp0,15` 1,83, `t0,6 fp0,05` 1,81,
