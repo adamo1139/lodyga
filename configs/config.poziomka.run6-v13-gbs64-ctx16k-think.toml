@@ -1,0 +1,36 @@
+# Poziomka run 6 (SFT polskie-sprawy-v3, szablon v13, 16384 packed, GBS 64),
+# iter 0000212, wariant think.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka_sft_run6_polskie_sprawy_v3_v13_16384_gbs64_hf/iter_0000212
+#
+# Czesc zmiatania po wielkosci partii: run9 gbs768/18 iter, run6 gbs64/212,
+# run8 gbs32/423, run7 gbs16/846. Kazdy run widzial tyle samo probek, rozni je
+# tylko liczba krokow optymalizatora.
+#
+# Sampling NIE byl dobierany sonda dla tych runow - jest skopiowany z
+# `instruct-2026-09-30-7 (16k/640k)` i z wiersza run5, zeby partie dalo sie
+# porownac miedzy soba i z modelem startowym. Serwer: okno 16384, RoPE 640000,
+# `--grammar-backend none`.
+#
+# Szablon v13 naprawil przelacznik rozumowania: na zbiorze v3 z poprzednim
+# szablonem `enable_thinking = true` dawalo 0 z 16 rozumujacych tur, tutaj 16
+# z 16 we wszystkich czterech runach.
+[model]
+id = "poziomka_run6_v13_gbs64_ctx16k_think"
+
+[chat_template]
+enable_thinking = true
+
+[api]
+base_url = "http://192.168.1.26:2306/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run6_polskie_sprawy_v3_v13_16384_gbs64_hf/iter_0000212"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.6
+top_p = 0.9
+min_p = 0.05
+frequency_penalty = 0.15
+stop = ["<|im_end|>"]

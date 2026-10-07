@@ -1,0 +1,32 @@
+# mistralai/mistral-small-2603 z wiadomością systemową po angielsku, wymuszającą
+# angielskie rozumowanie.
+#
+# Lustro `-rozum-pl`: ta sama wiadomość, ten sam układ zdań, tylko język
+# rozumowania odwrócony. Odpowiedź w obu wariantach ma być po polsku, bo rubryka
+# ocenia polszczyznę - gdyby i ona przeszła na angielski, pomiar mierzyłby język
+# odpowiedzi, a nie język myślenia.
+#
+# Jeden przebieg, nie trzy: `-rozum-pl` pokazał, że wymuszanie języka nie rusza
+# wyniku poza rozrzut, więc tutaj interesuje nas przede wszystkim, czy prompt
+# w ogóle przestawia język śladu.
+[model]
+id = "mistral_small_4_2603_think_rozum_en"
+
+[api]
+base_url = "https://openrouter.ai/api/v1"
+model = "mistralai/mistral-small-2603"
+mode = "chat"
+api_key_env = "OPENROUTER_API_KEY"
+# 32, nie 80 jak w pozostałych configach: przy 80 dostawca zwracał pustą
+# wiadomość, bez treści i bez śladu, prawie wyłącznie w turze 2.
+concurrency = 32
+timeout = 300
+
+[chat_template]
+system = "You are a helpful assistant. Before answering, think the problem through step by step. Conduct all of your reasoning in English only, and write the final answer in Polish."
+
+[generation]
+max_tokens = 120000
+temperature = 0.9
+top_p = 0.9
+reasoning_effort = "high"

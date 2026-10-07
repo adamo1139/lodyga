@@ -25,6 +25,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | Bielik-4.5B-v3-Instruct | chat | brak | 3 | **5,69** | 5,60–5,86 | 0 | 97% | 4,77 | 5,73 | 5,35 | 8,54 | 4,87 | 5,85 | 5,03 | 5,55 |
 | Bielik-1.5B-v3-Instruct | chat | brak | 3 | **3,83** | 3,72–3,96 | 0 | 93% | 3,95 | 4,00 | 2,77 | 6,02 | 2,87 | 4,15 | 3,38 | 3,65 |
 | Qra-13B-chat | chat | brak | 3 | **3,30** | 3,12–3,40 | 0 | 90% | 3,90 | 4,03 | 3,87 | 2,05 | 1,53 | 3,32 | 3,57 | 4,12 |
+| poziomka sft run7/iter_0000846 (v13, gbs16, 16k/640k) | chat | nie | 3 | **1,99** | 1,91–2,13 | 0 | 93% | 3,08 | 3,04 | 1,77 | 1,11 | 0,23 | 1,02 | 2,32 | 3,30 |
 | poziomka sft run5/iter_0000212 (16k/640k) | chat | nie | 3 | **1,73** | 1,65–1,89 | 0 | 97% | 2,92 | 2,66 | 1,93 | 0,63 | 0,23 | 0,98 | 1,92 | 2,60 |
 | poziomka-instruct-2026-09-30-7 (16k/640k, t0,6 min_p) | chat | nie | 3 | **1,66** | 1,56–1,78 | 0 | 94% | 2,85 | 2,72 | 1,43 | 0,89 | 0,25 | 0,97 | 1,72 | 2,38 |
 | poziomka-instruct-2026-09-30-1 (8k/84k, t0,8) | chat | nie | 3 | **1,65** | 1,52–1,85 | 0 | 95% | 2,52 | 2,66 | 1,72 | 1,43 | 0,32 | 0,83 | 1,38 | 2,42 |
@@ -429,6 +430,60 @@ Sampling protokolarny to `temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
   sprawdzonych samplerów to wciąż o połowę mniej niż 1,73 bez rozumowania, a
   najgorzej wypadają kodowanie (0,05), nauki ścisłe (0,45) i wnioskowanie
   (0,65) — czyli to, w czym rozumowanie miałoby pomagać.
+
+- **Poziomka run 7 `iter_0000846`** (zbiór `polskie-sprawy-v3`, szablon **v13**,
+  GBS 16): sampling ten sam co w wierszach run5 i `-7 (16k/640k)`, przeniesiony,
+  nie dobierany sondą dla tego runu. Serwer: okno 16384, RoPE 640000,
+  `--grammar-backend none`.
+
+  Szablon v13 naprawił przełącznik rozumowania, którego zbiór v3 z poprzednim
+  szablonem wygaszał: `enable_thinking = true` daje tu 16 z 16 rozumujących tur
+  w sondzie, wobec 0 z 16 na run5.
+
+  Wiersz powstał z trzech osobnych przebiegów jednoprzebiegowych (1,93 / 1,91 /
+  2,13), bo pierwszy był częścią zmiatania po wielkości partii, a dwa dalsze
+  dołożono później; średnia, rozrzut i kategorie policzone z trzech
+  `aggregate.json` tą samą arytmetyką, jaką stosuje `lodyga.py --passes 3`.
+  Ośmiu tur z 480 nie oceniono (niepoprawny JSON sędziego), zgodnie z protokołem
+  bez ponawiania.
+
+  **Zmiatanie po wielkości partii**, po jednym przebiegu na run, przy tej samej
+  liczbie obejrzanych próbek — iteracje są odwrotnie proporcjonalne do partii:
+
+  | run | GBS | iteracje | wynik (1 przebieg) |
+  |---|---|---|---|
+  | run7 | 16 | 846 | 1,93 |
+  | run6 | 64 | 212 | 1,89 |
+  | run8 | 32 | 423 | 1,78 |
+  | run9 | 768 | 18 | 0,78 |
+
+  Trójki 1,78–1,93 nie da się uszeregować: różnice są mniejsze od rozrzutu
+  między przebiegami (0,13–0,24). Rozstrzygające jest tylko to, że **gbs768 przy
+  osiemnastu krokach optymalizatora jest dwa i pół raza słabszy** — przy
+  najwyższej polszczyźnie w stawce (99%), czyli pisze poprawnie, ale nie trzyma
+  się zadania. Sonda pokazała tam też 3–4 zapętlone tury na 16, przeciek
+  przełącznika rozumowania (2 z 32 tur rozumowały przy `false`) i średnią
+  długość 5255 znaków, dwa–trzy razy powyżej reszty. To niedouczenie, nie
+  usterka.
+
+  Warianty think tej serii nie trafiły do tabeli: na przeniesionym samplerze
+  run6 dał 0,77 przy 43% pustych tur, a run9 0,14 przy 87%. Po dobraniu kary
+  sondą na run7 (`fp0,05`, mierzone na obu turach, 32 próby na wariant: udział
+  tur z odpowiedzią 27/32 w turze 1 i 21/32 w turze 2, wobec 17/32 i 16/32 przy
+  `fp0,15`) pełny przebieg dał 0,92 przy 29% pustych — nadal o połowę mniej niż
+  1,99 bez rozumowania. Wąskim gardłem nie jest jakość rozumowania, a wyjście
+  z niego: mediana śladu 4119 znaków przy budżecie 7800 tokenów, a tura 2 wypada
+  dwa razy gorzej od tury 1 w każdym z trzech niezależnych pomiarów.
+
+- **Merge `poziomka-instruct-2026-10-07`**: zmierzony pięcioma samplerami po
+  jednym przebiegu — `t0,8 fp0,05` 1,86, `t0,6 fp0,15` 1,83, `t0,6 fp0,05` 1,81,
+  `t0,8 fp0,15` 1,72, `t0,6 fp0,00` 1,63. Cała siatka mieści się w rozpiętości
+  0,23, czyli w rozrzucie między przebiegami, więc **w wariancie nothink ten
+  model jest obojętny na sampler** — inaczej niż warianty think, gdzie ta sama
+  kara rozstrzygała o dwudziestu punktach procentowych pustych tur. Wiersza nie
+  ma w tabeli, bo każdy pomiar to jeden przebieg; merge siedzi w środku swoich
+  składników i nie przebija najlepszego z nich.
+
 - **gpt-oss 20B i 120B**: sampling protokolarny, ale bez repetition penalty —
   kara za powtórzenia jest nie na miejscu przy modelu, który powtarza wątki
   w śladzie rozumowania.

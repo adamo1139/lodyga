@@ -1,0 +1,33 @@
+# Poziomka instruct 2026-10-07 (merge), wariant nothink.
+#   serwer: ~/projects/mergekit/poziomka-instruct-2026-10-07
+#
+# Serwer: okno 16384, RoPE 640000, `--grammar-backend none`.
+#
+# Sampling skopiowany z `instruct-2026-09-30-7 (16k/640k)` i z wierszy run5-run9,
+# zeby merge dal sie porownac z modelami, z ktorych powstal. Nie byl dobierany
+# sonda dla tego merge'a.
+#
+# Sonda: zero smieci przy temperaturze 0, zero pustych i zero urwanych tur
+# w nothink, 0-1/16 zapetlonych, srednia dlugosc 1523 (t0,3) i 972 (t0,8) znakow.
+# Przelacznik rozumowania dziala - 16/16 rozumujacych tur przy enable_thinking
+# = true, 0/32 przy false.
+[model]
+id = "poziomka_instruct_2026_10_07_ctx16k_t08_fp005"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2310/v1"
+model = "/home/adamo/projects/mergekit/poziomka-instruct-2026-10-07"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.8
+top_p = 0.9
+min_p = 0.05
+frequency_penalty = 0.05
+stop = ["<|im_end|>"]
