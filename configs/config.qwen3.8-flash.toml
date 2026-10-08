@@ -1,0 +1,45 @@
+# qwen/qwen3.8-flash (HF: Qwen/Qwen3.8-Flash-Next) przez OpenRouter.
+[model]
+id = "qwen3.8_flash"
+
+[api]
+base_url = "https://openrouter.ai/api/v1"
+model = "qwen/qwen3.8-flash"
+mode = "chat"
+api_key_env = "OPENROUTER_API_KEY"
+# 32, nie 80: przy 80 dostawca zwrocil pusta wiadomosc - bez tresci i bez sladu
+# - w 24 z 160 tur, po 11 w turze 1 i 13 w turze 2. Rozklad rowny miedzy turami
+# i brak sladu wykluczaja limit tokenow (maks slad 57 tys. znakow przy budzecie
+# 40000 tokenow). Ta sama sygnatura co przy Mistralu Small 4, gdzie zejscie
+# z 80 na 32 zbilo puste tury z 42/480 na 5/480.
+concurrency = 32
+timeout = 300
+
+# Sampling ZALECANY PRZEZ KARTE MODELU, a nie protokolarny - protokol dopuszcza
+# sampling per model (custom_scoring.md, "Answer generation"), tak jak przy
+# Muse-Glimmer i GLM 5.3 Flash.
+#
+# Karta podaje dwa zestawy; bierzemy ten dla trybu thinking, bo rozumowanie jest
+# w tym modelu domyslnie wlaczone (`default_enabled: true`) i nie da sie go
+# wylaczyc ani wyregulowac - `supported_efforts` jest puste, jak przy Ling 3.0
+# Flash. Zestaw dla trybu instruct (t0,7 / top_p 0,80 / presence_penalty 1,5)
+# opisywalby wiec inny tryb niz ten, ktory faktycznie mierzymy.
+#
+#   thinking:  temperature 1,0  top_p 0,95  top_k 20  min_p 0,0
+#              presence_penalty 0,0  repetition_penalty 1,0
+#
+# `min_p` i `repetition_penalty` nie sa w `supported_parameters` tego dostawcy,
+# ale zalecane wartosci (0,0 i 1,0) sa neutralne, czyli pominiecie ich daje
+# dokladnie to samo. `presence_penalty 0,0` przypinamy jawnie, bo karta zaznacza,
+# ze podnoszenie go redukuje zapetlenia, ale miesza jezyki - a jezyk jest tu
+# mierzona wlasnoscia.
+#
+# Slad rozumowania wchodzi do tego samego budzetu co odpowiedz, stad wysoki
+# max_tokens. Okno to 1M, a dostawca dopuszcza 131072 tokenow odpowiedzi, wiec
+# 40000 nie zbliza sie do zadnej granicy.
+[generation]
+max_tokens = 40000
+temperature = 1.0
+top_p = 0.95
+top_k = 20
+presence_penalty = 0.0

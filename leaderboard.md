@@ -19,6 +19,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | Bielik-11B-v3-Instruct | chat | brak | 3 | **7,53** | 7,30–7,74 | 0 | 94% | 6,83 | 7,45 | 7,35 | 9,06 | 6,55 | 8,25 | 7,00 | 7,78 |
 | Mistral-Small-4-2603 | chat | nie | 3 | **7,43** | 7,30–7,58 | 2 | 91% | 6,90 | 6,50 | 7,25 | 8,88 | 7,87 | 9,00 | 6,35 | 6,75 |
 | Nemotron-3.5-Lightning | chat | low | 3 | **7,36** | 7,27–7,42 | 0 | 62% | 5,77 | 6,10 | 7,62 | 9,72 | 8,93 | 8,37 | 6,23 | 6,13 |
+| Qwen3.8-Flash-Next | chat | tak* | 2 | **7,27** | 6,79–7,75 | 59 | 73% | 6,60 | 7,15 | 6,95 | 8,45 | 8,39 | 6,97 | 6,92 | 6,72 |
 | Bielik-PL-11B-v3.0-Instruct | chat | brak | 3 | **7,27** | 7,15–7,46 | 0 | 94% | 6,78 | 6,88 | 7,76 | 8,79 | 6,27 | 7,98 | 6,87 | 6,92 |
 | gpt-oss-20b | chat | high | 3 | **7,26** | 7,21–7,33 | 1 | 89% | 6,20 | 5,32 | 8,00 | 9,86 | 9,05 | 8,47 | 5,75 | 5,50 |
 | Bielik-PL-Minitron-7B-v3.0-Instruct | chat | brak | 3 | **6,41** | 6,29–6,58 | 0 | 94% | 6,25 | 5,99 | 5,77 | 8,66 | 5,00 | 7,07 | 6,10 | 6,50 |
@@ -364,6 +365,36 @@ Sampling protokolarny to `temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
   repetition penalty, `reasoning_effort = low`. Nemotron nie obsługuje `top_k`
   ani repetition penalty, więc idzie tylko na `temperature` i `top_p`. DeepSeek
   używa wariantu `:nitro`, który sortuje endpointy po przepustowości.
+- **Qwen3.8-Flash-Next** (`qwen/qwen3.8-flash`, HF `Qwen/Qwen3.8-Flash-Next`):
+  sampling **z karty modelu**, zestaw dla trybu thinking — `temperature 1,0`,
+  `top_p 0,95`, `top_k 20`, `presence_penalty 0,0`. Karta podaje też zestaw dla
+  trybu instruct, ale rozumowania w tym modelu nie da się wyłączyć ani
+  wyregulować (`default_enabled: true`, `supported_efforts` puste, jak przy Ling
+  3.0 Flash), więc tamten opisywałby tryb, którego nie mierzymy. `min_p`
+  i `repetition_penalty` z karty pominięte, bo dostawca ich nie obsługuje —
+  zalecane wartości (0,0 i 1,0) są neutralne, więc pominięcie nic nie zmienia.
+  `presence_penalty` przypięte jawnie na 0,0: karta ostrzega, że podnoszenie go
+  redukuje zapętlenia, ale **miesza języki**, a język jest tu mierzoną
+  własnością.
+
+  **DWA PRZEBIEGI, nie trzy, i różnią się współbieżnością — 80 w pierwszym, 32
+  w drugim.** Wyniki 7,75 i 6,79, czyli rozrzut 0,96, wielokrotnie powyżej tego,
+  co widujemy między przebiegami tego samego ustawienia. Ten wiersz jest więc
+  orientacyjny.
+
+  Powodem rozrzutu są **puste tury: 59 z 320 (18%)**, 24 w pierwszym przebiegu
+  i 35 w drugim. Wszystkie wróciły całkowicie puste — bez treści i bez śladu
+  rozumowania — i rozkładają się po obu turach (11/13 oraz 15/20). Zejście ze
+  współbieżności 80 na 32 miało to naprawić, jak przy Mistralu Small 4, ale dało
+  efekt odwrotny: pustych tur było WIĘCEJ. Przyczyna pozostaje nieustalona.
+  Budżet jej nie tłumaczy — najdłuższy ślad w drugim przebiegu to 100 004 znaki
+  (~33 tys. tokenów) przy limicie 40000, a puste tury nie mają śladu wcale, więc
+  nie są urwane w połowie myślenia. Polszczyzna 73% jest zaniżona tym samym
+  mechanizmem: 18% tur nie ma treści, której OpenLID mógłby przypisać język.
+
+  Profil kategorii jest odwrotny do polskich modeli i bliższy DeepSeekowi:
+  matematyka 8,45 i kodowanie 8,39 wobec piśmiennictwa 6,60 i humanistyki 6,72.
+
 - **Mistral Small 4 (2603)**: sampling protokolarny bez repetition penalty;
   dostawca nie obsługuje ani `top_k`, ani kary za powtórzenia, więc idzie tylko
   na `temperature` i `top_p`, jak Nemotron. Siły rozumowania są tylko dwie,
