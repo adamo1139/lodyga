@@ -26,6 +26,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | Bielik-4.5B-v3-Instruct | chat | brak | 3 | **5,69** | 5,60–5,86 | 0 | 97% | 4,77 | 5,73 | 5,35 | 8,54 | 4,87 | 5,85 | 5,03 | 5,55 |
 | Bielik-1.5B-v3-Instruct | chat | brak | 3 | **3,83** | 3,72–3,96 | 0 | 93% | 3,95 | 4,00 | 2,77 | 6,02 | 2,87 | 4,15 | 3,38 | 3,65 |
 | Qra-13B-chat | chat | brak | 3 | **3,30** | 3,12–3,40 | 0 | 90% | 3,90 | 4,03 | 3,87 | 2,05 | 1,53 | 3,32 | 3,57 | 4,12 |
+| poziomka-instruct-2026-10-10-della (16k/640k) | chat | nie | 3 | **2,12** | 2,01–2,18 | 0 | 95% | 3,58 | 2,90 | 2,03 | 1,54 | 0,37 | 1,23 | 2,40 | 2,87 |
 | poziomka sft run10/iter_0001525 (v4, gbs16, 16k/640k) | chat | nie | 3 | **2,05** | 2,03–2,07 | 0 | 91% | 3,15 | 2,85 | 1,90 | 1,82 | 0,64 | 0,98 | 1,93 | 3,10 |
 | poziomka sft run7/iter_0000846 (v13, gbs16, 16k/640k) | chat | nie | 3 | **1,99** | 1,91–2,13 | 0 | 93% | 3,08 | 3,04 | 1,77 | 1,11 | 0,23 | 1,02 | 2,32 | 3,30 |
 | poziomka-instruct-2026-10-07-sce (v13, 16k/640k) | chat | nie | 3 | **1,95** | 1,79–2,15 | 0 | 96% | 3,08 | 3,29 | 1,78 | 0,99 | 0,37 | 1,12 | 2,32 | 2,65 |
@@ -467,6 +468,33 @@ Sampling protokolarny to `temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
   sprawdzonych samplerów to wciąż o połowę mniej niż 1,73 bez rozumowania, a
   najgorzej wypadają kodowanie (0,05), nauki ścisłe (0,45) i wnioskowanie
   (0,65) — czyli to, w czym rozumowanie miałoby pomagać.
+
+- **Merge `poziomka-instruct-2026-10-10-della`** (DELLA, `della_linear`):
+  składniki `2026-10-07-sce` i `run10/iter_0001525`, baza `instruct-2026-09-30-7`.
+  Sampling przeniesiony z całej serii, nie dobierany dla tego merge'a. Sonda:
+  zero śmieci przy temperaturze 0, zero pustych i zero zapętlonych tur
+  w nothink, przełącznik rozumowania działa. Sonda była tu konieczna, bo DELLA
+  przerzedza delty losowo i zły dobór `density`/`epsilon` mógłby dać model
+  uszkodzony, jak merge `-2`, który sypał szumem.
+
+  **Najwyższa średnia Poziomki, ale od SCE i run10 nieodróżnialna.** 2,12 wobec
+  2,07 i 2,05, przy rozrzucie DELLA 0,17 i zakresie 2,01–2,18, który zachodzi na
+  oba. To **piąty z rzędu merge w tej serii, który nie przebija najlepszego
+  składnika** — małej przewagi nie da się wykluczyć, ale żeby ją wykazać przy
+  tym rozrzucie, trzeba by sześciu albo więcej przebiegów.
+
+  **DELLA jest wyraźnie mniej stabilna od pozostałych**: odchylenie 0,09 wobec
+  0,03 u SCE 10-10 i 0,02 u run10. Jest to spójne z mechanizmem — przerzedzanie
+  jest losowe, więc sam merge to jedno losowanie z rozkładu i dwa uruchomienia
+  tego samego configu dałyby różne wagi. Przy wyborze modelu do użytku to
+  argument za SCE albo za samym run10.
+
+  Przebieg 1 sugerował, że DELLA zachowuje zyski obu składników: matematyka
+  1,89 (jak run10) i piśmiennictwo 3,85 (powyżej obu). **Trzy przebiegi tego nie
+  potwierdziły**: matematyka 1,89 / 1,17 / 1,55, średnia 1,54, czyli dokładnie
+  między run10 (1,82) i SCE (1,05); piśmiennictwo 3,85 / 3,60 / 3,30, średnia
+  3,58, czyli tyle samo co SCE (3,53). Pojedynczy przebieg w tej rodzinie nie
+  rozstrzyga niczego.
 
 - **Poziomka run 10 `iter_0001525`** (zbiór **polskie-sprawy-v4**, szablon v13,
   GBS 16): sampling ten sam co w całej serii v13 i w merge'ach, przeniesiony,

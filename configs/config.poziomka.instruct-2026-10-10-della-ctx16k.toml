@@ -1,0 +1,34 @@
+# Poziomka instruct 2026-10-10 (merge DELLA), wariant nothink.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka-instruct-2026-10-10-della
+#
+# Serwer: okno 16384, RoPE 640000, `--grammar-backend none`.
+#
+# Sampling ten sam co w calej serii v13, w merge'ach SCE i w run10, czyli
+# przeniesiony - nie byl dobierany dla tego merge'a. Dzieki temu wiersz jest
+# wprost porownywalny ze skladnikami i z pozostalymi metodami scalania.
+#
+# Sonda: zero smieci przy temperaturze 0, zero pustych i zero zapetlonych tur
+# w nothink, srednia odpowiedz 908-1109 znakow. Przelacznik rozumowania dziala
+# (16/16 przy true, 0/32 przy false). DELLA przerzedza delty losowo wzgledem
+# wielkosci parametru, wiec sonda byla tu konieczna - zly dobor density/epsilon
+# moglby dac model uszkodzony, jak merge -2, ktory sypal szumem.
+[model]
+id = "poziomka_instruct_2026_10_10_della_ctx16k"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka-instruct-2026-10-10-della"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.6
+top_p = 0.9
+min_p = 0.05
+frequency_penalty = 0.15
+stop = ["<|im_end|>"]
