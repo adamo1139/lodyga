@@ -66,6 +66,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka-instruct-2026-09-30-7 (16k/640k, t0,6 min_p) | chat | tak | 3 | **1,20** | 1,16–1,22 | 32 | 87% | 2,55 | 1,78 | 0,82 | 0,85 | 0,40 | 0,70 | 1,13 | 1,32 |
 | poziomka-instruct-2026-09-30-6 (8k/84k, t0,8) | chat | tak | 3 | **1,18** | 1,10–1,25 | 27 | 88% | 2,63 | 1,94 | 0,55 | 1,00 | 0,15 | 0,78 | 0,75 | 1,65 |
 | poziomka sft 2026-09-24/iter_0000498 (8k/84k) | chat | tak | 3 | **1,17** | 1,08–1,25 | 42 | 85% | 2,38 | 1,85 | 0,67 | 1,15 | 0,19 | 0,70 | 0,97 | 1,43 |
+| poziomka sft run10/iter_0001525 (v4, gbs16, 16k/640k, fp0,05) | chat | tak | 3 | **1,12** | 1,03–1,19 | 89 | 70% | 2,15 | 1,20 | 1,02 | 1,38 | 0,59 | 0,83 | 0,77 | 1,03 |
 | poziomka sft 2026-09-14/iter_0000800 | chat | nie | 3 | **1,12** | 1,08–1,15 | 0 | 94% | 2,24 | 1,88 | 0,82 | 0,50 | 0,18 | 0,28 | 0,81 | 2,22 |
 | poziomka-instruct-2026-09-30-1 (16k/640k, t0,8) | chat | tak | 3 | **1,11** | 1,03–1,15 | 39 | 88% | 2,52 | 1,85 | 0,52 | 0,84 | 0,45 | 0,48 | 0,65 | 1,52 |
 | poziomka sft 2026-09-24/iter_0000100 | chat | tak | 3 | **1,10** | 0,97–1,21 | 33 | 86% | 2,02 | 1,53 | 0,82 | 1,10 | 0,42 | 0,77 | 1,05 | 1,12 |
@@ -492,6 +493,44 @@ Sampling protokolarny to `temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
   2,32) i odgrywania ról (2,85 wobec 3,04). Przy dziesięciu pytaniach na
   kategorię pojedyncza różnica to szum, ale kierunek powtórzył się też
   w pojedynczym przebiegu na `t0,8`.
+
+  **Wariant think na `fp0,05`, dobranym `sampler.py`** na tym checkpointcie, na
+  obu turach, 32 próby na wariant — udział tur z odpowiedzią (tura 1 / tura 2):
+
+  | sampler | tura 1 | tura 2 | ślad |
+  |---|---|---|---|
+  | t0,6 fp0,05 | 28/32 | 28/32 | 3057 zn. |
+  | t0,8 fp0,05 | 26/32 | 28/32 | 4075 zn. |
+  | t1,0 fp0,05 | 23/32 | 22/32 | 3183 zn., 11/64 urwanych |
+  | t0,6 fp0,15 | 22/32 | 21/32 | 5256 zn. |
+  | t0,8 fp0,15 | 21/32 | 16/32 | 12 201 zn. |
+
+  Decyduje kara, nie temperatura — trzeci niezależny pomiar z tym samym wynikiem
+  (run7, merge SCE, run10). **Te dwa wiersze nie są więc czystym porównaniem
+  samego rozumowania**: nothink idzie na `fp0,15`, think na `fp0,05`, bo przy
+  `fp0,15` wiersz think mierzyłby głównie limit.
+
+  Tura 2 **nie** jest tu gorsza od tury 1 przy dobrym samplerze (28/32 i 28/32),
+  inaczej niż na run7 i merge'u SCE, gdzie wypadała dwa razy gorzej. Odpowiedzi
+  są tu krótkie (mediana 403 znaki), więc prompt tury 2 jest lżejszy. Przy
+  `fp0,15` wzór wraca.
+
+  **Koszt rozumowania to równo połowa oceny, trzeci raz z rzędu**: 1,12 wobec
+  2,05, podobnie jak run7 (0,92 wobec 1,99) i merge SCE (0,93 wobec 1,95). Lepszy
+  dobór samplera zbił puste tury do 89 z 480 (19%) wobec 29% u tamtych, ale
+  proporcji nie zmienił. Traci wszystko poza piśmiennictwem (2,15): role 1,20
+  wobec 2,85, humanistyka 1,03 wobec 3,10, nauki ścisłe 0,77 wobec 1,93. Model
+  myśli tu dwunastokrotnie dłużej, niż odpowiada — mediana śladu 5133 znaki przy
+  odpowiedzi 403 znaki.
+
+  Wszystkie puste tury mają niepusty ślad, więc żadna nie jest przypadkiem,
+  w którym sędzia dostałby ślad jako odpowiedź; serwer ma parser rozumowania
+  i księgowanie jest czyste.
+
+  **Granica `sampler.py`**: jego liczby są dobre do rankingu zestawów, ale
+  zawyżają prognozę. Z 88% tur z odpowiedzią wyszłoby 12% pustych, a w pełnym
+  przebiegu jest 19% — sonda mierzy 16 pytań, pełny przebieg 80, i te dodatkowe
+  są trudniejsze (mediana śladu rośnie z 3057 do 5133 znaków).
 
   **Temperatura jest na tym checkpointcie bez znaczenia**: `t0,8` dało 1,93
   w jednym przebiegu wobec 2,03 na `t0,6` w pierwszym przebiegu, czyli różnicę
