@@ -1,0 +1,60 @@
+# Poziomka instruct 2026-10-10 (merge Arcee Fusion), wariant think.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka-instruct-2026-10-10-fusion
+#
+# Serwer: okno 16384, RoPE 640000, `--grammar-backend none`.
+#
+# Sampling ten sam co w calej serii v13, w merge'ach SCE i w run10, czyli
+# przeniesiony - nie byl dobierany dla tego merge'a. Dzieki temu wiersz jest
+# wprost porownywalny ze skladnikami i z pozostalymi metodami scalania.
+#
+# Sonda: zero smieci przy temperaturze 0, zero pustych i zero zapetlonych tur
+# w nothink, srednia odpowiedz 1071-1124 znaki. Przelacznik rozumowania dziala
+# (16/16 przy true, 0/32 przy false).
+#
+# UWAGA: Arcee Fusion jest NIESYMETRYCZNA - bierze dokladnie dwa modele, z ktorych
+# jeden jest baza, i wtapia w nia istotne roznice drugiego. `base_model: run10`
+# z wtopieniem SCE to INNY model niz `base_model: SCE` z wtopieniem run10.
+# Kierunek tego konkretnego scalania nie jest tu zapisany, bo nie wynika z nazwy
+# katalogu - jesli ma znaczenie dla interpretacji wiersza, trzeba go uzupelnic.
+
+[model]
+id = "poziomka_instruct_2026_10_10_fusion_ctx8k_think_t10_minp025"
+
+[chat_template]
+enable_thinking = true
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka-instruct-2026-10-10-fusion"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+# Serwer na INNEJ konfiguracji niz reszta wierszy tego modelu: okno 8192 i RoPE
+# 84000 zamiast 16384 i 640000. Tak mierzony byl wariant think merge'a
+# 2026-10-01, stad porownanie.
+#
+# max_tokens 3500 zamiast 7800 - regula podwojnego budzetu przy oknie 8192
+# dopuszcza okolo 3700, wiec 3500 jest na granicy, nie z zapasem. Widac to
+# w sondzie: urwanych tur jest 7-10 na 64, wobec 2-6 przy oknie 16384.
+#
+# Sampler dobrany `sampler.py`, obie tury, 32 proby (tura 1 / tura 2):
+#   t1,0 min_p 0,25   28/32  28/32   7/64 urwanych   <- wybrane
+#   t0,6 min_p 0,10   29/32  26/32   9/64
+#   t0,6 min_p 0,25   31/32  22/32   8/64
+#   t0,3 top_p 0,9    27/32  24/32   9/64   <- zestaw z 2026-10-01
+#   t1,0 min_p 0,40   29/32  22/32  10/64
+#   t0,3 min_p 0,10   26/32  22/32  10/64, slad 5650 znakow (!)
+#
+# `t1,0 min_p 0,25` wygrywa DRUGI raz, po oknie 16384 - wybor samplera przeniosl
+# sie miedzy konfiguracjami serwera. To wazne, bo wczesniejsza regula w tym
+# projekcie mowila cos przeciwnego: optimum bylo zwiazane z RoPE i nie
+# przenosilo sie (przy 84000 najlepsza byla t0,9, przy 640000 kierunek sie
+# odwracal). Tamta regula pochodzi sprzed serii v13.
+[generation]
+max_tokens = 3500
+temperature = 1.0
+top_p = 0.9
+min_p = 0.25
+frequency_penalty = 0.05
+stop = ["<|im_end|>"]
