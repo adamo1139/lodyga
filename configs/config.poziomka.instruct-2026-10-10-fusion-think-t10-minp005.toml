@@ -1,0 +1,39 @@
+# Poziomka instruct 2026-10-10 (merge Arcee Fusion), wariant think.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka-instruct-2026-10-10-fusion
+#
+# Serwer: okno 16384, RoPE 640000, `--grammar-backend none`.
+#
+# Sampling ten sam co w calej serii v13, w merge'ach SCE i w run10, czyli
+# przeniesiony - nie byl dobierany dla tego merge'a. Dzieki temu wiersz jest
+# wprost porownywalny ze skladnikami i z pozostalymi metodami scalania.
+#
+# Sonda: zero smieci przy temperaturze 0, zero pustych i zero zapetlonych tur
+# w nothink, srednia odpowiedz 1071-1124 znaki. Przelacznik rozumowania dziala
+# (16/16 przy true, 0/32 przy false).
+#
+# UWAGA: Arcee Fusion jest NIESYMETRYCZNA - bierze dokladnie dwa modele, z ktorych
+# jeden jest baza, i wtapia w nia istotne roznice drugiego. `base_model: run10`
+# z wtopieniem SCE to INNY model niz `base_model: SCE` z wtopieniem run10.
+# Kierunek tego konkretnego scalania nie jest tu zapisany, bo nie wynika z nazwy
+# katalogu - jesli ma znaczenie dla interpretacji wiersza, trzeba go uzupelnic.
+
+[model]
+id = "poziomka_instruct_2026_10_10_fusion_think_t10_minp005"
+
+[chat_template]
+enable_thinking = true
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka-instruct-2026-10-10-fusion"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 1.0
+top_p = 0.9
+min_p = 0.05
+frequency_penalty = 0.05
+stop = ["<|im_end|>"]

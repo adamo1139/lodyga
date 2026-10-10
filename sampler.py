@@ -100,6 +100,36 @@ def rozmowa(cfg, gen, pytanie, think):
     return pierwsza, druga
 
 
+SKROTY = {"temperature": "t", "frequency_penalty": "fp", "presence_penalty": "pres",
+          "min_p": "min_p", "top_p": "top_p", "top_k": "top_k",
+          "repetition_penalty": "rep"}
+
+
+def parsuj(zestaw):
+    """`temperature=1.2,min_p=0.1` -> {"temperature": 1.2, "min_p": 0.1}.
+
+    Wartości całkowite zostają całkowite (top_k), resztę bierzemy jako float.
+    """
+    wynik = {}
+    for para in zestaw.split(","):
+        klucz, _, wartosc = para.partition("=")
+        klucz, wartosc = klucz.strip(), wartosc.strip()
+        if not wartosc:
+            raise SystemExit(f"error: brak wartości w {para!r}")
+        wynik[klucz] = int(wartosc) if klucz == "top_k" else float(wartosc)
+    return wynik
+
+
+def opisz(gen):
+    """Krótka etykieta zestawu, do nagłówka tabeli."""
+    czesci = []
+    for klucz, wartosc in gen.items():
+        nazwa = SKROTY.get(klucz, klucz)
+        liczba = f"{wartosc:g}".replace(".", ",")
+        czesci.append(f"{nazwa}{liczba}" if nazwa in ("t", "fp", "pres") else f"{nazwa} {liczba}")
+    return " ".join(czesci)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -109,6 +139,11 @@ def main(argv=None):
     parser.add_argument("--temperatury", type=float, nargs="+", default=[0.6])
     parser.add_argument("--kary", type=float, nargs="+", default=[0.05, 0.15],
                         help="Wartości frequency_penalty")
+    parser.add_argument("--zestawy", nargs="+", default=None,
+                        help="Dowolne zestawy zamiast siatki temperatura x kara, po jednym "
+                             "na argument, w postaci `klucz=wartosc,klucz=wartosc`, np. "
+                             "'temperature=1.2,min_p=0.1,frequency_penalty=0.05'. Pozwala "
+                             "mieszac min_p, top_k i presence_penalty, czego siatka nie umie.")
     parser.add_argument("--pytania", type=int, default=16,
                         help="Ile pytań; rozdzielane po równo na 8 kategorii")
     parser.add_argument("--proby", type=int, default=2,
@@ -125,11 +160,14 @@ def main(argv=None):
     print(f"model:   {cfg['_model']}")
     print(f"serwer:  {cfg['api']['base_url']}")
     print(f"think:   {think}   max_tokens: {baza.get('max_tokens')}")
-    warianty = [
-        (f"t{t:.1f} fp{fp:.2f}".replace(".", ","), {**baza, "temperature": t,
-                                                    "frequency_penalty": fp})
-        for t, fp in itertools.product(args.temperatury, args.kary)
-    ]
+    if args.zestawy:
+        warianty = [(opisz(parsuj(z)), {**baza, **parsuj(z)}) for z in args.zestawy]
+    else:
+        warianty = [
+            (f"t{t:.1f} fp{fp:.2f}".replace(".", ","), {**baza, "temperature": t,
+                                                        "frequency_penalty": fp})
+            for t, fp in itertools.product(args.temperatury, args.kary)
+        ]
     zadania = [(n, gen, q) for n, gen in warianty for q in pytania
                for _ in range(args.proby)]
     start = time.time()

@@ -1,0 +1,56 @@
+# Poziomka instruct 2026-10-10 (merge Arcee Fusion), wariant think.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka-instruct-2026-10-10-fusion
+#
+# Serwer: okno 16384, RoPE 640000, `--grammar-backend none`.
+#
+# Sampling ten sam co w calej serii v13, w merge'ach SCE i w run10, czyli
+# przeniesiony - nie byl dobierany dla tego merge'a. Dzieki temu wiersz jest
+# wprost porownywalny ze skladnikami i z pozostalymi metodami scalania.
+#
+# Sonda: zero smieci przy temperaturze 0, zero pustych i zero zapetlonych tur
+# w nothink, srednia odpowiedz 1071-1124 znaki. Przelacznik rozumowania dziala
+# (16/16 przy true, 0/32 przy false).
+#
+# UWAGA: Arcee Fusion jest NIESYMETRYCZNA - bierze dokladnie dwa modele, z ktorych
+# jeden jest baza, i wtapia w nia istotne roznice drugiego. `base_model: run10`
+# z wtopieniem SCE to INNY model niz `base_model: SCE` z wtopieniem run10.
+# Kierunek tego konkretnego scalania nie jest tu zapisany, bo nie wynika z nazwy
+# katalogu - jesli ma znaczenie dla interpretacji wiersza, trzeba go uzupelnic.
+
+[model]
+id = "poziomka_instruct_2026_10_10_fusion_think_t10_minp025"
+
+[chat_template]
+enable_thinking = true
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka-instruct-2026-10-10-fusion"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+# Sampler DOBRANY `sampler.py` na tym modelu, wariant think, obie tury, 32 proby.
+# Udzial tur z odpowiedzia (tura 1 / tura 2) przy t1,0 i fp0,05:
+#   min_p 0,25   28/32  27/32   <- wybrane, luka miedzy turami znika
+#   min_p 0,40   28/32  26/32
+#   min_p 0,15   29/32  25/32
+#   min_p 0,10   30/32  21/32
+#   min_p 0,30   27/32  22/32
+# Tura 1 jest plaska (27-30/32) niezaleznie od min_p; rosnie TURA 2, z 21 na 27.
+# Wyzsze min_p stabilizuje generowanie tam, gdzie kontekst jest dluzszy, i usuwa
+# luke miedzy turami, ktora towarzyszyla calej serii.
+#
+# Zmierzone sedzia po jednym przebiegu, dla porownania:
+#   t0,8 min_p 0,10   1,08   41/160 pustych
+#   t1,2 min_p 0,20   0,95   37/160
+#   t1,0 min_p 0,05   0,89   49/160
+# `t1,2` mial MNIEJ pustych tur i NIZSZA ocene niz `t0,8` - udzial odpowiedzi nie
+# jest miara jakosci i nie wolno po nim wybierac samplera bez oceny sedziego.
+[generation]
+max_tokens = 7800
+temperature = 1.0
+top_p = 0.9
+min_p = 0.25
+frequency_penalty = 0.05
+stop = ["<|im_end|>"]

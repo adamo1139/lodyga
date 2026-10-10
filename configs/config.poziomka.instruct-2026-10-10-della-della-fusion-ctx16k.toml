@@ -1,0 +1,44 @@
+# Poziomka instruct 2026-10-10 (merge DELLA z DELLA i Fusion), wariant nothink.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka-instruct-2026-10-10-della-della-fusion
+#
+# Serwer: okno 16384, RoPE 640000, `--grammar-backend none`.
+#
+# Sampling ten sam co w calej serii v13, w merge'ach SCE i w run10, czyli
+# przeniesiony - nie byl dobierany dla tego merge'a. Dzieki temu wiersz jest
+# wprost porownywalny ze skladnikami i z pozostalymi metodami scalania.
+#
+# Scalanie scalen: DELLA (della_linear) z merge'ow `-della` i `-fusion`, baza `-7`.
+#
+# UWAGA na interpretacje: te dwa skladniki NIE sa niezalezne - oba powstaly z tej
+# samej pary (`2026-10-07-sce` + `run10`), wiec ich wektory zadaniowe wobec `-7`
+# sa w duzej mierze wspolliniowe. DELLA zarabia na redukcji interferencji miedzy
+# ROZNYMI wektorami; przy wektorach niemal rownoleglych nie ma czego odsiewac.
+#
+# Pytanie, po ktore ten pomiar jest robiony: czy role od Fusion (3,75, jedyna
+# roznica miedzy metodami scalania, ktora przezyla trzy przebiegi) przetrwaja
+# kolejne scalanie. Jesli tak, scalanie przenosi konkretna mocna strone, a nie
+# tylko usrednia.
+#
+# Szybki test przed pomiarem: odpowiedzi po polsku, finish=stop, dlugosci
+# normalne (720 znakow na pytanie o Mazury). Model nie jest zepsuty.
+
+[model]
+id = "poziomka_instruct_2026_10_10_della_della_fusion_ctx16k"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka-instruct-2026-10-10-della-della-fusion"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.6
+top_p = 0.9
+min_p = 0.05
+frequency_penalty = 0.15
+stop = ["<|im_end|>"]
