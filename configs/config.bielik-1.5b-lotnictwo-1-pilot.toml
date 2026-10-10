@@ -1,0 +1,39 @@
+# Bielik 1.5B po SFT `nauka-lotnictwa-1-pilot`, wariant nothink.
+#   serwer: /media/nvme_2tb/maked/bielik_train/bielik-1.5b-nauka-lotnictwa-1-pilot
+#
+# To NIE jest `Bielik-1.5B-v3-Instruct` z tabeli, tylko ten model po SFT tym
+# samym szablonem czatu i bardzo podobnym zbiorem co Poziomki serii v13.
+#
+# Sampling protokolarny, identyczny jak w wierszu `Bielik-1.5B-v3-Instruct`, zeby
+# dalo sie zmierzyc, co zrobil SFT. Okno serwera to 8192, wiec max_tokens 3500
+# miesci sie w regule podwojnego budzetu (najdluzsza para pytan + 2 x 3500).
+#
+# Sonda: zero smieci przy temperaturze 0, zero pustych, urwanych i zapetlonych
+# tur w nothink, odpowiedzi po 887-1242 znaki.
+#
+# Przelacznik rozumowania DZIALA, inaczej niz w `Bielik-1.5B-v3-Instruct`, ktory
+# rozumowania nie generuje wcale (kolumna `brak`): 0 z 32 tur rozumowalo przy
+# enable_thinking=false, 16 z 16 przy true. SFT przeniosl wiec zachowanie serii
+# v13. Wariant think wymaga osobnego doboru samplera - w sondzie ma 6-8 pustych
+# tur na 16, bo slad (1432-1858 znakow) nie miesci sie w budzecie razem
+# z odpowiedzia.
+[model]
+id = "bielik_1.5b_lotnictwo_1_pilot"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/bielik_train/bielik-1.5b-nauka-lotnictwa-1-pilot"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 3500
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+stop = ["<|im_end|>"]
