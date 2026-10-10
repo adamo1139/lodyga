@@ -26,6 +26,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | Bielik-4.5B-v3-Instruct | chat | brak | 3 | **5,69** | 5,60–5,86 | 0 | 97% | 4,77 | 5,73 | 5,35 | 8,54 | 4,87 | 5,85 | 5,03 | 5,55 |
 | Bielik-1.5B-v3-Instruct | chat | brak | 3 | **3,83** | 3,72–3,96 | 0 | 93% | 3,95 | 4,00 | 2,77 | 6,02 | 2,87 | 4,15 | 3,38 | 3,65 |
 | Qra-13B-chat | chat | brak | 3 | **3,30** | 3,12–3,40 | 0 | 90% | 3,90 | 4,03 | 3,87 | 2,05 | 1,53 | 3,32 | 3,57 | 4,12 |
+| poziomka sft run10/iter_0001525 (v4, gbs16, 16k/640k) | chat | nie | 3 | **2,05** | 2,03–2,07 | 0 | 91% | 3,15 | 2,85 | 1,90 | 1,82 | 0,64 | 0,98 | 1,93 | 3,10 |
 | poziomka sft run7/iter_0000846 (v13, gbs16, 16k/640k) | chat | nie | 3 | **1,99** | 1,91–2,13 | 0 | 93% | 3,08 | 3,04 | 1,77 | 1,11 | 0,23 | 1,02 | 2,32 | 3,30 |
 | poziomka-instruct-2026-10-07-sce (v13, 16k/640k) | chat | nie | 3 | **1,95** | 1,79–2,15 | 0 | 96% | 3,08 | 3,29 | 1,78 | 0,99 | 0,37 | 1,12 | 2,32 | 2,65 |
 | poziomka sft run5/iter_0000212 (16k/640k) | chat | nie | 3 | **1,73** | 1,65–1,89 | 0 | 97% | 2,92 | 2,66 | 1,93 | 0,63 | 0,23 | 0,98 | 1,92 | 2,60 |
@@ -465,6 +466,41 @@ Sampling protokolarny to `temperature = 0,9`, `top_p = 0,9`, `top_k = 40`,
   sprawdzonych samplerów to wciąż o połowę mniej niż 1,73 bez rozumowania, a
   najgorzej wypadają kodowanie (0,05), nauki ścisłe (0,45) i wnioskowanie
   (0,65) — czyli to, w czym rozumowanie miałoby pomagać.
+
+- **Poziomka run 10 `iter_0001525`** (zbiór **polskie-sprawy-v4**, szablon v13,
+  GBS 16): sampling ten sam co w całej serii v13 i w merge'ach, przeniesiony,
+  nie dobierany sondą dla tego runu. Serwer: okno 16384, RoPE 640000,
+  `--grammar-backend none`.
+
+  Pierwszy run na zbiorze v4 i jedyny w serii z 1525 iteracjami — run7 miał 846
+  przy tej samej partii 16, więc run10 widział prawie dwa razy więcej próbek.
+  Wiersz powstał z trzech osobnych przebiegów jednoprzebiegowych (2,03 / 2,05 /
+  2,07); średnia, rozrzut i kategorie policzone z trzech `aggregate.json` tą samą
+  arytmetyką, jaką stosuje `lodyga.py --passes 3`.
+
+  **Rozrzut 0,04 przy odchyleniu 0,02 jest najniższy w całej tabeli** (run7 0,13,
+  merge SCE 0,18, Polanka 0,10). Sam pomiar jest więc tu wyjątkowo stabilny —
+  niepewność w porównaniu z run7 pochodzi z rozrzutu run7, nie z tego wiersza.
+
+  **Najwyższa średnia Poziomki, ale od run7 nieodróżnialna**: 2,05 wobec 1,99,
+  a zakres przebiegów run7 (1,91–2,13) obejmuje 2,05. Zbiór v4 i dwukrotnie
+  dłuższy trening nie dały więc przewagi, którą dałoby się wykazać.
+
+  Zmienił się natomiast profil, i to spójnie w trzech przebiegach: **matematyka
+  1,82 wobec 1,11 u run7 i kodowanie 0,64 wobec 0,23** — czyli dwie najsłabsze
+  kategorie w serii podniosły się najmocniej. Kosztem nauk ścisłych (1,93 wobec
+  2,32) i odgrywania ról (2,85 wobec 3,04). Przy dziesięciu pytaniach na
+  kategorię pojedyncza różnica to szum, ale kierunek powtórzył się też
+  w pojedynczym przebiegu na `t0,8`.
+
+  **Temperatura jest na tym checkpointcie bez znaczenia**: `t0,8` dało 1,93
+  w jednym przebiegu wobec 2,03 na `t0,6` w pierwszym przebiegu, czyli różnicę
+  mniejszą od rozrzutu. Sonda sugerowała `t0,8`, bo przy `t0,3` były 2 urwane
+  tury na 16 i średnia odpowiedź 3490 znaków (run7: 1722); na `t0,6` urwanych
+  jednak nie ma — mediana odpowiedzi 665 znaków, maksimum 13 439 przy limicie
+  7800 tokenów. Wiersz idzie więc na `t0,6`, bo tylko tak jest porównywalny
+  z resztą serii. Wariant `t0,8` nie ma wiersza: mierzyliśmy go wyłącznie po to,
+  żeby sprawdzić wpływ temperatury.
 
 - **Poziomka run 7 `iter_0000846`** (zbiór `polskie-sprawy-v3`, szablon **v13**,
   GBS 16): sampling ten sam co w wierszach run5 i `-7 (16k/640k)`, przeniesiony,

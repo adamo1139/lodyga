@@ -1,0 +1,43 @@
+# Poziomka run 10 (SFT polskie-sprawy-v4, szablon v13, 16384 packed, GBS 16),
+# iter 1525, wariant nothink, t0,6.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka_sft_run10_polskie_sprawy_v4_hf/iter_0001525
+#
+# Pierwszy run na zbiorze v4 (poprzednie: v3). Przy tej samej partii 16 co run7
+# ma 1525 iteracji zamiast 846, czyli widzial wyraznie wiecej probek niz cala
+# seria v13.
+#
+# temperature 0,6, czyli jak cala seria v13 i merge'e - ten wiersz jest wiec
+# z nimi wprost porownywalny. Wariant t0,8 jest w osobnym configu; sonda
+# sugerowala tam mniej urwanych tur, bo ten checkpoint jest gadatliwszy od
+# poprzednikow i przy niskiej temperaturze dobija do budzetu:
+#   nothink t0,3   2/16 urwanych, srednia odpowiedz 3490 znakow
+#   nothink t0,8   0/16 urwanych, srednia odpowiedz  993 znaki
+# (run7 mial przy t0,3 srednio 1722 znaki i zero urwanych). Zero zapetlonych tur
+# we wszystkich czterech kombinacjach, zero smieci przy temperaturze 0.
+#
+# Przelacznik rozumowania dziala: 16/16 rozumujacych tur przy enable_thinking
+# = true, 0/32 przy false. Szablon v13 trzyma sie wiec takze na zbiorze v4.
+#
+# Pomiar na t0,8 dal 1,93 (1 przebieg, 0 pustych, polszczyzna 94%, mediana
+# odpowiedzi 675 znakow). Ten config mierzy to samo na t0,6, zeby rozdzielic
+# wplyw zbioru v4 od wplywu temperatury.
+[model]
+id = "poziomka_run10_v4_gbs16_ctx16k"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run10_polskie_sprawy_v4_hf/iter_0001525"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.6
+top_p = 0.9
+min_p = 0.05
+frequency_penalty = 0.15
+stop = ["<|im_end|>"]
