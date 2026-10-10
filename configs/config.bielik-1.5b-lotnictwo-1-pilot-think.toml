@@ -1,0 +1,60 @@
+# Bielik 1.5B po SFT `nauka-lotnictwa-1-pilot`, wariant think.
+#   serwer: /media/nvme_2tb/maked/bielik_train/bielik-1.5b-nauka-lotnictwa-1-pilot
+#
+# To NIE jest `Bielik-1.5B-v3-Instruct` z tabeli, tylko ten model po SFT tym
+# samym szablonem czatu i bardzo podobnym zbiorem co Poziomki serii v13.
+#
+# BRAK `max_tokens` - celowo. Przy 3500 wariant think mial w sondzie 6-8 pustych
+# tur na 16, bo slad (1432-1858 znakow) nie miesci sie razem z odpowiedzia. Bez
+# tego pola serwer generuje do konca okna 8192, wiec tura 1 ma szanse sie
+# skonczyc.
+#
+# CENA: to lamie regule podwojnego budzetu. Tura 1 moze zjesc prawie cale okno,
+# a wtedy prompt tury 2 (zawierajacy odpowiedz z tury 1) zostawia na generowanie
+# bardzo malo. Spodziewaj sie, ze tura 2 bedzie wypadac gorzej niz przy 3500.
+#
+# Sonda: zero smieci przy temperaturze 0, zero pustych, urwanych i zapetlonych
+# tur w nothink, odpowiedzi po 887-1242 znaki.
+#
+# Przelacznik rozumowania DZIALA, inaczej niz w `Bielik-1.5B-v3-Instruct`, ktory
+# rozumowania nie generuje wcale (kolumna `brak`): 0 z 32 tur rozumowalo przy
+# enable_thinking=false, 16 z 16 przy true. SFT przeniosl wiec zachowanie serii
+# v13. Wariant think wymaga osobnego doboru samplera - w sondzie ma 6-8 pustych
+# tur na 16, bo slad (1432-1858 znakow) nie miesci sie w budzecie razem
+# z odpowiedzia.
+[model]
+id = "bielik_1.5b_lotnictwo_1_pilot_think"
+
+[chat_template]
+enable_thinking = true
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/bielik_train/bielik-1.5b-nauka-lotnictwa-1-pilot"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+# Sampler PROTOKOLARNY, ten sam co w wariancie nothink - dzieki temu oba wiersze
+# roznia sie WYLACZNIE rozumowaniem. Przy Poziomce nigdy sie to nie udalo, bo tam
+# wariant think na samplerze z nothink mierzyl glownie limit.
+#
+# `sampler.py`, obie tury, 32 proby (tura 1 / tura 2):
+#   t0,9 top_p0,9 top_k40 rep1,05   32/32  28/32   <- wybrane, 94% tur z odpowiedzia
+#   t1,0 min_p 0,40 fp0,05          26/32  25/32
+#   t0,8 min_p 0,10 fp0,05          24/32  28/32
+#   t0,6 min_p 0,05 fp0,05          25/32  23/32
+#   t1,0 min_p 0,25 fp0,05          25/32  23/32   <- dwukrotny zwyciezca na Poziomce
+#   t0,3 top_p 0,9  fp0,05          22/32  24/32
+#
+# WNIOSEK: dobor samplera NIE przenosi sie miedzy modelami. `t1,0 min_p 0,25`
+# wygral na Poziomce dwa razy, na dwoch roznych konfiguracjach serwera, a tutaj
+# przegrywa o dziewiec tur. Tokenizer jest ten sam (APT4), wiec wyjasnienie przez
+# tokenizacje `</think>` NIE dziala - przyczyna siedzi w modelu i pozostaje
+# nieustalona.
+[generation]
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+stop = ["<|im_end|>"]
