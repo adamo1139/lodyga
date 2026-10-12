@@ -1,0 +1,47 @@
+# Bielik-PL-Minitron-7B po SFT `nauka-lotnictwa-2`, wariant think.
+#   serwer: /media/nvme_2tb/maked/bielik_train/bielik-pl-minitron-7b-nauka-lotnictwa-2
+#   sglang, --reasoning-parser qwen3, --context-length 16384
+#
+# To NIE jest `Bielik-PL-Minitron-7B-v3.0-Instruct` z tabeli, tylko ten model po
+# SFT tym samym szablonem czatu i zbiorem co `bielik-1.5b-nauka-lotnictwa-1`.
+#
+# Sampling protokolarny, ten sam co w wariancie nothink - dzieki temu oba wiersze
+# roznia sie WYLACZNIE rozumowaniem. Na `bielik-1.5b-nauka-lotnictwa-1` ten
+# zestaw wygral siatke `sampler.py` o dziewiec tur z zestawami dobranymi na
+# Poziomce, wiec tu zaczynamy od niego.
+#
+# `max_tokens 7800` zamiast 3500 z wiersza nothink: przy oknie 8192 i limicie
+# 3882 sonda dawala 4-5 urwanych i 3-4 puste tury na 16. Po przejsciu na okno
+# 16384 i limit 7978 zostalo 0-1 urwanych i 1-2 puste.
+#
+# SERWUJ NA SGLANGU, nie na vLLM. Na vLLM przy enable_thinking=true slad
+# rozumowania wpadal do `content` zamiast do `reasoning_content`, bez zadnych
+# znacznikow `<think>`/`</think>`, i generacja dobijala do limitu (8615 znakow,
+# finish=length). Harness nie mial wtedy po czym rozdzielic sladu od odpowiedzi
+# i sedzia dostalby rozumowanie zamiast odpowiedzi. Na sglangu z parserem qwen3
+# dziala poprawnie.
+#
+# Sonda (okno 16384): zero smieci przy temperaturze 0, zero pustych, urwanych
+# i zapetlonych tur w nothink. Przelacznik rozumowania DZIALA (0/32 przy false,
+# 16/16 przy true), inaczej niz w `Bielik-PL-Minitron-7B-v3.0-Instruct`, ktory ma
+# w tabeli `brak`.
+[model]
+id = "bielik_minitron_7b_lotnictwo_2_think"
+
+[chat_template]
+enable_thinking = true
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/bielik_train/bielik-pl-minitron-7b-nauka-lotnictwa-2"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+stop = ["<|im_end|>"]

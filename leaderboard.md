@@ -27,6 +27,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | bielik-pl-minitron-7b-nauka-lotnictwa-2 | chat | nie | 3 | **5,29** | 5,23–5,33 | 0 | 94% | 6,27 | 5,68 | 4,77 | 6,89 | 2,85 | 5,62 | 4,78 | 5,48 |
 | Bielik-1.5B-v3-Instruct | chat | brak | 3 | **3,83** | 3,72–3,96 | 0 | 93% | 3,95 | 4,00 | 2,77 | 6,02 | 2,87 | 4,15 | 3,38 | 3,65 |
 | bielik-1.5b-nauka-lotnictwa-1-pilot | chat | nie | 3 | **3,78** | 3,58–3,95 | 0 | 90% | 4,47 | 4,86 | 2,58 | 4,28 | 2,35 | 3,28 | 3,65 | 4,80 |
+| bielik-pl-minitron-7b-nauka-lotnictwa-2 (fp0,05 rep1,01) | chat | tak | 1 | **3,50** | — | 30 | 76% | 3,30 | 4,20 | 3,75 | 4,74 | 1,15 | 5,20 | 3,26 | 2,45 |
 | Qra-13B-chat | chat | brak | 3 | **3,30** | 3,12–3,40 | 0 | 90% | 3,90 | 4,03 | 3,87 | 2,05 | 1,53 | 3,32 | 3,57 | 4,12 |
 | bielik-1.5b-nauka-lotnictwa-1-pilot | chat | tak | 3 | **2,77** | 2,71–2,87 | 38 | 87% | 2,78 | 3,29 | 2,13 | 4,05 | 1,38 | 3,17 | 2,30 | 3,13 |
 | poziomka-instruct-2026-10-10-della (16k/640k) | chat | nie | 3 | **2,12** | 2,01–2,18 | 0 | 95% | 3,58 | 2,90 | 2,03 | 1,54 | 0,37 | 1,23 | 2,40 | 2,87 |
