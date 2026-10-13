@@ -1,0 +1,61 @@
+# Poziomka run 11 (SFT polskie-sprawy-v6, szablon v13, 16384 packed, GBS 16),
+# iter 2756, wariant think.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka_sft_run11_polskie_sprawy_v6_v13_16384_gbs16_hf/iter_0002756
+#
+# Zbior v6: 1,325,738 rozmow, czyli 2,5x wiecej niz v4-nc (538,079), ale liczba
+# rozmow Z ROZUMOWANIEM jest identyczna (107,709 co do rekordu) - v6 to v4-nc
+# plus ~775 tys. rozmow bez rozumowania. Udzial rozumowania spadl z 21% do 8,2%.
+# Pakowanie rzadsze: 82,9% wobec 92,5%, czyli nowe rozmowy sa krotsze.
+# LR 9,67e-5 z reguly pierwiastkowej (217,7k tokenow/krok), 2756 krokow.
+#
+# Sampler DOBRANY `sampler.py` na tym modelu: t0,8 / top_p 0,9 / top_k 40 /
+# fp 0,05, BEZ min_p. Obie tury, 32 proby na wariant, udzial tur z odpowiedzia:
+#   t0,8 top_k40            29/32  25/32   0/64 urwanych, slad 2479 zn.  <- wybrane
+#   t1,0 min_p 0,25 top_k40 28/32  23/32   1/64
+#   t1,0 top_k40            25/32  24/32   3/64
+#   t0,6 top_k40            25/32  23/32   1/64
+#   t0,8 bez top_k          26/32  24/32   0/64
+#   t1,0 bez top_k i min_p  21/32  18/32   6/64
+#   t0,6 min_p 0,05 fp0,15  20/32  14/32   1/64   <- sampler wiersza nothink
+#
+# Trzy rzeczy z tego doboru:
+# - KARA rozstrzyga najmocniej: samo zejscie z fp0,15 na fp0,05 przy t0,6 podnosi
+#   z 34 na 48 odpowiedzi na 64 i skraca slad z 4491 na 2784 znaki. Slad powstaje
+#   przed odpowiedzia, wiec kara zdazy ukarac slownictwo potrzebne pozniej.
+# - min_p jest potrzebne TYLKO przy wysokiej temperaturze. Zdjecie go przy t1,0
+#   psuje (48 -> 39, urwane 1 -> 6), przy t0,8 i t0,6 nie szkodzi wcale.
+# - top_k 40 pomaga w 4 z 5 wariantow i zastepuje min_p w roli obcinania ogona.
+#   To podwaza wczesniejszy werdykt o top_k, odrzuconym po pomiarze na merge'u -7
+#   (8-10 pustych tur na 48) - tamto bylo bez min_p, przy innej temperaturze
+#   i na innym checkpointcie, wiec ocena byla warunkowa, nie ogolna.
+#
+# UWAGA: wariant nothink idzie na t0,6 / min_p 0,05 / fp 0,15, wiec te dwa
+# wiersze NIE sa czystym porownaniem samego rozumowania.
+#
+# Sonda: zero smieci przy temperaturze 0, zero pustych i urwanych tur w nothink,
+# 0-2 zapetlone na 16. Przelacznik rozumowania dziala (0/32 przy false, 16/16
+# przy true). Slady krotsze niz w run 10 (1267-1428 znakow), zgodnie z rzadszym
+# pakowaniem v6.
+#
+# Konwersja sprawdzona `tools/dcp_do_hf.sh`: q/k layernorm bez zer na wszystkich
+# czterech checkpointach, szablon czatu skopiowany z cache'u treningowego.
+[model]
+id = "poziomka_run11_v6_gbs16_ctx16k_think_t08_topk40"
+
+[chat_template]
+enable_thinking = true
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run11_polskie_sprawy_v6_v13_16384_gbs16_hf/iter_0002756"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.8
+top_p = 0.9
+top_k = 40
+frequency_penalty = 0.05
+stop = ["<|im_end|>"]

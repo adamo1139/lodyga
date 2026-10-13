@@ -20,9 +20,17 @@ DWIE RZECZY, KTÓRE MUSZĄ ZOSTAĆ, bo każda wzięła się z pomyłki:
    wracał (`t0,8 fp0,15`: 21/32 wobec 16/32, ślad 12 201 znaków). Różnicy między
    turami nie zakładaj, zmierz ją.
 
-2. 32 PRÓBY NA WARIANT, nie 16. Na 16 pytaniach ten sam zestaw dawał raz 15/16,
-   raz 11/16 - rozrzut między powtórzeniami był tak duży jak różnice między
-   samplerami. Stąd domyślne `--proby 2` (każde pytanie dwa razy).
+2. CAŁY ZESTAW 80 PYTAŃ, nie podzbiór. Przy 16 pytaniach sonda PIĘĆ RAZY
+   Z RZĘDU przeszacowała udział tur z odpowiedzią, raz nawet dwukrotnie
+   (zapowiadała 16% pustych, pełny przebieg dał 33%). Przyczyna: 16 pytań to
+   podzbiór łatwiejszy od całości, co widać po śladzie - 2479 znaków w sondzie
+   wobec 3819 w pomiarze na tych samych ustawieniach. Przy 80 pytaniach sonda
+   mierzy ten sam materiał co pomiar, więc jej liczby są wprost przekładalne.
+   Mniejsze `--pytania` zostawiam do szybkiego podglądu, ale wtedy traktuj wynik
+   jako ranking zestawów, nie jako prognozę.
+   POTWIERDZONE pomiarem: na run11 sonda na 80 pytaniach zapowiadała 16 tur bez
+   odpowiedzi, pełny przebieg dał 19. Wersja na 16 pytaniach dla tego samego
+   modelu zapowiadała 84% tur z odpowiedzią, a wyszło 67%.
 
 CO TEN SKRYPT MIERZY, A CZEGO NIE. Mierzy mechanikę: domykanie bloku, urwane
 tury, długości. NIE mierzy jakości tekstu - a `frequency_penalty` i temperatura
@@ -144,10 +152,11 @@ def main(argv=None):
                              "na argument, w postaci `klucz=wartosc,klucz=wartosc`, np. "
                              "'temperature=1.2,min_p=0.1,frequency_penalty=0.05'. Pozwala "
                              "mieszac min_p, top_k i presence_penalty, czego siatka nie umie.")
-    parser.add_argument("--pytania", type=int, default=16,
-                        help="Ile pytań; rozdzielane po równo na 8 kategorii")
-    parser.add_argument("--proby", type=int, default=2,
-                        help="Ile razy każde pytanie; 16 pytań x 2 = 32 próby na wariant")
+    parser.add_argument("--pytania", type=int, default=80,
+                        help="Ile pytań; rozdzielane po równo na 8 kategorii. "
+                             "80 to CALY zestaw Łodygi - tyle samo, co pełny pomiar")
+    parser.add_argument("--proby", type=int, default=1,
+                        help="Ile razy każde pytanie; 80 x 1 = 80 prób na wariant")
     parser.add_argument("--workers", type=int, default=32)
     args = parser.parse_args(argv)
 
@@ -157,6 +166,9 @@ def main(argv=None):
     baza = {k: v for k, v in cfg.get("generation", {}).items() if k != "frequency_penalty"}
     pytania = sonda.sample_questions(args.pytania)
 
+    if args.pytania < 80:
+        print(f"UWAGA: {args.pytania} pytan zamiast 80. Sonda na podzbiorze "
+              f"systematycznie ZAWYZA udzial tur z odpowiedzia.\n")
     print(f"model:   {cfg['_model']}")
     print(f"serwer:  {cfg['api']['base_url']}")
     print(f"think:   {think}   max_tokens: {baza.get('max_tokens')}")

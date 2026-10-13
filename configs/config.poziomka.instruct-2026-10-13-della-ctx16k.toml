@@ -1,0 +1,47 @@
+# DELLA z merge'ow 10-10 + trajektorii run11, baza 09-30-7. Wariant nothink.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka-instruct-2026-10-13-della
+#
+# Sklad (wagi sumuja sie do 1,0, wiec `normalize` nic nie zmienia, a przy
+# lambda 1,0 laczna delta wobec bazy ma wielkosc sredniej wazonej delt):
+#   0,40  run11/iter_0002756   2,15   <- najlepszy zmierzony skladnik
+#   0,15  run11/iter_0002100   niemierzony
+#   0,15  10-10-della          2,12
+#   0,15  10-10-fusion         2,12
+#   0,10  run11/iter_0001400   niemierzony
+#   0,05  run11/iter_0000700   niemierzony
+# Linia run11 ma 0,70, merge'e 10-10 0,30. `-stock` (2,03) swiadomie pominiety.
+# density 0,5 / epsilon 0,15 w kazdym skladniku, czyli prawdopodobienstwo
+# zachowania delty w [0,35, 0,65]. Przy szesciu modelach z jednej linii delty sa
+# mocno skorelowane, wiec pruning ma co ciac - inaczej niz przy dwumodelowym
+# merge'u, gdzie wyszlo density 1,0.
+#
+# Sampler PROTOKOLARNY, taki sam jak run11 (2,15) i wszystkie merge'e 10-10,
+# zeby wiersze byly porownywalne.
+#
+# Sonda: 0% smieci przy t0 i t0,8, 0/16 urwanych, 0 pustych i 0 zapetlonych
+# w nothink, przelacznik rozumowania dziala (0/16 przy false, 16/16 przy true).
+#
+# OCZEKIWANIE przed pomiarem: w siedmiu merge'ach zaden nie pobil najlepszego
+# skladnika, wiec realistyczny zakres to 2,0-2,15. Ten merge sprawdza, czy
+# usrednienie trajektorii run11 podciagnie slabe kategorie - kodowanie 0,85
+# i ekstrakcje 0,95 - nie czy ustanowi rekord.
+[model]
+id = "poziomka_instruct_2026_10_13_della_ctx16k"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka-instruct-2026-10-13-della"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.6
+top_p = 0.9
+min_p = 0.05
+frequency_penalty = 0.15
+stop = ["<|im_end|>"]
