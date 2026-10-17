@@ -30,14 +30,18 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | bielik-pl-minitron-7b-nauka-lotnictwa-2 (fp0,05 rep1,01) | chat | tak | 1 | **3,50** | — | 30 | 76% | 3,30 | 4,20 | 3,75 | 4,74 | 1,15 | 5,20 | 3,26 | 2,45 |
 | Qra-13B-chat | chat | brak | 3 | **3,30** | 3,12–3,40 | 0 | 90% | 3,90 | 4,03 | 3,87 | 2,05 | 1,53 | 3,32 | 3,57 | 4,12 |
 | bielik-1.5b-nauka-lotnictwa-1-pilot | chat | tak | 3 | **2,77** | 2,71–2,87 | 38 | 87% | 2,78 | 3,29 | 2,13 | 4,05 | 1,38 | 3,17 | 2,30 | 3,13 |
+| poziomka sft run15/iter_0005214 (v8, gbs16, 16k/640k) | chat | nie | 3 | **2,25** | 2,16–2,31 | 0 | 94% | 3,12 | 3,52 | 2,05 | 1,72 | 0,95 | 0,93 | 2,50 | 3,20 |
 | poziomka sft run11/iter_0002756 (v6, gbs16, 16k/640k) | chat | nie | 3 | **2,15** | 2,12–2,16 | 0 | 88% | 3,05 | 3,14 | 2,38 | 1,85 | 0,85 | 0,95 | 1,87 | 3,12 |
 | poziomka-instruct-2026-10-13-della (16k/640k) | chat | nie | 3 | **2,13** | 1,99–2,24 | 0 | 90% | 3,10 | 3,39 | 1,68 | 1,70 | 0,94 | 1,17 | 2,10 | 2,98 |
 | poziomka-instruct-2026-10-10-della (16k/640k) | chat | nie | 3 | **2,12** | 2,01–2,18 | 0 | 95% | 3,58 | 2,90 | 2,03 | 1,54 | 0,37 | 1,23 | 2,40 | 2,87 |
 | cpral/poziomka-instruct-2026-10-10 (16k/640k) | chat | nie | 3 | **2,12** | 1,99–2,24 | 0 | 95% | 3,62 | 3,75 | 1,97 | 1,39 | 0,40 | 1,03 | 2,10 | 2,82 |
+| poziomka kd run14/iter_0000635 (destylacja RKL k40, 8k→16k, gbs64) | chat | nie | 3 | **2,09** | 1,98–2,16 | 0 | 90% | 2,85 | 3,40 | 1,77 | 1,68 | 1,17 | 0,72 | 2,30 | 2,85 |
 | poziomka sft run10/iter_0001525 (v4, gbs16, 16k/640k) | chat | nie | 3 | **2,05** | 2,03–2,07 | 0 | 91% | 3,15 | 2,85 | 1,90 | 1,82 | 0,64 | 0,98 | 1,93 | 3,10 |
 | poziomka-instruct-2026-10-10-stock (16k/640k) | chat | nie | 3 | **2,03** | 1,94–2,15 | 0 | 94% | 3,22 | 2,82 | 1,73 | 1,18 | 0,55 | 1,13 | 2,45 | 3,18 |
+| poziomka-instruct-2026-10-13-fusion (16k/640k) | chat | nie | 3 | **2,00** | 1,92–2,08 | 0 | 96% | 3,23 | 3,27 | 1,72 | 1,08 | 0,30 | 1,13 | 2,36 | 2,85 |
 | poziomka sft run7/iter_0000846 (v13, gbs16, 16k/640k) | chat | nie | 3 | **1,99** | 1,91–2,13 | 0 | 93% | 3,08 | 3,04 | 1,77 | 1,11 | 0,23 | 1,02 | 2,32 | 3,30 |
 | poziomka-instruct-2026-10-07-sce (v13, 16k/640k) | chat | nie | 3 | **1,95** | 1,79–2,15 | 0 | 96% | 3,08 | 3,29 | 1,78 | 0,99 | 0,37 | 1,12 | 2,32 | 2,65 |
+| poziomka sft run13/iter_0001350 (uczeń lotnictwa, 6k, gbs64) | chat | nie | 3 | **1,82** | 1,64–2,03 | 0 | 95% | 2,87 | 2,78 | 1,33 | 0,84 | 0,68 | 0,93 | 2,12 | 2,93 |
 | poziomka sft run5/iter_0000212 (16k/640k) | chat | nie | 3 | **1,73** | 1,65–1,89 | 0 | 97% | 2,92 | 2,66 | 1,93 | 0,63 | 0,23 | 0,98 | 1,92 | 2,60 |
 | poziomka-instruct-2026-09-30-7 (16k/640k, t0,6 min_p) | chat | nie | 3 | **1,66** | 1,56–1,78 | 0 | 94% | 2,85 | 2,72 | 1,43 | 0,89 | 0,25 | 0,97 | 1,72 | 2,38 |
 | poziomka-instruct-2026-09-30-1 (8k/84k, t0,8) | chat | nie | 3 | **1,65** | 1,52–1,85 | 0 | 95% | 2,52 | 2,66 | 1,72 | 1,43 | 0,32 | 0,83 | 1,38 | 2,42 |
@@ -47,6 +51,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka-instruct-2026-09-30-6 (8k/84k, t0,8) | chat | nie | 3 | **1,58** | 1,49–1,62 | 0 | 96% | 2,43 | 2,45 | 1,65 | 0,98 | 0,58 | 0,97 | 1,50 | 2,02 |
 | poziomka-instruct-2026-09-30-7 (8k/84k) | chat | nie | 3 | **1,57** | 1,28–1,88 | 0 | 93% | 2,33 | 2,23 | 1,77 | 1,35 | 0,38 | 0,97 | 1,48 | 2,05 |
 | poziomka-instruct-2026-09-30-5 (8k/84k) | chat | nie | 3 | **1,54** | 1,49–1,61 | 0 | 94% | 2,15 | 2,27 | 1,25 | 1,46 | 0,58 | 1,23 | 1,40 | 1,95 |
+| poziomka-instruct-2026-09-30-7 (16k/640k, sampler ucznia) | chat | nie | 3 | **1,54** | 1,38–1,62 | 1 | 95% | 2,88 | 1,98 | 1,20 | 1,02 | 0,37 | 0,75 | 1,52 | 2,58 |
 | poziomka-instruct-2026-09-30-7 (8k/84k, t0,8) | chat | nie | 3 | **1,54** | 1,49–1,62 | 0 | 94% | 2,55 | 2,37 | 1,45 | 0,88 | 0,38 | 0,77 | 1,58 | 2,35 |
 | poziomka-instruct-2026-09-30-1 (8k/84k) | chat | nie | 3 | **1,51** | 1,41–1,67 | 0 | 92% | 2,22 | 2,38 | 1,52 | 1,50 | 0,47 | 0,93 | 1,53 | 1,52 |
 | poziomka-instruct-2026-09-30-3 (8k/84k) | chat | nie | 3 | **1,50** | 1,41–1,60 | 0 | 93% | 2,50 | 2,30 | 1,43 | 1,65 | 0,17 | 0,85 | 1,43 | 1,68 |
@@ -104,6 +109,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka sft run5/iter_0000212 (16k/640k, prefill, t1,0 fp0,05) | chat | prefill | 1 | **0,90** | — | 32 | 79% | 2,10 | 1,40 | 0,65 | 1,05 | 0,05 | 0,50 | 0,45 | 1,00 |
 | polka-1.1b-chat | chat | brak | 3 | **0,88** | 0,80–1,01 | 0 | 97% | 1,28 | 1,63 | 0,81 | 0,57 | 0,45 | 0,38 | 0,47 | 1,45 |
 | poziomka sft 2026-09-24/iter_0000300 (8k/84k) | chat | nie | 3 | **0,87** | 0,83–0,89 | 0 | 91% | 1,80 | 0,85 | 1,35 | 1,22 | 0,30 | 0,42 | 0,47 | 0,53 |
+| poziomka sft run12/iter_0001022 (v6-reasoning, gbs16, 16k/640k, fp0,05) | chat | tylko | 1 | **0,86** | — | 21 | 77% | 1,16 | 0,90 | 0,90 | 1,45 | 0,15 | 0,50 | 0,50 | 1,30 |
 | poziomka sft 2026-09-24/iter_0000300 (8k/84k) | chat | tak | 3 | **0,84** | 0,76–0,92 | 53 | 80% | 1,77 | 1,17 | 0,98 | 0,64 | 0,43 | 0,75 | 0,43 | 0,57 |
 | poziomka sft 2026-09-24/iter_0000300 (8k/84k, t0,8) | chat | nie | 3 | **0,82** | 0,76–0,87 | 0 | 95% | 1,85 | 0,90 | 1,32 | 0,58 | 0,13 | 0,33 | 0,62 | 0,82 |
 | poziomka sft 2026-09-24/iter_0000200 (8k/84k) | chat | tak | 3 | **0,81** | 0,70–1,04 | 66 | 78% | 1,72 | 1,30 | 0,75 | 0,90 | 0,18 | 0,42 | 0,67 | 0,58 |
@@ -129,7 +135,10 @@ model nie wygenerował odpowiedzi (na 160). „Pol." to odsetek odpowiedzi
 rozpoznanych jako polskie — statystyka opisowa, nie składnik wyniku. „Rozrzut"
 to zakres wyników z kolejnych przebiegów. API: `chat` to `/chat/completions`,
 `compl.` to `/completions` z szablonem renderowanym lokalnie. „Myślenie: brak"
-oznacza, że model nie generuje rozumowania w tej konfiguracji. `tak*` przy
+oznacza, że model nie generuje rozumowania w tej konfiguracji. „Myślenie:
+tylko" przy `run12`: model trenowany wyłącznie na rozmowach z rozumowaniem, nie
+ma trybu nothink — przy `enable_thinking = false` zapętla się, więc wiersza bez
+rozumowania nie da się dla niego zmierzyć. `tak*` przy
 Lingu: model rozumuje w każdej turze (480/480), ale dostawca nie wystawia
 `reasoning_effort`, więc siły rozumowania nie da się przypiąć. `nie*` przy
 `2026-09-21/iter_0000100`: szablon dostał `enable_thinking = false`, ale model

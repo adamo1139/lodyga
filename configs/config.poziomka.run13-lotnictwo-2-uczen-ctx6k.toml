@@ -1,0 +1,42 @@
+# Poziomka run 13: uczen na danych `nauka_lotnictwa_2`, szablon v13,
+# 6144 packed, GBS 64, iter 1350. Wariant nothink.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka_sft_run13_nauka_lotnictwa_2_uczen_v13_6144_gbs64_hf/iter_0001350
+#
+# TE SAME DANE TRENINGOWE co `bielik-pl-minitron-7b-nauka-lotnictwa-2` (5,29),
+# ktory jest tu instruktorem. Ten wiersz mierzy wiec uczen przeciw instruktorowi
+# na tym samym zbiorze.
+#
+# Sampler IDENTYCZNY z instruktorem - `t0,9 / top_p 0,9 / top_k 40 / rep 1,05`,
+# max_tokens 3500 (protokolarny dla Bielikow) - zeby porownanie dotyczylo
+# modelu, nie parametrow.
+#
+# UWAGA na okno: model trenowano na 6144, a serwer wystawia 16384, wiec sonda
+# wyliczyla max_tokens 7978 - POWYZEJ okna treningowego. Zostawiamy 3500 jak
+# u instruktora; w praktyce nie wiaze, bo w sondzie odpowiedzi nothink maja
+# 760-1040 znakow, czyli rzedu 300 tokenow. Gdyby wiazal, trzeba zejsc do ~2900,
+# bo regula podwojnego budzetu przy ctx 6144 daje (6144 - najdluzsza para
+# pytan - szablon) / 2.
+#
+# Sonda: 0% smieci przy t0 i t0,8, 0 pustych i 0 urwanych tur w nothink,
+# 0-1 zapetlona na 16, przelacznik rozumowania dziala (0/16 przy false, 16/16
+# przy true). Wariant think ma 3 puste i 1-2 urwane na 16 - mierzony osobno.
+[model]
+id = "poziomka_run13_lotnictwo_2_uczen_ctx6k"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run13_nauka_lotnictwa_2_uczen_v13_6144_gbs64_hf/iter_0001350"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 3500
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+stop = ["<|im_end|>"]

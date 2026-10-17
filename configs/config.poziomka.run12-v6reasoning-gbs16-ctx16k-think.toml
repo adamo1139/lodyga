@@ -1,0 +1,60 @@
+# Poziomka run 12 (SFT polskie-sprawy-v6-reasoning, szablon v13, 16384 packed,
+# GBS 16), iter 1022. Model BEZ trybu nothink - tylko rozumowanie.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka_sft_run12_polskie_sprawy_v6_reasoning_v13_16384_gbs16_hf/iter_0001022
+#
+# Zbior zawiera WYLACZNIE rozmowy z rozumowaniem, wiec tryb nothink nie zostal
+# wytrenowany i nie istnieje. Przy `enable_thinking: false` model sie zapetla:
+# na kontrolnym 17x23 wyprodukowal "czyli 17 razy 17, czyli 17 razy 17..."
+# a mediana wyjscia w nothink to 10 003 znaki wobec 4103 w think. Wiersza
+# nothink dla tego modelu NIE robimy - bylby pomiarem zapetlen, nie modelu.
+#
+# Sonda w trybie think: `reasoning_content` wypelnione 16/16, znacznik to zwykly
+# `<think>`, parser qwen3 go zdejmuje, odpowiedz wychodzi czysta, 17x23 = 391
+# poprawnie. Mediana sladu 4103 zn., odpowiedzi 835. Pojawiajacy sie w sondzie
+# `<analyse>` to artefakt degeneracji w nothink, nie znacznik tego modelu - w
+# trybie think nie wystapil ani raz.
+#
+# Sampler: `t0,8 / top_p 0,9 / top_k 40 / fp 0,05`, ten sam co wiersz think
+# run11 (1,03), zeby porownanie dotyczylo modelu, a nie parametrow.
+#
+# Sweep `sampler.py`, 80 pytan x 1 proba, OBIE tury, baza t0,8 / top_p 0,9 /
+# top_k 40 / max_tokens 7800. Tury z odpowiedzia na 160, obok run11 na
+# identycznych zestawach:
+#
+#   zestaw          run11   run12   urwane(run12)  slad   odpow.
+#   bez kary          77      93        72/160      5003    734
+#   fp 0,05          113     141        13/160      3855    906   <- wybrane
+#   rep 1,05         125     135        27/160      3801    985
+#   rep 1,10         140     149        12/160      3945    983
+#   rep 1,15         134     151         7/160      3987   1420
+#
+# Trzy rzeczy z tego porownania:
+# - Wyrzucenie nothink ze zbioru pomaga w KAZDYM wariancie, najmocniej na
+#   `fp 0,05`: z 71% na 88% wypelnionych tur. Model potrzebuje MNIEJSZEJ kary,
+#   zeby domknac blok.
+# - TURA 2 NIE jest gorsza od tury 1, a miejscami lepsza (bez kary 58 wobec 35,
+#   rep 1,05: 73 wobec 62). W run11 byla gorsza we wszystkich wariantach.
+# - Przy run11 `rep 1,15` cofalo sie wobec 1,10 (134 wobec 140), tutaj dalej
+#   rosnie (151 wobec 149). Wyzszych kar NIE uzywamy mimo lepszej mechaniki:
+#   przy run11 mediana odpowiedzi rosla razem z kara bez zysku w ocenie, a tu
+#   przy 1,15 jest to juz 1420 znakow wobec 906 na `fp 0,05`.
+[model]
+id = "poziomka_run12_v6reasoning_gbs16_ctx16k_think"
+
+[chat_template]
+enable_thinking = true
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run12_polskie_sprawy_v6_reasoning_v13_16384_gbs16_hf/iter_0001022"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.8
+top_p = 0.9
+top_k = 40
+frequency_penalty = 0.05
+stop = ["<|im_end|>"]

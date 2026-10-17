@@ -1,0 +1,32 @@
+# poziomka-instruct-2026-09-30-7, czyli BAZA ucznia lotnictwa (run13),
+# zmierzona SAMPLEREM UCZNIA zamiast swoim.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka-instruct-2026-09-30-7
+#
+# Po co: wiersz bazy (1,66) mierzono na `t0,6 / top_p 0,9 / min_p 0,05 /
+# fp 0,15`, a ucznia (1,82) na samplerze instruktora `t0,9 / top_p 0,9 /
+# top_k 40 / rep 1,05`, max_tokens 3500. Rozstepy 1,56-1,78 i 1,64-2,03 zachodza
+# na siebie, wiec +0,16 moze byc efektem samplera, nie treningu. Ten przebieg
+# usuwa ten jeden konfundent: identyczny sampler po obu stronach.
+#
+# Dla instruktora takiego problemu nie ma - 6,41 -> 5,29 to przedzialy rozlaczne
+# (6,29-6,58 wobec 5,23-5,33), oba po 3 przebiegi.
+[model]
+id = "poziomka_instruct_2026_09_30_7_sampler_ucznia"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka-instruct-2026-09-30-7"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 3500
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+stop = ["<|im_end|>"]
