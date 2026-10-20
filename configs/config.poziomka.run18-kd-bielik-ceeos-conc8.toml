@@ -1,0 +1,49 @@
+# Poziomka run 18: destylacja RKL k10 z bazowego `Bielik-v3-Instruct`, zbior v8,
+# `nothink`, 19pct, z poprawka CEEOS na `<|im_end|>`, GBS 64, iter 197.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka_kd_run18_bielik_v3_instruct_v8_nothink_19pct_rkl_ceeos_k10_gbs64_hf/iter_0000197
+#
+# CO ZMIENILA POPRAWKA CEEOS wobec run17 (1,54): mediana dlugosci spadla
+# trzykrotnie (4917 -> 1630 znakow przy t0,3), zapetlenia tekstowe z 3-4 na 16
+# do 1 na 16. run17 lecial do 45 tys. znakow tekstu, bo nie mial czym skonczyc.
+#
+# ALE POJAWILA SIE NOWA DEGENERACJA: model wpada w petle na ZNAKU NOWEJ LINII
+# i leci do wyczerpania budzetu. Tura wraca z `finish_reason=length`, pelnym
+# zuzyciem tokenow i trescia zlozona WYLACZNIE z `\n` (4000 znakow, 4000 razy
+# `\n`). Po `strip()` to pusta odpowiedz.
+#
+# ZJAWISKO ZALEZY OD ROWNOLEGLOSCI, nie od promptu:
+# - pojedynczo, 3 razy z rzedu, ten sam prompt przy temperaturze 0 dawal
+#   poprawna odpowiedz w 18 tokenach i `finish=stop`,
+# - w puli 16 watkow ten sam prompt wpadal w petle; dwa przebiegi tej samej
+#   szesnastki dalu 4/16 i 2/16 pustych, pokrywajac sie na dwoch pytaniach.
+# Przy temperaturze 0 roznica miedzy przebiegami oznacza niedeterminizm po
+# stronie serwera (batching), a petla na `\n` to wlasciwosc modelu, ktora ten
+# niedeterminizm wyzwala.
+#
+# DLATEGO `concurrency = 8` zamiast protokolarnych 80. To ODSTEPSTWO: wiersz
+# z tego pomiaru nie jest wprost porownywalny z reszta tabeli, bo pozostale
+# modele mierzono przy 80. Celem jest sprawdzic, czy przy mniejszym obciazeniu
+# petla znika - jesli tak, to problem jest w serwerze, a nie w modelu.
+#
+# Sampler klasyczny Poziomki, t0,8 jak run17, zeby para run17/run18 byla
+# porownywalna miedzy soba.
+[model]
+id = "poziomka_run18_kd_bielik_ceeos_conc8"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_kd_run18_bielik_v3_instruct_v8_nothink_19pct_rkl_ceeos_k10_gbs64_hf/iter_0000197"
+mode = "chat"
+concurrency = 8
+timeout = 900
+
+[generation]
+max_tokens = 7800
+temperature = 0.8
+top_p = 0.9
+min_p = 0.05
+frequency_penalty = 0.15
+stop = ["<|im_end|>"]

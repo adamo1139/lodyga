@@ -85,8 +85,16 @@ def zapytaj(cfg, gen, wiadomosci, think):
         data=json.dumps(payload).encode(),
         headers={"Content-Type": "application/json"},
     )
-    with urllib.request.urlopen(req, timeout=api.get("timeout", 900)) as odp:
-        wybor = json.load(odp)["choices"][0]
+    # Model, ktory nie domyka odpowiedzi, moze w turze 1 zuzyc tyle budzetu, ze
+    # prompt tury 2 plus `max_tokens` nie miesci sie w oknie - serwer odrzuca to
+    # jako HTTP 400. To jest WYNIK pomiaru, nie awaria skryptu, wiec liczymy taka
+    # ture jako `blad` zamiast wywracac caly sweep. Tak wywrocil sie run17:
+    # odpowiedzi tury 1 siegaly 45 tys. znakow.
+    try:
+        with urllib.request.urlopen(req, timeout=api.get("timeout", 900)) as odp:
+            wybor = json.load(odp)["choices"][0]
+    except urllib.error.HTTPError:
+        return "blad", "", ""
     wiadomosc = wybor["message"]
     slad = wiadomosc.get("reasoning_content") or wiadomosc.get("reasoning") or ""
     return wybor.get("finish_reason"), slad, (wiadomosc.get("content") or "").strip()
@@ -188,18 +196,20 @@ def main(argv=None):
     print(f"\n{len(zadania)} rozmów ({2 * len(zadania)} zapytań) w {time.time() - start:.0f}s\n")
 
     print(f"{'wariant':20} {'odp. tura1':>11} {'odp. tura2':>11} {'urwane':>9} "
-          f"{'ślad':>7} {'odpow.':>7}")
+          f"{'błędy':>7} {'ślad':>7} {'odpow.':>7} {'najdł.':>8}")
     for nazwa, _ in warianty:
         grupa = [r for n, r in wyniki if n == nazwa]
         t1 = sum(1 for (_, _, o), _ in grupa if o)
         t2 = sum(1 for _, (_, _, o) in grupa if o)
         urwane = sum((a[0] == "length") + (b[0] == "length") for a, b in grupa)
+        bledy = sum((a[0] == "blad") + (b[0] == "blad") for a, b in grupa)
         slady = [len(s) for para in grupa for _, s, _ in para if s]
         odp = [len(o) for para in grupa for _, _, o in para if o]
         print(f"{nazwa:20} {t1:>5}/{len(grupa):<5} {t2:>5}/{len(grupa):<5} "
-              f"{urwane:>5}/{2 * len(grupa):<3} "
+              f"{urwane:>5}/{2 * len(grupa):<3} {bledy:>7} "
               f"{int(statistics.median(slady)) if slady else 0:>7} "
-              f"{int(statistics.median(odp)) if odp else 0:>7}")
+              f"{int(statistics.median(odp)) if odp else 0:>7} "
+              f"{max(odp) if odp else 0:>8}")
     print("\nMiara to mechanika, nie jakość - wybrany zestaw potwierdź ocenionym przebiegiem.")
     return 0
 

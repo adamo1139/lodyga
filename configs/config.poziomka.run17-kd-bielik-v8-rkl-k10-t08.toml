@@ -1,0 +1,40 @@
+# Poziomka run 17: DESTYLACJA RKL k10 z BAZOWEGO `Bielik-v3-Instruct` jako
+# nauczyciela, zbiór v8, wariant `nothink`, 19pct, GBS 16, iter 788.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka_kd_run17_bielik_v3_instruct_v8_nothink_19pct_rkl_k10_gbs16_hf/iter_0000788
+#
+# Zmiana wobec poprzednich destylacji: nauczycielem jest BAZOWY Bielik Instruct,
+# a nie Bielik dostrojony (instruktor lotnictwa), z którego destylowaliśmy
+# wcześniej. Rodzina nauczyciela ta sama, stopień dostrojenia inny.
+#
+# Sampler: klasyczny zestaw Poziomki, ale z temperaturą 0,8 zamiast 0,6.
+#
+# SONDA POKAZAŁA TRZY SYGNAŁY OSTRZEGAWCZE, więc wynik czytać ostrożnie:
+# - przy temperaturze 0 wyszły 2 PUSTE odpowiedzi na 12, przy t0,8 trzy;
+#   poprzednie modele miały tam zawsze 0/12,
+# - 3-4 ZAPĘTLONE tury na 16 w nothink, przy zerze u run15,
+# - średnia długość 4917 znaków przy t0,3 i 4560 przy t0,8, wobec 1216-1804
+#   u run15 i run16, czyli około trzykrotnie więcej.
+# Poza tym: 0% śmieci, 0 urwanych tur, przełącznik rozumowania działa.
+#
+# Wariant think NIEUŻYWALNY: 16 pustych tur na 16 przy t0,3 i 14 na 16 przy
+# t0,8.
+[model]
+id = "poziomka_run17_kd_bielik_v8_rkl_k10_t08"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_kd_run17_bielik_v3_instruct_v8_nothink_19pct_rkl_k10_gbs16_hf/iter_0000788"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.8
+top_p = 0.9
+min_p = 0.05
+frequency_penalty = 0.15
+stop = ["<|im_end|>"]

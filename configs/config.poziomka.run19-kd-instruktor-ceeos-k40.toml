@@ -1,0 +1,48 @@
+# Poziomka run 19: destylacja RKL k40 + CEEOS z INSTRUKTORA jako nauczyciela,
+# zbior v8, `nothink`, 50pct, GBS 256, iter 132.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka_kd_run19_instruktor_v8_nothink_50pct_rkl_ceeos_k40_gbs256_hf/iter_0000132
+#
+# ZMIENIA WOBEC run18 CZTERY RZECZY NARAZ: nauczyciela (instruktor zamiast
+# bazowego Bielik-v3-Instruct), udzial (50% wobec 19%), szerokosc top-k
+# (40 wobec 10) i GBS (256 wobec 64). CEEOS zostaje. Jesli wynik bedzie lepszy,
+# NIE bedzie wiadomo, ktorej zmianie to przypisac.
+#
+# Sonda NAJCZYSTSZA w calej serii destylacji:
+#   model             urwane  puste  zapetl  sr.dl.
+#   run17 (bez ceeos)   0/16     0     4/16    4917
+#   run18 (ceeos)       0/16     3     1/16    1630
+#   run19 (ceeos)       0/16     0     0/16     992
+# Zero pustych, zero urwanych, zero zapetlen, zero smieci przy t0. Dlugosc
+# stabilna miedzy temperaturami (992 i 997), czego u run18 nie bylo
+# (1630 wobec 2196).
+#
+# WAZNE: petla na `\n`, ktora u run18 wymusila `concurrency 8`, NIE wystapila
+# ani razu przy pelnej rownoleglosci sondy. Dlatego tutaj wracamy do
+# protokolarnych 80 i wiersz jest wprost porownywalny z reszta tabeli - czego
+# o wierszu run18 (conc 8) powiedziec sie nie da.
+#
+# Sampler KLASYCZNY Poziomki: `7800 / t0,6 / top_p 0,9 / min_p 0,05 / fp 0,15`.
+# UWAGA: run17 i run18 mierzono na t0,8, wiec para run18/run19 rozni sie takze
+# temperatura. Wobec run15 (SFT, 2,25) i reszty rodziny porownanie jest czyste.
+#
+# Wariant think nadal slaby: 5-6 pustych tur na 16, jak u run18.
+[model]
+id = "poziomka_run19_kd_instruktor_ceeos_k40"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_kd_run19_instruktor_v8_nothink_50pct_rkl_ceeos_k40_gbs256_hf/iter_0000132"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.6
+top_p = 0.9
+min_p = 0.05
+frequency_penalty = 0.15
+stop = ["<|im_end|>"]

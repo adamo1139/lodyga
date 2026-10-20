@@ -1,0 +1,52 @@
+# Poziomka run 16: DESTYLACJA WIEDZY na `polskie-sprawy-v8` - odwrotna
+# dywergencja KL po top-10 logitach, 16384 packed, GBS 16, iter 5214.
+# Wariant nothink.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka_kd_run16_polskie_sprawy_v8_rkl_k10_16384_gbs16_hf/iter_0005214
+#
+# run16 ZACZYNA OD run15, to nie jest wariant równoległy. Kolejność:
+# SFT na v8 (run15, 2,25) -> destylacja RKL k10 na v8 (run16). Ten wiersz mierzy
+# więc, co destylacja DOŁOŻYŁA do gotowego SFT, a nie czy destylacja jest lepsza
+# od SFT. Odpowiedź: obniżyła wynik o 0,30, przedziały rozłączne
+# (2,16-2,31 wobec 1,87-2,02).
+#
+# Dla porównania run14 to destylacja RKL z k40, startująca z run13 (ucznia
+# lotnictwa) - tam destylacja PODNIOSŁA wynik, bo odbudowywała to, co zepsuł
+# trening lotniczy. Tutaj punktem startowym jest zdrowy model, więc nie ma
+# czego odbudowywać.
+#
+# Sampler KLASYCZNY dla Poziomki: `max_tokens 7800 / t0,6 / top_p 0,9 /
+# min_p 0,05 / fp 0,15`, ten sam co run15, run11, run14 i rodzina merge'ów.
+#
+# Sonda: 0% śmieci przy t0 i t0,8, 0 pustych i 0 urwanych tur w nothink,
+# 1 zapętlona na 16 przy t0,3, przełącznik rozumowania działa (0/16 przy false,
+# 16/16 przy true).
+#
+# UWAGA 1: długości w nothink są rozstrzelone - 1804 znaki przy t0,3 i 868 przy
+# t0,8, czyli odwrotnie niż zwykle i dwukrotnie. run15 miał 1216 i 1271, czyli
+# płasko. Na 16 pytaniach to może być przypadek, ale gdyby wynik wyszedł
+# nietypowo, to jest pierwszy trop.
+#
+# UWAGA 2: wariant think wygląda gorzej niż u run15 - 5 pustych tur na 16 przy
+# t0,3 i 5 ZAPĘTLONYCH przy t0,8 ze średnim śladem 5239 znaków (run15 miał 4-6
+# pustych, ale zero zapętleń). Przy pomiarze think trzeba będzie dobrać karę
+# `sampler.py`, jak przy run11.
+[model]
+id = "poziomka_run16_kd_v8_rkl_k10_ctx16k"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_kd_run16_polskie_sprawy_v8_rkl_k10_16384_gbs16_hf/iter_0005214"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.6
+top_p = 0.9
+min_p = 0.05
+frequency_penalty = 0.15
+stop = ["<|im_end|>"]
