@@ -30,12 +30,13 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | bielik-pl-minitron-7b-nauka-lotnictwa-2 (fp0,05 rep1,01) | chat | tak | 1 | **3,50** | — | 30 | 76% | 3,30 | 4,20 | 3,75 | 4,74 | 1,15 | 5,20 | 3,26 | 2,45 |
 | Qra-13B-chat | chat | brak | 3 | **3,30** | 3,12–3,40 | 0 | 90% | 3,90 | 4,03 | 3,87 | 2,05 | 1,53 | 3,32 | 3,57 | 4,12 |
 | bielik-1.5b-nauka-lotnictwa-1-pilot | chat | tak | 3 | **2,77** | 2,71–2,87 | 38 | 87% | 2,78 | 3,29 | 2,13 | 4,05 | 1,38 | 3,17 | 2,30 | 3,13 |
-| poziomka kd run19/iter_0000132 (destylacja RKL k40 + CEEOS z instruktora, v8, 50pct, gbs256) | chat | nie | 3 | **2,36** | 2,32–2,39 | 0 | 96% | 3,15 | 4,25 | 1,85 | 1,29 | 0,95 | 0,75 | 3,03 | 3,52 |
+| cpral/Poziomka-Instruct-2026-10-20 (16k/640k) | chat | nie | 3 | **2,36** | 2,32–2,39 | 0 | 96% | 3,15 | 4,25 | 1,85 | 1,29 | 0,95 | 0,75 | 3,03 | 3,52 |
 | poziomka sft run15/iter_0005214 (v8, gbs16, 16k/640k) | chat | nie | 3 | **2,25** | 2,16–2,31 | 0 | 94% | 3,12 | 3,52 | 2,05 | 1,72 | 0,95 | 0,93 | 2,50 | 3,20 |
 | poziomka sft run11/iter_0002756 (v6, gbs16, 16k/640k) | chat | nie | 3 | **2,15** | 2,12–2,16 | 0 | 88% | 3,05 | 3,14 | 2,38 | 1,85 | 0,85 | 0,95 | 1,87 | 3,12 |
 | poziomka-instruct-2026-10-13-della (16k/640k) | chat | nie | 3 | **2,13** | 1,99–2,24 | 0 | 90% | 3,10 | 3,39 | 1,68 | 1,70 | 0,94 | 1,17 | 2,10 | 2,98 |
 | poziomka-instruct-2026-10-10-della (16k/640k) | chat | nie | 3 | **2,12** | 2,01–2,18 | 0 | 95% | 3,58 | 2,90 | 2,03 | 1,54 | 0,37 | 1,23 | 2,40 | 2,87 |
 | cpral/poziomka-instruct-2026-10-10 (16k/640k) | chat | nie | 3 | **2,12** | 1,99–2,24 | 0 | 95% | 3,62 | 3,75 | 1,97 | 1,39 | 0,40 | 1,03 | 2,10 | 2,82 |
+| poziomka sft run21/iter_0004094 (jakość50, gbs16, 16k/640k) | chat | nie | 3 | **2,11** | 1,96–2,21 | 0 | 94% | 3,15 | 3,50 | 2,12 | 1,46 | 0,53 | 0,90 | 2,35 | 2,82 |
 | poziomka kd run14/iter_0000635 (destylacja RKL k40, 8k→16k, gbs64) | chat | nie | 3 | **2,09** | 1,98–2,16 | 0 | 90% | 2,85 | 3,40 | 1,77 | 1,68 | 1,17 | 0,72 | 2,30 | 2,85 |
 | poziomka kd run18/iter_0000197 (destylacja RKL k10 + CEEOS z Bielik-v3-Instruct, v8, t0,8, concurrency 8) | chat | nie | 3 | **2,09** | 2,03–2,22 | 4 | 96% | 3,08 | 3,40 | 1,80 | 0,95 | 0,53 | 1,30 | 2,40 | 3,20 |
 | poziomka sft run10/iter_0001525 (v4, gbs16, 16k/640k) | chat | nie | 3 | **2,05** | 2,03–2,07 | 0 | 91% | 3,15 | 2,85 | 1,90 | 1,82 | 0,64 | 0,98 | 1,93 | 3,10 |
