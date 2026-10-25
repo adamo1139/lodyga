@@ -1,0 +1,36 @@
+# Poziomka run 21 (SFT polskie-sprawy-jakosc50), iter 4094, wariant THINK.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka_sft_run21_polskie_sprawy_jakosc50_v13_16384_gbs16_hf/iter_0004094
+#
+# Sampler: `t0,8 / top_p 0,9 / top_k 40 / fp 0,05`, ten sam, ktorym mierzono
+# wiersze think run11 (1,03) i run12 (0,86), wiec porownanie dotyczy modelu,
+# a nie parametrow. NIE jest to sampler klasyczny Poziomki - wiersz nothink
+# run21 (2,11) idzie na `t0,6 / min_p 0,05 / fp 0,15`, wiec te dwa wiersze NIE
+# sa czystym porownaniem samego rozumowania.
+#
+# Sonda w trybie think: 3-5 pustych tur na 16 przy t0,3 i t0,8, 1 urwana,
+# zero zapetlen, slad 857-993 znaki. To mniej pustych niz mial run11 przed
+# doborem kary, wiec nie robimy osobnego sweepu przed pierwszym przebiegiem.
+#
+# UWAGA: przy run11 kara za powtorzenia podniosla wypelnione tury ze 113 na 140
+# na 160 (`rep 1,10` zamiast `fp 0,05`), ale ocena drgnela tylko z 1,03 na 1,09.
+# Jesli tutaj puste tury okaza sie problemem, sweep ma sens dopiero wtedy.
+[model]
+id = "poziomka_run21_jakosc50_ctx16k_think"
+
+[chat_template]
+enable_thinking = true
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run21_polskie_sprawy_jakosc50_v13_16384_gbs16_hf/iter_0004094"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.8
+top_p = 0.9
+top_k = 40
+frequency_penalty = 0.05
+stop = ["<|im_end|>"]
