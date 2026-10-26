@@ -45,6 +45,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka sft run7/iter_0000846 (v13, gbs16, 16k/640k) | chat | nie | 3 | **1,99** | 1,91–2,13 | 0 | 93% | 3,08 | 3,04 | 1,77 | 1,11 | 0,23 | 1,02 | 2,32 | 3,30 |
 | poziomka kd run16/iter_0005214 (destylacja RKL k10, v8, gbs16, 16k/640k) | chat | nie | 3 | **1,95** | 1,87–2,02 | 0 | 96% | 2,73 | 3,73 | 1,68 | 0,85 | 0,93 | 0,67 | 2,38 | 2,60 |
 | poziomka-instruct-2026-10-07-sce (v13, 16k/640k) | chat | nie | 3 | **1,95** | 1,79–2,15 | 0 | 96% | 3,08 | 3,29 | 1,78 | 0,99 | 0,37 | 1,12 | 2,32 | 2,65 |
+| poziomka sft run22/iter_0004094 (jakość50, start z bazy, gbs16, 16k/640k) | chat | nie | 3 | **1,89** | 1,82–2,01 | 0 | 96% | 2,68 | 3,85 | 1,73 | 1,28 | 0,32 | 0,67 | 1,90 | 2,62 |
 | poziomka sft run13/iter_0001350 (uczeń lotnictwa, 6k, gbs64) | chat | nie | 3 | **1,82** | 1,64–2,03 | 0 | 95% | 2,87 | 2,78 | 1,33 | 0,84 | 0,68 | 0,93 | 2,12 | 2,93 |
 | poziomka sft run5/iter_0000212 (16k/640k) | chat | nie | 3 | **1,73** | 1,65–1,89 | 0 | 97% | 2,92 | 2,66 | 1,93 | 0,63 | 0,23 | 0,98 | 1,92 | 2,60 |
 | poziomka-instruct-2026-09-30-7 (16k/640k, t0,6 min_p) | chat | nie | 3 | **1,66** | 1,56–1,78 | 0 | 94% | 2,85 | 2,72 | 1,43 | 0,89 | 0,25 | 0,97 | 1,72 | 2,38 |

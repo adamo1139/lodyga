@@ -1,0 +1,39 @@
+# Poziomka run 22 (SFT polskie-sprawy-jakosc50, szablon v13, 16384 packed,
+# GBS 16), iter 4094, START Z MODELU BAZOWEGO (`baza` w nazwie). Wariant nothink.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka_sft_run22_baza_polskie_sprawy_jakosc50_v13_16384_gbs16_hf/iter_0004094
+#
+# Para z run21: TEN SAM zbior jakosc50, ta sama liczba krokow (4094), ten sam
+# GBS 16 i okno 16384. Rozni je tylko punkt startowy. run21 = 2,11 (1,96-2,21).
+#
+# Sampler KLASYCZNY Poziomki: `7800 / t0,6 / top_p 0,9 / min_p 0,05 / fp 0,15`.
+#
+# Sonda: 0% smieci, 0 pustych, 0 urwanych i ZERO zapetlen w nothink przy obu
+# temperaturach (run21 mial 1 zapetlona na 16). Przelacznik rozumowania dziala.
+# Dlugosci 928 i 994 znaki - krotkie, jak u run21.
+#
+# Wspolne z run21, wiec prawdopodobnie zasluga zbioru, nie punktu startowego:
+# fraza "Witajcie, mali odkrywcy!" w probce sondy na pytanie o blog podrozniczy.
+# Przy run21 nie zaszkodzila pismiennictwu (3,15).
+#
+# Wariant think slabszy niz u run21: 6-7 pustych tur na 16 wobec 3-5, slad
+# przy t0,3 tylko 356 znakow.
+[model]
+id = "poziomka_run22_baza_jakosc50_ctx16k"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run22_baza_polskie_sprawy_jakosc50_v13_16384_gbs16_hf/iter_0004094"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.6
+top_p = 0.9
+min_p = 0.05
+frequency_penalty = 0.15
+stop = ["<|im_end|>"]
