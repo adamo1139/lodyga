@@ -45,6 +45,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka kd run14/iter_0000635 (destylacja RKL k40, 8k→16k, gbs64) | chat | nie | 3 | **2,09** | 1,98–2,16 | 0 | 90% | 2,85 | 3,40 | 1,77 | 1,68 | 1,17 | 0,72 | 2,30 | 2,85 |
 | poziomka kd run18/iter_0000197 (destylacja RKL k10 + CEEOS z Bielik-v3-Instruct, v8, t0,8, concurrency 8) | chat | nie | 3 | **2,09** | 2,03–2,22 | 4 | 96% | 3,08 | 3,40 | 1,80 | 0,95 | 0,53 | 1,30 | 2,40 | 3,20 |
 | poziomka sft run10/iter_0001525 (v4, gbs16, 16k/640k) | chat | nie | 3 | **2,05** | 2,03–2,07 | 0 | 91% | 3,15 | 2,85 | 1,90 | 1,82 | 0,64 | 0,98 | 1,93 | 3,10 |
+| poziomka sft run27/iter_0027458 (v8 + jakość50, gbs1, 16k/640k) | chat | nie | 3 | **2,05** | 1,92–2,27 | 0 | 92% | 3,28 | 3,30 | 2,40 | 1,36 | 0,96 | 0,60 | 2,12 | 2,33 |
 | poziomka-instruct-2026-10-10-stock (16k/640k) | chat | nie | 3 | **2,03** | 1,94–2,15 | 0 | 94% | 3,22 | 2,82 | 1,73 | 1,18 | 0,55 | 1,13 | 2,45 | 3,18 |
 | poziomka-instruct-2026-10-13-fusion (16k/640k) | chat | nie | 3 | **2,00** | 1,92–2,08 | 0 | 96% | 3,23 | 3,27 | 1,72 | 1,08 | 0,30 | 1,13 | 2,36 | 2,85 |
 | poziomka sft run7/iter_0000846 (v13, gbs16, 16k/640k) | chat | nie | 3 | **1,99** | 1,91–2,13 | 0 | 93% | 3,08 | 3,04 | 1,77 | 1,11 | 0,23 | 1,02 | 2,32 | 3,30 |
