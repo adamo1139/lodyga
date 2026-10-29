@@ -1,0 +1,37 @@
+# Poziomka run 25 (SFT polskie-sprawy-v8-jakosc50, szablon v13, 16384 packed,
+# GBS 4), iter 6865. Wariant nothink.
+#   serwer: /media/nvme_2tb/maked/poziomka_train/poziomka_sft_run25_polskie_sprawy_v8_jakosc50_v13_16384_gbs4_hf/iter_0006865
+#
+# Seria GBS na tym samym zbiorze i tej samej liczbie widzianych probek (okolo
+# jednej epoki):
+#   run25  GBS 4   6865 krokow  -> 27 460 probek
+#   run23  GBS 8   3433 kroki   -> 27 464 probki   (2,23, t0,6)
+#   run24  GBS 16  1717 krokow  -> 27 472 probki   (2,26, t0,8)
+#
+# Sampler KLASYCZNY Poziomki: `7800 / t0,6 / top_p 0,9 / min_p 0,05 / fp 0,15`,
+# czyli TEN SAM co run23. Z run23 porownanie jest czyste (rozni je tylko GBS),
+# z run24 nie - tamten mierzony na t0,8.
+#
+# Sonda: 0% smieci przy t0 i t0,8, 0 pustych i 0 urwanych tur w nothink,
+# 1 zapetlona na 16 przy t0,3, przelacznik rozumowania dziala. Wariant think
+# najslabszy w serii GBS: przy t0,3 8 urwanych i 9 pustych na 16.
+[model]
+id = "poziomka_run25_v8_jakosc50_gbs4_ctx16k"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/poziomka_train/poziomka_sft_run25_polskie_sprawy_v8_jakosc50_v13_16384_gbs4_hf/iter_0006865"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 7800
+temperature = 0.6
+top_p = 0.9
+min_p = 0.05
+frequency_penalty = 0.15
+stop = ["<|im_end|>"]
