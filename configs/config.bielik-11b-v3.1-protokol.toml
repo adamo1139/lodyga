@@ -1,0 +1,24 @@
+# Bielik 11B v3.1 Instruct, wariant BEZ ROZUMOWANIA na SAMPLERZE PROTOKOLARNYM
+# Bielikow - tym samym, ktorym mierzony byl v3.0 (7,53). Serwer i szablon jak
+# w config.bielik-11b-v3.1.toml (vLLM 0.34.0, parser `bielik`).
+#
+# Cel: rozdzielic wplyw samplera od wplywu modelu w porownaniu v3.0 -> v3.1.
+# v3.1 na zalecanym przez autorow t0,3 dal 7,00, czyli o 0,53 mniej niz v3.0,
+# ale tamto porownanie roznilo sie samplerem. Tu sampler jest identyczny z v3.0;
+# zostaje jeszcze roznica szablonu (v3.1 wstrzykuje blok systemowy z data).
+[model]
+id = "bielik_11b_v3.1_instruct_protokol"
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/models/Bielik-11B-v3.1-Instruct"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 3500
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05

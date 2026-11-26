@@ -1,0 +1,36 @@
+# Bielik 11B v3.1 Instruct, BEZ ROZUMOWANIA, sampler protokolarny Bielikow,
+# BEZ DOMYSLNEGO SYSTEM PROMPTU v3.1 - czyli tak, jak mierzony byl v3.0.
+# Serwer jak w config.bielik-11b-v3.1.toml (vLLM 0.34.0, parser `bielik`).
+#
+# Szablon v3.1 domyslnie (`provider_system_prompt = true`) wstrzykuje dlugi,
+# angielski system prompt: "You are Bielik, a large language model created by
+# the SpeakLeash Foundation and ACK Cyfronet AGH...", z data, regulami jezyka
+# odpowiedzi itd. Na zywym serwerze to samo pytanie ma 1064 tokeny promptu
+# z nim i 24 bez niego.
+#
+# Rodzina v3.0 (szablony cpral/Bielik-PL-11B-v3.0-Instruct-ungated
+# i cpral/Bielik-1.5B-v3.0-Instruct-ungated) to czysty ChatML z bos_token, BEZ
+# ZADNEGO domyslnego system promptu. "System prompt z v3.0" = brak promptu,
+# wiec wylaczamy prompt v3.1 i nie dokladamy wlasnej wiadomosci systemowej.
+# BOS wstawiaja oba szablony, tu roznicy nie ma.
+#
+# Para z config.bielik-11b-v3.1-protokol.toml: ten sam sampler, rozni je TYLKO
+# system prompt. Razem z wierszem v3.0 (7,53) pozwala rozdzielic wplyw samplera,
+# promptu i samych wag.
+[model]
+id = "bielik_11b_v3.1_instruct_protokol_bez_promptu"
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/models/Bielik-11B-v3.1-Instruct"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 3500
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+chat_template_kwargs = { provider_system_prompt = false }

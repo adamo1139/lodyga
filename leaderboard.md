@@ -23,6 +23,8 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | Qwen3.8-Flash-Next | chat | tak* | 2 | **7,27** | 6,79–7,75 | 59 | 73% | 6,60 | 7,15 | 6,95 | 8,45 | 8,39 | 6,97 | 6,92 | 6,72 |
 | Bielik-PL-11B-v3.0-Instruct | chat | brak | 3 | **7,27** | 7,15–7,46 | 0 | 94% | 6,78 | 6,88 | 7,76 | 8,79 | 6,27 | 7,98 | 6,87 | 6,92 |
 | gpt-oss-20b | chat | high | 3 | **7,26** | 7,21–7,33 | 1 | 89% | 6,20 | 5,32 | 8,00 | 9,86 | 9,05 | 8,47 | 5,75 | 5,50 |
+| Bielik-11B-v3.1-Instruct (protokół) | chat | nie | 3 | **7,25** | 7,17–7,30 | 0 | 93% | 7,08 | 7,48 | 7,07 | 7,91 | 6,07 | 8,22 | 6,64 | 7,57 |
+| Bielik-11B-v3.1-Instruct (protokół, bez system promptu) | chat | nie | 3 | **7,08** | 6,88–7,26 | 0 | 93% | 6,63 | 7,12 | 6,92 | 8,13 | 5,58 | 8,03 | 6,85 | 7,50 |
 | Bielik-11B-v3.1-Instruct (t0,3) | chat | nie | 3 | **7,00** | 6,87–7,12 | 0 | 94% | 6,88 | 7,53 | 5,95 | 7,82 | 5,87 | 7,82 | 6,53 | 7,65 |
 | Bielik-PL-Minitron-7B-v3.0-Instruct | chat | brak | 3 | **6,41** | 6,29–6,58 | 0 | 94% | 6,25 | 5,99 | 5,77 | 8,66 | 5,00 | 7,07 | 6,10 | 6,50 |
 | LFM3-1.7B | chat | tak | 3 | **6,02** | 5,90–6,24 | 1 | 84% | 4,13 | 3,77 | 6,10 | 9,43 | 8,12 | 8,30 | 4,55 | 3,95 |
@@ -392,6 +394,15 @@ serwerze i samplerze autorów (`T 0,1 / top_k 50 / repetition_penalty 1,1`).
 OpenRouter (`liquid/lfm-3-1.7b`) wymusza rozumowanie i odrzuca jego wyłączenie,
 dlatego nie z niego. Przy `enable_thinking = false` model nie rozumował w żadnej
 turze sondy. Ślad, gdy jest, prowadzi po angielsku.
+
+**`Bielik-11B-v3.1-Instruct`** ([cpral](https://huggingface.co/cpral/Bielik-11B-v3.1-Instruct-ungated))
+na vLLM 0.34 z parserem `bielik` z `speakleash/bielik-tools`. Rozumowanie steruje
+`reasoning_effort` w `chat_template_kwargs` (domyślnie `none`), a szablon
+domyślnie wstrzykuje angielski system prompt (~1000 tokenów). Wiersze rozkładają
+różnicę do v3.0 (7,53): sampler zalecany przez autorów (`t0,3`) zamiast
+protokolarnego kosztuje 0,25, a wycięcie system promptu (`provider_system_prompt
+= false`) nie pomaga (7,08 wobec 7,25). Po wyrównaniu obu v3.1 zostaje
+słabszy od v3.0, głównie w matematyce (7,9–8,1 wobec 9,06).
 
 Serie Poziomki nazwane są datą publikacji repozytorium:
 `sft 2026-09-14` to [`cpral/poziomka_sft_2026_09_14_hf`](https://huggingface.co/cpral/poziomka_sft_2026_09_14_hf),
