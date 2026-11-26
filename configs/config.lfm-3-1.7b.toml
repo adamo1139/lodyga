@@ -1,0 +1,39 @@
+# LFM3-1.7B (Liquid AI), wariant BEZ ROZUMOWANIA, wlasny endpoint SGLang.
+#   https://huggingface.co/LiquidAI/LFM3-1.7B
+#
+#   python3 -m sglang.launch_server --model-path LiquidAI/LFM3-1.7B \
+#       --port 2300 --host 0.0.0.0 --reasoning-parser qwen3 --context-length 32768
+#
+# Dlaczego nie OpenRouter: endpoint `liquid/lfm-3-1.7b` nie pozwala wylaczyc
+# rozumowania - odrzuca `reasoning: {enabled: false}` i `{effort: "none"}`
+# komunikatem "Reasoning is mandatory for this endpoint and cannot be disabled".
+#
+# Szablon czatu wspiera `enable_thinking`: przy false dokleja do promptu pusty
+# `<think></think>`. <think> i </think> to osobne tokeny specjalne (124901,
+# 124902), wiec parser qwen3 je rozpozna. README autorow ostrzega jednak, ze
+# wylaczanie bywa niekonsekwentne - sonda (kolumna "rozumuje") pokaze, jak czesto
+# model mysli mimo enable_thinking=false.
+#
+# Sampler zalecany przez autorow do zastosowan ogolnych: temperature 0,1 /
+# top_k 50 / repetition_penalty 1,1.
+#
+# max_tokens 8192 - przy --context-length 32768 regula podwojnego budzetu
+# miesci sie z duzym zapasem.
+[model]
+id = "lfm3_1.7b"
+
+[chat_template]
+enable_thinking = false
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "LiquidAI/LFM3-1.7B"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 8192
+temperature = 0.1
+top_k = 50
+repetition_penalty = 1.1

@@ -1,0 +1,38 @@
+# LFM3-1.7B (Liquid AI), wariant Z ROZUMOWANIEM, wlasny endpoint vLLM.
+#   https://huggingface.co/LiquidAI/LFM3-1.7B
+#
+#   CUDA_VISIBLE_DEVICES=5 vllm serve /media/nvme_2tb/maked/models/LFM3-1.7B \
+#       --served-model-name LiquidAI/LFM3-1.7B --host 0.0.0.0 --port 2300 \
+#       --max-model-len 32768 --reasoning-parser qwen3
+#
+# Ten sam serwer i ten sam sampler co wariant bez rozumowania
+# (config.lfm-3-1.7b.toml), wiec para rozni sie tylko przelacznikiem.
+# Sampler autorow do zastosowan ogolnych: temperature 0,1 / top_k 50 /
+# repetition_penalty 1,1.
+#
+# OpenRouter (`liquid/lfm-3-1.7b`) wymusza rozumowanie i nie pozwala go
+# wylaczyc, dlatego oba warianty mierzymy na wlasnym endpointcie.
+#
+# Sonda: rozumuje 16/16 przy enable_thinking=true, 1 pusta i 1 urwana na 16 przy
+# t0,8. Model rozumuje PO ANGIELSKU (widoczne juz na OpenRouterze).
+#
+# max_tokens 16000 - wiecej niz w wariancie bez rozumowania, bo slad zjada
+# budzet. Regula podwojnego budzetu przy oknie 32768 daje ~16 170.
+[model]
+id = "lfm3_1.7b_think"
+
+[chat_template]
+enable_thinking = true
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "LiquidAI/LFM3-1.7B"
+mode = "chat"
+concurrency = 80
+timeout = 900
+
+[generation]
+max_tokens = 16000
+temperature = 0.1
+top_k = 50
+repetition_penalty = 1.1

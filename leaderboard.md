@@ -23,8 +23,10 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | Bielik-PL-11B-v3.0-Instruct | chat | brak | 3 | **7,27** | 7,15–7,46 | 0 | 94% | 6,78 | 6,88 | 7,76 | 8,79 | 6,27 | 7,98 | 6,87 | 6,92 |
 | gpt-oss-20b | chat | high | 3 | **7,26** | 7,21–7,33 | 1 | 89% | 6,20 | 5,32 | 8,00 | 9,86 | 9,05 | 8,47 | 5,75 | 5,50 |
 | Bielik-PL-Minitron-7B-v3.0-Instruct | chat | brak | 3 | **6,41** | 6,29–6,58 | 0 | 94% | 6,25 | 5,99 | 5,77 | 8,66 | 5,00 | 7,07 | 6,10 | 6,50 |
+| LFM3-1.7B | chat | tak | 3 | **6,02** | 5,90–6,24 | 1 | 84% | 4,13 | 3,77 | 6,10 | 9,43 | 8,12 | 8,30 | 4,55 | 3,95 |
 | Bielik-4.5B-v3-Instruct | chat | brak | 3 | **5,69** | 5,60–5,86 | 0 | 97% | 4,77 | 5,73 | 5,35 | 8,54 | 4,87 | 5,85 | 5,03 | 5,55 |
 | bielik-pl-minitron-7b-nauka-lotnictwa-2 | chat | nie | 3 | **5,29** | 5,23–5,33 | 0 | 94% | 6,27 | 5,68 | 4,77 | 6,89 | 2,85 | 5,62 | 4,78 | 5,48 |
+| LFM3-1.7B | chat | nie | 3 | **4,96** | 4,87–5,02 | 0 | 93% | 3,43 | 3,38 | 4,13 | 8,24 | 6,30 | 6,15 | 3,83 | 4,30 |
 | Bielik-1.5B-v3-Instruct | chat | brak | 3 | **3,83** | 3,72–3,96 | 0 | 93% | 3,95 | 4,00 | 2,77 | 6,02 | 2,87 | 4,15 | 3,38 | 3,65 |
 | bielik-1.5b-nauka-lotnictwa-1-pilot | chat | nie | 3 | **3,78** | 3,58–3,95 | 0 | 90% | 4,47 | 4,86 | 2,58 | 4,28 | 2,35 | 3,28 | 3,65 | 4,80 |
 | bielik-pl-minitron-7b-nauka-lotnictwa-2 (fp0,05 rep1,01) | chat | tak | 1 | **3,50** | — | 30 | 76% | 3,30 | 4,20 | 3,75 | 4,74 | 1,15 | 5,20 | 3,26 | 2,45 |
@@ -381,6 +383,13 @@ oknie 4096. Model nie rozumuje, więc wiersz jest tylko jeden.
 Jeden przebieg odrzuciliśmy: na wsadzie 6 serwer wyczerpał 16 GB GPU i 12 zapytań
 o turę 2 skończyło się błędem, który harness zapisał jako pustą odpowiedź.
 Wiersz to trzy czyste przebiegi na wsadzie 4.
+
+**`LFM3-1.7B`** ([Liquid AI](https://huggingface.co/LiquidAI/LFM3-1.7B)) mierzony na
+własnym endpoincie vLLM (`--reasoning-parser qwen3`), oba warianty na tym samym
+serwerze i samplerze autorów (`T 0,1 / top_k 50 / repetition_penalty 1,1`).
+OpenRouter (`liquid/lfm-3-1.7b`) wymusza rozumowanie i odrzuca jego wyłączenie,
+dlatego nie z niego. Przy `enable_thinking = false` model nie rozumował w żadnej
+turze sondy. Ślad, gdy jest, prowadzi po angielsku.
 
 Serie Poziomki nazwane są datą publikacji repozytorium:
 `sft 2026-09-14` to [`cpral/poziomka_sft_2026_09_14_hf`](https://huggingface.co/cpral/poziomka_sft_2026_09_14_hf),
