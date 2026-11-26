@@ -38,6 +38,7 @@ rubryka, inne prompty. Porównuj tylko wiersze z tej tabeli między sobą.
 | poziomka sft run23/iter_0003433 (v8 + jakość50, gbs8, 16k/640k) | chat | nie | 3 | **2,23** | 2,11–2,29 | 0 | 92% | 3,12 | 3,42 | 2,32 | 1,40 | 0,78 | 0,87 | 2,65 | 3,22 |
 | poziomka sft run11/iter_0002756 (v6, gbs16, 16k/640k) | chat | nie | 3 | **2,15** | 2,12–2,16 | 0 | 88% | 3,05 | 3,14 | 2,38 | 1,85 | 0,85 | 0,95 | 1,87 | 3,12 |
 | poziomka sft run26/iter_0013729 (v8 + jakość50, gbs2, 16k/640k) | chat | nie | 3 | **2,15** | 2,14–2,17 | 0 | 90% | 2,95 | 3,50 | 2,13 | 1,38 | 0,95 | 1,00 | 2,22 | 3,07 |
+| Slayer1B-1.09-Instruct-26.11 | chat | brak | 3 | **2,14** | 2,13–2,15 | 0 | 92% | 3,30 | 3,22 | 2,03 | 1,03 | 0,32 | 0,83 | 2,77 | 3,63 |
 | poziomka-instruct-2026-10-13-della (16k/640k) | chat | nie | 3 | **2,13** | 1,99–2,24 | 0 | 90% | 3,10 | 3,39 | 1,68 | 1,70 | 0,94 | 1,17 | 2,10 | 2,98 |
 | poziomka-instruct-2026-10-10-della (16k/640k) | chat | nie | 3 | **2,12** | 2,01–2,18 | 0 | 95% | 3,58 | 2,90 | 2,03 | 1,54 | 0,37 | 1,23 | 2,40 | 2,87 |
 | cpral/poziomka-instruct-2026-10-10 (16k/640k) | chat | nie | 3 | **2,12** | 1,99–2,24 | 0 | 95% | 3,62 | 3,75 | 1,97 | 1,39 | 0,40 | 1,03 | 2,10 | 2,82 |
@@ -366,6 +367,20 @@ to 1024 tokeny, więc ścisłe jej trzymanie dawałoby 200 i ucinało turę 1
 w połowie zdania. Ceną jest to, że przy długiej odpowiedzi prompt tury 2 bywa
 obcinany od lewej. Nie zaszkodziło: zero pustych tur, zero zapętleń i 90%
 polszczyzny na 480 tur.
+
+**`Slayer1B-1.09-Instruct-26.11`** ([SlayerLab](https://huggingface.co/SlayerLab/Slayer1B-1.09-Instruct-26.11))
+to ta sama rodzina architektur co GoLLeM v6, więc mierzyliśmy go tym samym
+serwerem. Wymagał czterech dostosowań: brak biasów w `qkv` i `proj`, głowa
+zapisana tylko jako `tok.weight`, `<|endoftext|>` na początku rozmowy oraz koniec
+tury także na `<|endoftext|>` i `<|im_start|>`. Forward sprawdziliśmy wobec
+referencyjnego `slayer_model.py` autorów: logity zgodne do 4·10⁻⁵, argmax na 100%
+pozycji. Sampler to ustawienie autorów (`T 0,3 / top_p 0,9 /
+repetition_penalty 1,1`), `max_tokens 1834` z reguły podwójnego budżetu przy
+oknie 4096. Model nie rozumuje, więc wiersz jest tylko jeden.
+
+Jeden przebieg odrzuciliśmy: na wsadzie 6 serwer wyczerpał 16 GB GPU i 12 zapytań
+o turę 2 skończyło się błędem, który harness zapisał jako pustą odpowiedź.
+Wiersz to trzy czyste przebiegi na wsadzie 4.
 
 Serie Poziomki nazwane są datą publikacji repozytorium:
 `sft 2026-09-14` to [`cpral/poziomka_sft_2026_09_14_hf`](https://huggingface.co/cpral/poziomka_sft_2026_09_14_hf),

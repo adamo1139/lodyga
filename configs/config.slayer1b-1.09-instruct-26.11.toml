@@ -1,0 +1,48 @@
+# Slayer1B 1.09 Instruct 26.11 (SlayerLab).
+#   https://huggingface.co/SlayerLab/Slayer1B-1.09-Instruct-26.11
+#
+# Ta sama rodzina architektur co GoLLeM v6 (RMSNorm, SwiGLU, RoPE interleaved,
+# qk_norm, value residual), wiec mierzymy go przez nasz serwer zgodny z OpenAI:
+#
+#   python3 serwer_gollem.py --model /media/adamo/usemka/tmp/Slayer1B-1.09-Instruct-26.11 \
+#       --bos --port 2300 --batch 6
+#
+# Roznice wobec GoLLeM v6, obsluzone w serwer_gollem.py / modeling_gollem_v6.py:
+#   - brak biasow w qkv i proj ("attn_bias": 0),
+#   - head.weight nie zapisany w pliku (tied z tok.weight),
+#   - <|endoftext|> (id 0) na poczatku rozmowy - flaga --bos,
+#   - koniec tury takze na <|endoftext|> i <|im_start|> - tez pod --bos.
+# Forward zweryfikowany wobec referencyjnego slayer_model.py autorow: max |roznica|
+# logitow 4,3e-05, argmax zgodny na 100% pozycji, top-5 identyczne.
+#
+# --batch 6, bo przy 24 KV cache (fp32, okno 4096) nie miescil sie w 16 GB
+# RTX 5080 i serwer zwracal HTTP 500.
+#
+# Sampler autorow: `T 0,3 / top_p 0,9 / repetition_penalty 1,1` - ustawienie
+# C_t0.3_p0.9_rep1.1 z ich gen_settings.py i domyslne w ich chat_server.py.
+# Kara liczy sie WYLACZNIE od tokenow wygenerowanych w turze, w konwencji CTRL,
+# tak samo w ich serwerze i w naszym.
+#
+# Wariantu z rozumowaniem nie ma - model nie rozumuje (0 z 16 tur przy
+# enable_thinking=true w sondzie), wiec sekcji [chat_template] nie ma.
+#
+# Sonda (z fp 0,05, nie z karami autorow): 0% smieci, 0 pustych, 1 urwana na 16,
+# ale 5 zapetlonych na 16 przy t0,3 i 2 przy t0,8.
+[model]
+id = "slayer1b_1.09_instruct_26.11"
+
+[api]
+base_url = "http://127.0.0.1:2300/v1"
+model = "/media/adamo/usemka/tmp/Slayer1B-1.09-Instruct-26.11"
+mode = "chat"
+concurrency = 80
+# Serwer liczy po 6 zapytan naraz, reszta czeka w kolejce - stad dluzszy timeout.
+timeout = 1800
+
+[generation]
+# Regula podwojnego budzetu przy oknie 4096 (wyliczone przez sonde).
+max_tokens = 1834
+temperature = 0.3
+top_p = 0.9
+repetition_penalty = 1.1
+stop = ["<|im_end|>"]
