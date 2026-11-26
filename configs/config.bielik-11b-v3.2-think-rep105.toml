@@ -1,0 +1,24 @@
+# Bielik 11B v3.2 Instruct, Z ROZUMOWANIEM (reasoning_effort = max), t0,3 plus
+# repetition_penalty 1,05. Serwer jak w config.bielik-11b-v3.2.toml.
+#
+# Trzeci punkt w trojce wariantow samplera dla v3.2 z rozumowaniem:
+#   t0,3                     7,20  - 44 puste tury na 480 (zapetlenia w sladzie)
+#   protokol (t0,9, rep1,05) 6,86  - 0 petli, ale tekst swobodny zapada sie
+#                                     (pismiennictwo 5,30, role 5,35, human. 5,20)
+#   t0,3 + rep 1,05          ?     - czy kara sama przerwie petle bez szkody,
+#                                     ktora w protokole robila wysoka temperatura
+[model]
+id = "bielik_11b_v3.2_instruct_think_max_t03_rep105"
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/models/Bielik-11B-v3.2-Instruct"
+mode = "chat"
+concurrency = 80
+timeout = 900
+
+[generation]
+max_tokens = 16000
+temperature = 0.3
+repetition_penalty = 1.05
+chat_template_kwargs = { reasoning_effort = "max" }
