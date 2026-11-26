@@ -1,0 +1,40 @@
+# Bielik 11B v3.2 Instruct, wariant BEZ ROZUMOWANIA, vLLM 0.34.0.
+#   https://huggingface.co/cpral/Bielik-11B-v3.2-Instruct-ungated
+#
+#   CUDA_VISIBLE_DEVICES=4,5,6,7 vllm serve /media/nvme_2tb/maked/models/Bielik-11B-v3.2-Instruct \
+#       --pipeline-parallel-size 4 --host 0.0.0.0 --port 2300 --max-model-len 32768 \
+#       --reasoning-parser-plugin ~/projects/vllm/bielik-tools/tools/bielik_vllm_reasoning_parser.py \
+#       --reasoning-parser bielik
+#
+# Szablon czatu z checkpointu (= tools/bielik_v3.2_chat_template.jinja z
+# speakleash/bielik-tools, wspolny dla 3.1 i 3.2). Rozumowanie steruje
+# `reasoning_effort` (none|low|medium|high|max), domyslnie `none` - szablon
+# wymusza wtedy pusty <think></think>. `enable_thinking` jest ignorowane.
+#
+# Dlatego config NIE ma sekcji [chat_template]: harness nie wysle wtedy
+# `enable_thinking`, a README bielik-tools ostrzega, ze wyslanie go do szablonu
+# v3.1/v3.2 moze w niektorych konfiguracjach przeniesc odpowiedz do `reasoning`
+# albo ja zgubic. Brak kwargs = reasoning_effort none = bez rozumowania.
+#
+# Szablon domyslnie wstrzykuje blok systemowy z biezaca data i domyslnym jezykiem
+# odpowiedzi (`provider_system_prompt = true`). Zostawione - tak model wyglada
+# "z pudelka". v3.0 takiego bloku nie mial.
+#
+# Sampler na zyczenie: WYLACZNIE temperature 0,3 (bez top_p, top_k i kar).
+# max_tokens 3500 - budzet protokolarny Bielikow, ten sam co v3.0.
+#
+# Sonda: 0% smieci, 0 pustych, 0 urwanych, 0 zapetlen, rozumuje 0/16 we
+# wszystkich wierszach.
+[model]
+id = "bielik_11b_v3.2_instruct"
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/models/Bielik-11B-v3.2-Instruct"
+mode = "chat"
+concurrency = 80
+timeout = 600
+
+[generation]
+max_tokens = 3500
+temperature = 0.3

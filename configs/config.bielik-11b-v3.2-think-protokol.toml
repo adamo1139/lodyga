@@ -1,0 +1,27 @@
+# Bielik 11B v3.2 Instruct, Z ROZUMOWANIEM (reasoning_effort = max), na SAMPLERZE
+# PROTOKOLARNYM Bielikow. Serwer jak w config.bielik-11b-v3.2.toml.
+#
+# Para z config.bielik-11b-v3.2-think.toml (t0,3), rozni je TYLKO sampler.
+#
+# Po co: na samej t0,3 v3.2 z rozumowaniem zapetla sie w ok. 10% tur. Zapetlone
+# slady (96% powtorzonych 8-gramow, najczestszy 8-gram mediana 60x, do 245x)
+# zjadaja caly budzet 16 000 tokenow, tura zostaje bez odpowiedzi i dostaje 0.
+# Tury, ktore sie domknely, sredno dostaja 7,8-8,2. Sprawdzamy, czy
+# repetition_penalty 1,05 i t0,9 z protokolu te petle przerywaja.
+[model]
+id = "bielik_11b_v3.2_instruct_think_max_protokol"
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/models/Bielik-11B-v3.2-Instruct"
+mode = "chat"
+concurrency = 80
+timeout = 900
+
+[generation]
+max_tokens = 16000
+temperature = 0.9
+top_p = 0.9
+top_k = 40
+repetition_penalty = 1.05
+chat_template_kwargs = { reasoning_effort = "max" }

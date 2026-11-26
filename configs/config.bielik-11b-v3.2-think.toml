@@ -1,0 +1,27 @@
+# Bielik 11B v3.2 Instruct, wariant Z ROZUMOWANIEM (reasoning_effort = max),
+# vLLM 0.34.0 z parserem `bielik` z speakleash/bielik-tools - komenda serwera
+# jak w config.bielik-11b-v3.2.toml.
+#
+# Rozumowanie wlaczamy przez `chat_template_kwargs.reasoning_effort`, NIE przez
+# `enable_thinking` (szablon v3.1/v3.2 je ignoruje). Config nie ma sekcji
+# [chat_template], wiec harness nie nadpisze tych kwargs wlasnym enable_thinking.
+#
+# Proba przed pomiarem: slad trafia do `reasoning_content` (prowadzony PO
+# ANGIELSKU), odpowiedz czysta w `content`, bez znacznikow <think>.
+#
+# Sampler zalecany przez autorow: WYLACZNIE temperature 0,3.
+# max_tokens 16000 - regula podwojnego budzetu przy oknie 32 768 daje ~16 170.
+[model]
+id = "bielik_11b_v3.2_instruct_think_max"
+
+[api]
+base_url = "http://192.168.1.26:2300/v1"
+model = "/media/nvme_2tb/maked/models/Bielik-11B-v3.2-Instruct"
+mode = "chat"
+concurrency = 80
+timeout = 900
+
+[generation]
+max_tokens = 16000
+temperature = 0.3
+chat_template_kwargs = { reasoning_effort = "max" }
